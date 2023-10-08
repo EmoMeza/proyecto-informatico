@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "731017bc-1ddb-405d-b96e-705ec0084770",
+		"name": "Proyecto Informatico",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27084407",
+		"_collection_link": "https://universal-firefly-533538.postman.co/workspace/dc7a9622-cc73-42d1-8b75-e7f303d6df23/collection/27084407-731017bc-1ddb-405d-b96e-705ec0084770?action=share&source=collection_link&creator=27084407"
+	},
+	"item": [
+		{
+			"name": "Recibir Evento",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/get/evento?nombre=xd",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"evento"
+					],
+					"query": [
+						{
+							"key": "nombre",
+							"value": "xd"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Añadir Evento",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nombre\": \"actividad test\",\r\n    \"categoria\": \"actividad\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"ramo\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/add/evento",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"add",
+						"evento"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Editar Evento",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\",\r\n    \"ramo\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/update/evento?nombre=cx",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"update",
+						"evento"
+					],
+					"query": [
+						{
+							"key": "nombre",
+							"value": "cx"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Evento",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/delete/evento?nombre=xd",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"delete",
+						"evento"
+					],
+					"query": [
+						{
+							"key": "nombre",
+							"value": "xd"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Todos los Eventos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/get/all/eventos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"all",
+						"eventos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filtrar Eventos por Categoria",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/get/filter/eventos?categoria=actividad",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"filter",
+						"eventos"
+					],
+					"query": [
+						{
+							"key": "categoria",
+							"value": "actividad"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Alumno",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/get/alumno?matricula=2012123123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"alumno"
+					],
+					"query": [
+						{
+							"key": "matricula",
+							"value": "2012123123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Añadir Alumno",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/add/Alumno?nombre=luismiguel&matricula=2012123123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"add",
+						"Alumno"
+					],
+					"query": [
+						{
+							"key": "nombre",
+							"value": "luismiguel"
+						},
+						{
+							"key": "matricula",
+							"value": "2012123123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Editar Ramos Alumno",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\",\"deep learning\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/update/Alumno?matricula=2012123123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"update",
+						"Alumno"
+					],
+					"query": [
+						{
+							"key": "matricula",
+							"value": "2012123123"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

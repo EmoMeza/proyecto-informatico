@@ -68,7 +68,7 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[100],
-        title: const Text("Todo listas"),
+        title: const Text("EventiCAA"),
       ),
       body: SingleChildScrollView(
         child: Column(

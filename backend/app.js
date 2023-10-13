@@ -125,22 +125,26 @@ app.delete('/delete/caa', async function (req, res) {
 
 app.get('/get/ingresos/caa', async function (req, res) {
     const id = req.query.id;
-    try{
+    try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("caa");
         const result = await collection.findOne({ _id: new ObjectId(id) });
-        if(!result){
+        if (!result) {
             res.send(`El id ${id} no existe en la base de datos`);
-        }
-        else{
-            var suma = 0;
-            for (var i = 0; i < result.ingresos.length; i++) {
+        } else {
+            if(!result.ingresos){
+                res.send("0");
+            }else{
+                //check if result.ingresos exists
+                var suma = 0;
+                for (var i = 0; i < result.ingresos.length; i++) {
                     if (result.ingresos[i] != null){
-                            suma += result.ingresos[i][0];
+                        suma += result.ingresos[i][0];
                     }
+                }
+                res.send(suma.toString());
             }
-            res.send(suma);
         }
     } finally {
         await client.close();
@@ -186,13 +190,17 @@ app.get('/get/egresos/caa', async function (req, res) {
             res.send(`El id ${id} no existe en la base de datos`);
         }
         else{
-            var suma = 0;
-            for (var i = 0; i < result.egresos.length; i++) {
-                    if (result.egresos[i] != null){
-                            suma += result.egresos[i][0];
-                    }
+            if(result.egresos){
+                var suma = 0;
+                for (var i = 0; i < result.egresos.length; i++) {
+                        if (result.egresos[i] != null){
+                                suma += result.egresos[i][0];
+                        }
+                }
+                res.send(suma.toString());
+            }else{
+                res.send("0");
             }
-            res.send(suma);
         }
     } finally {
         await client.close();
@@ -214,7 +222,12 @@ app.post('/add/egreso/caa', async function (req, res) {
             // if the id exists, add the data to the array named egresos inside the one that has the same id
             await collection.updateOne({_id: new ObjectId(id)}, {$push: {egresos: data2}});
             
-            await collection.updateOne({_id: new ObjectId(id)}, {$set: {total: result.total-data2[0]}});
+            if (result.total){
+                await collection.updateOne({_id: new ObjectId(id)}, {$set: {total: result.total-data2[0]}});                
+            }else{
+                await collection.updateOne({_id: new ObjectId(id)}, {$set: {total: -data2[0]}});
+
+            }
             //send the result to the client
             res.send("se ha insertado correctamente");   
         }
@@ -238,12 +251,15 @@ app.get('/get/total/caa', async function (req, res) {
             res.send(`El id ${id} no existe en la base de datos`);
         }
         else{
-            res.send(result.total);
+            res.send(result.total.toString());
         }
     } finally {
         await client.close();
     }
 });
+
+
+
 
 // Rutas
 app.get('/get/evento', async function (req, res) {
@@ -484,13 +500,17 @@ app.get('/get/all/ingresos', async function (req, res) {
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
             // sum the first position of the arrays of ingresos and returns the result
-            var suma = 0;
-            for (var i = 0; i < result.ingresos.length; i++) {
-                    if (result.ingresos[i] != null){
-                            suma += result.ingresos[i][0];
-                    }
+            if(result.ingresos){
+                var suma = 0;
+                for (var i = 0; i < result.ingresos.length; i++) {
+                        if (result.ingresos[i] != null){
+                                suma += result.ingresos[i][0];
+                        }
+                }
+                res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+            }else{
+                res.send("0");
             }
-            res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
         }
     } finally {
         await client.close();
@@ -501,19 +521,28 @@ app.post('/add/ingreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
-    console.log(data2);
     try{
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
+        const caa = database.collection("caa");
         //check if the id already exists in the collection, if exists send a message to the client and exit
         const result = await collection.findOne({ _id: new ObjectId(id) });
+        id_caa = result.id_caa;
+        const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
+
         if(result){
             // if the id exists, add the data to the array named ingresos inside the one that has the same id
             await collection.updateOne({_id: new ObjectId(id)}, {$push: {ingresos: data2}});
+            data3 = data2;
+            data3.push(id);
+            await caa.updateOne({_id: new ObjectId(id_caa)}, {$push: {ingresos: data2}});
             //send the result to the client
             
             await collection.updateOne({_id: new ObjectId(id)}, {$set: {total: result.total+data2[0]}});
+            //add to the data the id of the event to the array data2
+            data2.push(id);
+            await caa.updateOne({_id: new ObjectId(id_caa)}, {$set: {total: caa_result.total+data2[0]}});
             res.send("se ha insertado correctamente");   
         }
         else{
@@ -537,11 +566,16 @@ app.get('/get/all/egresos', async function (req, res) {
                 res.send(`El evento con el id "${id}" no existe en la base de datos`);
             } else {
                 // sum the first position of the arrays of egresos and returns the result
-                var suma = 0;
-                for (var i = 0; i < result.egresos.length; i++) {
-                        if (result.egresos[i] != null){
-                                suma += result.egresos[i][0];
-                        }
+                if(result.egresos){
+                    var suma = 0;
+                    for (var i = 0; i < result.egresos.length; i++) {
+                            if (result.egresos[i] != null){
+                                    suma += result.egresos[i][0];
+                            }
+                    }
+                    res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+                }else{
+                    res.send("0");
                 }
                 res.send(`El total de egresos del evento ${result.nombre} es: ${suma}`);
             }
@@ -554,18 +588,22 @@ app.post('/add/egreso', async function (req, res) {
         const id = req.query.id;
         const data = req.body;
         const data2 = data.egresos;
-        console.log(data2);
         try{
                 await client.connect();
                 const database = client.db("proyecto_informatico");
                 const collection = database.collection("test");
                 //check if the id already exists in the collection, if exists send a message to the client and exit
+                const caa = database.collection("caa");
                 const result = await collection.findOne({ _id: new ObjectId(id) });
                 if(result){
                         // if the id exists, add the data to the array named egresos inside the one that has the same id
                         await collection.updateOne({_id: new ObjectId(id)}, {$push: {egresos: data2}});
+                        data3 = data2;
+                        data3.push(id);
+                        await caa.updateOne({_id: new ObjectId(result.id_caa)}, {$push: {egresos: data2}});
                         //update total
                         await collection.updateOne({_id: new ObjectId(id)}, {$set: {total: result.total-data2[0]}});
+                        await caa.updateOne({_id: new ObjectId(result.id_caa)}, {$set: {total: result.total-data2[0]}});
                         res.send("se ha insertado correctamente");   
                 }
                 else{

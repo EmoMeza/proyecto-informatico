@@ -8,567 +8,908 @@
 	},
 	"item": [
 		{
-			"name": "Recibir Evento",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/get/evento?id=6528ade70dca99270d152e32",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"evento"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528ade70dca99270d152e32"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Añadir Evento",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"nombre\": \"xd\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/add/evento",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"add",
-						"evento"
-					],
-					"query": [
-						{
-							"key": "",
-							"value": null,
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Editar Evento",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/update/evento?id=6528ade70dca99270d152e32",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"update",
-						"evento"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528ade70dca99270d152e32"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Eliminar Evento",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/delete/evento?id=6528ade70dca99270d152e32",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"delete",
-						"evento"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528ade70dca99270d152e32"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir Todos los Eventos",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/get/all/eventos",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"all",
-						"eventos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Filtrar Eventos por Categoria",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/get/filter/eventos?categoria=actividad",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"filter",
-						"eventos"
-					],
-					"query": [
-						{
-							"key": "categoria",
-							"value": "actividad"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir Alumno",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/get/alumno?matricula=2012123123",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"alumno"
-					],
-					"query": [
-						{
-							"key": "matricula",
-							"value": "2012123123"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Añadir Alumno",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/add/Alumno?nombre=luismiguel&matricula=2012123123",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"add",
-						"Alumno"
-					],
-					"query": [
-						{
-							"key": "nombre",
-							"value": "luismiguel"
+			"name": "Alumnos",
+			"item": [
+				{
+					"name": "Recibir Alumno",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						{
-							"key": "matricula",
-							"value": "2012123123"
+						"url": {
+							"raw": "http://localhost:4040/get/alumno?matricula=2012123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"alumno"
+							],
+							"query": [
+								{
+									"key": "matricula",
+									"value": "2012123123"
+								}
+							]
 						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Editar Ramos Alumno",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\",\"deep learning\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:4040/update/Alumno?matricula=2012123123",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"update",
-						"Alumno"
-					],
-					"query": [
-						{
-							"key": "matricula",
-							"value": "2012123123"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Eliminar Alumno",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/delete/alumno?matricula=2012123123",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"delete",
-						"alumno"
-					],
-					"query": [
-						{
-							"key": "matricula",
-							"value": "2012123123"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir Ingresos",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"ingresos\" : [10,\"descripcion\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/get/all/ingresos?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"all",
-						"ingresos"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Añadir Ingreso",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"ingresos\" : [100,\"descripcion\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/add/ingreso?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"add",
-						"ingreso"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir Egresos",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/get/all/egresos?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"all",
-						"egresos"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Añadir Egreso",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"egresos\" : [20,\"descripcion\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/add/egreso?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"add",
-						"egreso"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir  Total",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/get/total?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"total"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Recibir Lista de Asistencia",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/get/all/asistencias/?id=6528bc4f608738791556c167",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"get",
-						"all",
-						"asistencias",
-						""
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Añadir Asistencia",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/add/asistencia/?id=6528bc4f608738791556c167&matricula=2012123123",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"add",
-						"asistencia",
-						""
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "6528bc4f608738791556c167"
+				{
+					"name": "Añadir Alumno",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						{
-							"key": "matricula",
-							"value": "2012123123"
+						"url": {
+							"raw": "http://localhost:4040/add/Alumno?nombre=luismiguel&matricula=2012123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"Alumno"
+							],
+							"query": [
+								{
+									"key": "nombre",
+									"value": "luismiguel"
+								},
+								{
+									"key": "matricula",
+									"value": "2012123123"
+								}
+							]
 						}
-					]
+					},
+					"response": []
+				},
+				{
+					"name": "Editar Ramos Alumno",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ramos\":[\"proyecto informatico\",\"programacion i\",\"deep learning\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/update/Alumno?matricula=2012123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"update",
+								"Alumno"
+							],
+							"query": [
+								{
+									"key": "matricula",
+									"value": "2012123123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Alumno",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/delete/alumno?matricula=2012123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"delete",
+								"alumno"
+							],
+							"query": [
+								{
+									"key": "matricula",
+									"value": "2012123123"
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "Eventos",
+			"item": [
+				{
+					"name": "Recibir Evento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/get/evento?id=652945b24deb42bad8b01411",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"evento"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652945b24deb42bad8b01411"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Evento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"tarreo informatica\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/evento",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"evento"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Editar Evento",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/update/evento?id=6528ade70dca99270d152e32",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"update",
+								"evento"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6528ade70dca99270d152e32"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Evento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/delete/evento?id=6528ade70dca99270d152e32",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"delete",
+								"evento"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6528ade70dca99270d152e32"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Todos los Eventos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/get/all/eventos",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"all",
+								"eventos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filtrar Eventos por Categoria",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/get/filter/eventos?categoria=actividad",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"filter",
+								"eventos"
+							],
+							"query": [
+								{
+									"key": "categoria",
+									"value": "actividad"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Ingresos",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ingresos\" : [10,\"descripcion\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/all/ingresos?id=65297a298eab1a7b89d04d09",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"all",
+								"ingresos"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "65297a298eab1a7b89d04d09"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Ingreso",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ingresos\" : [69000,\"descripcion\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/ingreso?id=65297a298eab1a7b89d04d09",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"ingreso"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "65297a298eab1a7b89d04d09"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Egresos",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/all/egresos?id=652946134deb42bad8b01412",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"all",
+								"egresos"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652946134deb42bad8b01412"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Egreso",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"egresos\" : [20000,\"descripcion\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/egreso?id=65297a298eab1a7b89d04d09",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"egreso"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "65297a298eab1a7b89d04d09"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir  Total",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/total?id=652946134deb42bad8b01412",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"total"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652946134deb42bad8b01412"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Lista de Asistencia",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/get/all/asistencias/?id=652946134deb42bad8b01412",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"all",
+								"asistencias",
+								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652946134deb42bad8b01412"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Asistencia",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/add/asistencia/?id=6528bc4f608738791556c167&matricula=2012123123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"asistencia",
+								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6528bc4f608738791556c167"
+								},
+								{
+									"key": "matricula",
+									"value": "2012123123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CAA",
+			"item": [
+				{
+					"name": "Recibir CAA",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CAINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir CAA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CAINFxd\",\n    \"total\" : 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/caa",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"caa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Editar CAA",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CEINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/update/caa?id=65296a2743d766ad19aae2ce",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"update",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "65296a2743d766ad19aae2ce"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar CAA",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CEINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/delete/caa?id=65296a2743d766ad19aae2ce",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"delete",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "65296a2743d766ad19aae2ce"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir ingresos CAA",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CAINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/ingresos/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"ingresos",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Ingresos CAA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ingresos\" : [100,\"descripcion\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/ingreso/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"ingreso",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Egresos CAA",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CAINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/egresos/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"egresos",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Añadir Egresos CAA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"egresos\" : [100,\"descripcion\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/add/egreso/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"add",
+								"egreso",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir Egresos CAA Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\" : \"CAINF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4040/get/total/caa?id=652976834af6fedf26f3493d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"total",
+								"caa"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652976834af6fedf26f3493d"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

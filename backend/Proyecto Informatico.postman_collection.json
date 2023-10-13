@@ -4,7 +4,7 @@
 		"name": "Proyecto Informatico",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "27084407",
-		"_collection_link": "https://universal-firefly-533538.postman.co/workspace/dc7a9622-cc73-42d1-8b75-e7f303d6df23/collection/27084407-731017bc-1ddb-405d-b96e-705ec0084770?action=share&source=collection_link&creator=27084407"
+		"_collection_link": "https://universal-firefly-533538.postman.co/workspace/Team-Workspace~dc7a9622-cc73-42d1-8b75-e7f303d6df23/collection/27084407-731017bc-1ddb-405d-b96e-705ec0084770?action=share&source=collection_link&creator=27084407"
 	},
 	"item": [
 		{
@@ -13,7 +13,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:4040/get/evento?nombre=xd",
+					"raw": "http://localhost:4040/get/evento?id=6528ade70dca99270d152e32",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -25,8 +25,8 @@
 					],
 					"query": [
 						{
-							"key": "nombre",
-							"value": "xd"
+							"key": "id",
+							"value": "6528ade70dca99270d152e32"
 						}
 					]
 				}
@@ -40,7 +40,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"nombre\": \"actividad test\",\r\n    \"categoria\": \"actividad\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"ramo\": \"\"\r\n}",
+					"raw": "{\r\n    \"nombre\": \"xd\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -57,6 +57,13 @@
 					"path": [
 						"add",
 						"evento"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -69,7 +76,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\",\r\n    \"ramo\": \"\"\r\n}",
+					"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -77,7 +84,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4040/update/evento?nombre=cx",
+					"raw": "http://localhost:4040/update/evento?id=6528ade70dca99270d152e32",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -89,8 +96,8 @@
 					],
 					"query": [
 						{
-							"key": "nombre",
-							"value": "cx"
+							"key": "id",
+							"value": "6528ade70dca99270d152e32"
 						}
 					]
 				}
@@ -98,12 +105,12 @@
 			"response": []
 		},
 		{
-			"name": "Recibir Evento",
+			"name": "Eliminar Evento",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:4040/delete/evento?nombre=xd",
+					"raw": "http://localhost:4040/delete/evento?id=6528ade70dca99270d152e32",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -115,8 +122,8 @@
 					],
 					"query": [
 						{
-							"key": "nombre",
-							"value": "xd"
+							"key": "id",
+							"value": "6528ade70dca99270d152e32"
 						}
 					]
 				}
@@ -274,6 +281,286 @@
 						"Alumno"
 					],
 					"query": [
+						{
+							"key": "matricula",
+							"value": "2012123123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar Alumno",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/delete/alumno?matricula=2012123123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"delete",
+						"alumno"
+					],
+					"query": [
+						{
+							"key": "matricula",
+							"value": "2012123123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Ingresos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ingresos\" : [10,\"descripcion\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/get/all/ingresos?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"all",
+						"ingresos"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Añadir Ingreso",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ingresos\" : [100,\"descripcion\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/add/ingreso?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"add",
+						"ingreso"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Egresos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/get/all/egresos?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"all",
+						"egresos"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Añadir Egreso",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"egresos\" : [20,\"descripcion\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/add/egreso?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"add",
+						"egreso"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir  Total",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"egresos\" : [10,\"descripcion\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4040/get/total?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"total"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recibir Lista de Asistencia",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/get/all/asistencias/?id=6528bc4f608738791556c167",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"get",
+						"all",
+						"asistencias",
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Añadir Asistencia",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4040/add/asistencia/?id=6528bc4f608738791556c167&matricula=2012123123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4040",
+					"path": [
+						"add",
+						"asistencia",
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "6528bc4f608738791556c167"
+						},
 						{
 							"key": "matricula",
 							"value": "2012123123"

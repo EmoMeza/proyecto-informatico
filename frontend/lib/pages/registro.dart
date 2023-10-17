@@ -46,14 +46,16 @@ class _RegistroState extends State<Registro> {
     await prefs.setString('login', login);
     await prefs.setString('contrasena', contrasena);
     await prefs.setString('nombre', nombre);
-    await prefs.setString('tipoCuenta', tipoCuenta); // Guardar el tipo de cuenta
+    await prefs.setString(
+        'tipoCuenta', tipoCuenta); // Guardar el tipo de cuenta
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Éxito'),
-          content: const Text('Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
+          content: const Text(
+              'Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
           actions: [
             ElevatedButton(
               onPressed: () {
@@ -74,65 +76,69 @@ class _RegistroState extends State<Registro> {
       appBar: AppBar(
         title: const Text('Registro'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: loginController,
-              decoration: const InputDecoration(labelText: 'Login'),
-            ),
-            TextField(
-              controller: contrasenaController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
-            ),
-            TextField(
-              controller: repetirContrasenaController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Repetir Contraseña'),
-            ),
-            TextField(
-              controller: nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-            ),
-            Row(
-              children: [
-                const Text('Seleccionar tipo de cuenta:'),
-                DropdownButton<String>(
-                  value: tipoCuenta,
-                  onChanged: (String? value) {
-                    setState(() {
-                      tipoCuenta = value!;
-                    });
-                  },
-                  items: <String>['Estudiante', 'Centro de Alumnos'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: guardarDatos,
-                  child: const Text('Guardar'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Volver'),
-                ),
-              ],
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: loginController,
+                decoration: const InputDecoration(labelText: 'Login'),
+              ),
+              TextField(
+                controller: contrasenaController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+              ),
+              TextField(
+                controller: repetirContrasenaController,
+                obscureText: true,
+                decoration:
+                    const InputDecoration(labelText: 'Repetir Contraseña'),
+              ),
+              TextField(
+                controller: nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              Row(
+                children: [
+                  const Text('Seleccionar tipo de cuenta:'),
+                  DropdownButton<String>(
+                    value: tipoCuenta,
+                    onChanged: (String? value) {
+                      setState(() {
+                        tipoCuenta = value!;
+                      });
+                    },
+                    items: <String>['Estudiante', 'Centro de Alumnos']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: guardarDatos,
+                    child: const Text('Guardar'),
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Volver'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

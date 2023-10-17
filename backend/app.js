@@ -151,7 +151,7 @@ app.get('/get/ingresos/caa', async function (req, res) {
     }
 });
 
-app.post('/add/ingreso/caa', async function (req, res) {1
+app.post('/add/ingreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;

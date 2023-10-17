@@ -151,7 +151,7 @@ app.get('/get/ingresos/caa', async function (req, res) {
     }
 });
 
-app.post('/add/ingreso/caa', async function (req, res) {1
+app.post('/add/ingreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
@@ -258,9 +258,6 @@ app.get('/get/total/caa', async function (req, res) {
     }
 });
 
-
-
-
 // Rutas
 app.get('/get/evento', async function (req, res) {
     const id = req.query.id;
@@ -325,7 +322,7 @@ app.put('/update/evento', async function (req, res) {
     }
 }); 
 
-app.put('/update/validacion/evento', async function (req, res) {
+app.put('/update/validacion/evento', async function (req, res) { // revisar
     const id = req.query.id;
     const nuevaValidacion = req.body.validacion;
 
@@ -374,9 +371,6 @@ app.put('/update/validacion/evento', async function (req, res) {
         await client.close();
     }
 });
-
-
-
 
 app.delete('/delete/evento', async function (req, res) {
     const id = req.query.id;
@@ -688,7 +682,6 @@ app.get('/get/total', async function (req, res) {
         }
 });
 
-
 app.get('/get/all/asistencias', async function (req, res) {
     const id = req.query.id;
     try{
@@ -707,7 +700,7 @@ app.get('/get/all/asistencias', async function (req, res) {
     }
 });
 
-app.post('/add/asistencia', async function (req, res) {
+app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre del alumno
     const id = req.query.id;
     const matricula = req.query.matricula;
 
@@ -732,6 +725,11 @@ app.post('/add/asistencia', async function (req, res) {
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
                     await collection.updateOne({_id: new ObjectId(id)}, {$push: {asistencia: matricula}});
+                    //calculate the length of result.asistencia
+                    const result = await collection.findOne({ _id: new ObjectId(id) });
+                    if (result.asistencia.length >= 5){
+                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {visible: true}});
+                    }
                     res.send("se ha insertado correctamente");
                 }
             }
@@ -740,7 +738,6 @@ app.post('/add/asistencia', async function (req, res) {
         await client.close();
     }
 });
-
 
 
 const puerto = process.env.PORT || 4040;

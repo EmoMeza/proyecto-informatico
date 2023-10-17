@@ -18,6 +18,7 @@ Este proyecto requiere Node.js para ejecutar el backend. Sigue los siguientes pa
 ## Ejecución
 
 Una vez completada la configuración, puedes ejecutar el backend con el siguiente comando:
-    ```
+
     npm run dev
-    ```
+
+    

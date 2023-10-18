@@ -417,6 +417,9 @@ app.post('/add/alumno', async function (req, res) {
     // Unify the data into a single object
     data.nombre = nombre;
     data.matricula = matricula;
+    //first two digits of the matricula and first two digits of the nombre in lowercase are the password
+    const password = matricula.substring(0,2) + nombre.substring(0,2).toLowerCase();
+    data.contraseña = password
     try {
       await client.connect();
       const database = client.db("proyecto_informatico");

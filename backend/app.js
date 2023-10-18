@@ -135,6 +135,22 @@ app.delete('/delete/caa', async function (req, res) {
     }
 });
 
+app.get('/get/all/caas', async function (req, res) {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("caa");
+        const data = await collection.find().toArray();
+        res.send(data);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    }
+    finally {
+        await client.close();
+    }
+});
+
 app.get('/get/ingresos/caa', async function (req, res) {
     const id = req.query.id;
     try {

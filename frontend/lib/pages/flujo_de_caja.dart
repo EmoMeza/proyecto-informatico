@@ -28,6 +28,17 @@ class DataPoint {
   final String description;
 
   DataPoint(this.value, this.description);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'value': value,
+      'description': description,
+    };
+  }
+
+  factory DataPoint.fromMap(Map<String, dynamic> map) {
+    return DataPoint(map['value'], map['description']);
+  }
 }
 
 class _DashboardState extends State<Dashboard> {
@@ -37,7 +48,39 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    //fetchData();
+    loadListFromSharedPreferences().then((loadedData) {
+      setState(() {
+        cashFlowData = loadedData;
+        total = cashFlowData.fold(
+            0, (previousValue, element) => previousValue + element.value);
+      });
+    });
+  }
+
+  Future<void> saveListToSharedPreferences(List<DataPoint> dataList) async {
+    final prefs = await SharedPreferences.getInstance();
+    final listMap = dataList.map((data) => data.toMap()).toList();
+    await prefs.setStringList(
+        'dataPointList', listMap.map((map) => jsonEncode(map)).toList());
+  }
+
+  Future<List<DataPoint>> loadListFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final listMap = prefs.getStringList('dataPointList') ?? [];
+    return listMap.map((json) => DataPoint.fromMap(jsonDecode(json))).toList();
+  }
+
+  void _updateCashFlowAndSave(
+      bool isIncome, double amount, String description) {
+    if (isIncome) {
+      cashFlowData.add(DataPoint(amount, description));
+    } else {
+      cashFlowData.add(DataPoint(-amount, description));
+    }
+    total = cashFlowData.fold(
+        0, (previousValue, element) => previousValue + element.value);
+    setState(() {});
+    saveListToSharedPreferences(cashFlowData); // Guardar en SharedPreferences
   }
 
   void _openEntryDialog(bool isIncome) async {
@@ -75,15 +118,8 @@ class _DashboardState extends State<Dashboard> {
                 // Guardar los datos en la lista cashFlowData
                 final monto = double.parse(amountController.text);
                 final descripcion = descriptionController.text;
-
-                if (!isIncome) {
-                  cashFlowData.add(DataPoint(-monto, descripcion));
-                } else {
-                  cashFlowData.add(DataPoint(monto, descripcion));
-                }
-
-                Navigator.of(context).pop(); // Cerrar el diálogo
-                setState(() {}); // Actualizar la UI con los nuevos datos
+                _updateCashFlowAndSave(isIncome, monto, descripcion);
+                Navigator.of(context).pop();
               },
               child: Text('Guardar'),
             ),
@@ -107,6 +143,18 @@ class _DashboardState extends State<Dashboard> {
               Text('Flujo de Caja'),
               Text('Total: \$${total.toStringAsFixed(2)}'),
             ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: cashFlowData.length,
+              itemBuilder: (context, index) {
+                final dataPoint = cashFlowData[index];
+                return ListTile(
+                  title: Text(dataPoint.description),
+                  subtitle: Text('\$${dataPoint.value.toStringAsFixed(2)}'),
+                );
+              },
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

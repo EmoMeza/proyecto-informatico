@@ -183,7 +183,6 @@ app.get('/get/ingresos/caa', async function (req, res) {
 });
 
 app.post('/add/ingreso/caa', async function (req, res) {
-app.post('/add/ingreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
@@ -372,57 +371,6 @@ app.put('/update/evento', async function (req, res) {
         await client.close();
     }
 }); 
-
-app.put('/update/validacion/evento', async function (req, res) { // revisar
-    const id = req.query.id;
-    const nuevaValidacion = req.body.validacion;
-
-    try {
-        await client.connect();
-        const database = client.db("proyecto_informatico");
-        const collection = database.collection("test");
-
-        // Verifica si el documento con el ID proporcionado existe
-        const result = await collection.findOne({ _id: new ObjectId(id) });
-
-        if (!result) {
-            res.send(`El evento con el ID ${id} no existe en la base de datos`);
-        } else {
-            // Verifica si el campo "validacion" existe y es un número
-            if (!result.validacion || typeof result.validacion !== 'number') {
-                // Si no existe, agrégalo con un valor inicial
-                await collection.updateOne(
-                    { _id: new ObjectId(id) },
-                    { $set: { validacion: 0 } }
-                );
-
-                // Actualiza el resultado después de agregar el campo
-                result.validacion = 0;
-            }
-
-            // Actualiza la validación del evento
-            const newValidation = result.validacion + 1;
-            await collection.updateOne(
-                { _id: new ObjectId(id) },
-                { $set: { validacion: newValidation } }
-            );
-
-            // Verifica si la condición para actualizar "visible" se cumple
-            if (newValidation >= 5) {
-                // Si la condición se cumple, actualiza "visible" a true
-                await collection.updateOne(
-                    { _id: new ObjectId(id) },
-                    { $set: { visible: true } }
-                );
-            }
-
-            res.send("Se ha actualizado la validación correctamente");
-        }
-    } finally {
-        await client.close();
-    }
-});
-
 app.delete('/delete/evento', async function (req, res) {
     const id = req.query.id;
     try {
@@ -842,6 +790,6 @@ app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre 
 
 const puerto = process.env.PORT || 4040;
 
-app.listen(puerto, function () {
-    console.log(`Servidor escuchando en el puerto: ${puerto}!`);
-});
+    app.listen(puerto, function () {
+        console.log(`Servidor escuchando en el puerto: ${puerto}!`);
+    });

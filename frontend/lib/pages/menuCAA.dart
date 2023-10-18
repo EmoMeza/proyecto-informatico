@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'agregarEvento.dart';
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [
@@ -55,6 +56,12 @@ class menuCAA extends StatelessWidget {
               onTap: () {
                 // Navegar a la página 1
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          AgregarEvento()), // Replace AgregarEventoPage with the actual name of your agregar_evento page
+                );
               },
             ),
             ListTile(

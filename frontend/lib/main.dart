@@ -4,7 +4,7 @@ import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/menuAlumnos.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
+import 'package:proyecto_informatico/pages/calendario.dart';
 
 void main() {
   initializeDateFormatting().then((_) => runApp(MyApp()));
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/menuCAA': (context) => menuCAA(),
         '/menuAlumnos': (context) => menuAlumnos(),
         '/agregarEvento': (context) => AgregarEvento(),
+        '/calendario': (context) => Calendario(),
       },
     );
   }

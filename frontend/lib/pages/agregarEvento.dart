@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../api_services.dart';
 
 class AgregarEvento extends StatefulWidget {
   const AgregarEvento({Key? key}) : super(key: key);
@@ -40,12 +41,22 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   void _submitForm() {
-    //debug: falta agregar logica
-    print('Form submitted!');
-    print('Dropdown value: $dropdownValue');
-    print('Selected date: $selectedDate');
-    print('Selected time: $selectedTime');
-    print('Other form data:');
+    String idCaa = '652b4e270f9658f04ee3adba';
+    Future<Map<String, dynamic>> caa = ApiService.getCaa(idCaa);
+
+    //Imprimo el resultado de la consulta
+    caa.then((value) => print(value));
+
+    // Map<String, dynamic> CAAInfo = {
+    //   'nombre': 'Centro alumnos prueba api',
+    //   'total': '0',
+    // };
+
+    // Future<Map<String, dynamic>> caa = ApiService.postCaa(CAAInfo);
+
+    // //Imprimo el resultado de la consulta
+    // caa.then((value) => print(value));
+    
   }
 
   @override

@@ -11,7 +11,11 @@ class AgregarEvento extends StatefulWidget {
 class _AgregarEventoState extends State<AgregarEvento> {
   String? dropdownValue = 'Evaluación';
   DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
+  final TextEditingController _timeController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
@@ -26,8 +30,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
-  TimeOfDay selectedTime = TimeOfDay.now();
-  final TextEditingController _timeController = TextEditingController();
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
@@ -106,6 +108,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
               ),
               const SizedBox(height: 20),
               TextFormField(
+                controller: _nombreController,
                 decoration: const InputDecoration(
                   labelText: 'Nombre ramo/actividad',
                 ),
@@ -114,6 +117,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
               TextFormField(
                 maxLines:
                     4, // Adjust the number of lines for the description field
+                controller: _descripcionController,
                 decoration: const InputDecoration(
                   labelText: 'Descripción',
                 ),

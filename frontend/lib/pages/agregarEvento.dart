@@ -39,6 +39,15 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
+  void _submitForm() {
+    //debug: falta agregar logica
+    print('Form submitted!');
+    print('Dropdown value: $dropdownValue');
+    print('Selected date: $selectedDate');
+    print('Selected time: $selectedTime');
+    print('Other form data:');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +129,11 @@ class _AgregarEventoState extends State<AgregarEvento> {
                 decoration: const InputDecoration(
                   labelText: 'Sala/lugar',
                 ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: const Text('Enviar'),
               ),
             ],
           ),

@@ -1,5 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 class Registro extends StatefulWidget {
   const Registro({Key? key}) : super(key: key);
@@ -13,10 +15,9 @@ class _RegistroState extends State<Registro> {
   TextEditingController contrasenaController = TextEditingController();
   TextEditingController repetirContrasenaController = TextEditingController();
   TextEditingController nombreController = TextEditingController();
-  String tipoCuenta = 'Estudiante'; // Inicializar con 'Estudiante'
+  String tipoCuenta = 'Estudiante';
 
   void guardarDatos() async {
-    final prefs = await SharedPreferences.getInstance();
     final login = loginController.text;
     final contrasena = contrasenaController.text;
     final nombre = nombreController.text;
@@ -42,32 +43,42 @@ class _RegistroState extends State<Registro> {
       return;
     }
 
-    // Guardar los datos en Shared Preferences
-    await prefs.setString('login', login);
-    await prefs.setString('contrasena', contrasena);
-    await prefs.setString('nombre', nombre);
-    await prefs.setString(
-        'tipoCuenta', tipoCuenta); // Guardar el tipo de cuenta
+    // Configurar la conexión MongoDB
+    final db = mongo.Db('mongodb+srv://Jose-BA:profevaras@cluster0.trauygm.mongodb.net/?retryWrites=true&w=majority');
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Éxito'),
-          content: const Text(
-              'Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    try {
+      await db.open();
+      
+      await db.collection('usuarios').insert({
+        'login': login,
+        'contrasena': contrasena,
+        'nombre': nombre,
+        'tipoCuenta': tipoCuenta,
+      });
+
+      await db.close();
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Éxito'),
+            content: const Text('Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('Error al guardar los datos en MongoDB: $e');
+    }
   }
 
   @override
@@ -93,8 +104,7 @@ class _RegistroState extends State<Registro> {
               TextField(
                 controller: repetirContrasenaController,
                 obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Repetir Contraseña'),
+                decoration: const InputDecoration(labelText: 'Repetir Contraseña'),
               ),
               TextField(
                 controller: nombreController,

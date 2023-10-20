@@ -29,7 +29,7 @@ class Calendario extends StatefulWidget {
 
 
 class _CalendarioState extends State<Calendario> {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Random random = Random();
@@ -70,7 +70,8 @@ class _CalendarioState extends State<Calendario> {
         day.isAtSameMomentAs(evento.fechaFinal) ||
         (day.isAfter(evento.fechaInicio) && day.isBefore(evento.fechaFinal));
   }).toList();
-}
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +107,42 @@ class _CalendarioState extends State<Calendario> {
             },
             calendarStyle: CalendarStyle(
               weekendTextStyle: const TextStyle().copyWith(color: Colors.red),
+              markersMaxCount: 1,
+              markersAlignment: Alignment.bottomRight,
+            ),
+            calendarBuilders: CalendarBuilders(
+              singleMarkerBuilder: (context, day, events) {
+                var eventosDelDia = _getEventosDelDia(day);
+                if (eventosDelDia.isNotEmpty) {
+                  return Stack(
+                    alignment: AlignmentGeometry.lerp(Alignment.bottomRight, Alignment.topLeft, 0.8)!
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.deepPurple,
+                          shape: BoxShape.circle,
+                        ),
+                        width: 20.0,
+                        height: 20.0,
+                      ),
+                      Positioned(
+                        top: 4,
+                        left: 6,
+                        child: Text(
+                          '${eventosDelDia.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return Container();
+                }
+              },
             ),
           ),
           Expanded(

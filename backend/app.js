@@ -159,7 +159,7 @@ app.get('/get/ingresos/caa', async function (req, res) {
         const collection = database.collection("caa");
         const result = await collection.findOne({ _id: new ObjectId(id) });
         if (!result) {
-            res.send(`El id ${id} no existe en la base de datos`);
+            res.status(404).send(`El id ${id} no existe en la base de datos`);
         } else {
             if (!result.ingresos) {
                 res.send("0");
@@ -581,7 +581,7 @@ app.get('/get/all/ingresos', async function (req, res) {
                         suma += result.ingresos[i][0];
                     }
                 }
-                res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+                res.send(suma.toString()); // using the "nombre" field from the result document
             } else {
                 res.send("0");
             }
@@ -653,11 +653,11 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
-                res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+                res.send(suma.toString()); // using the "nombre" field from the result document
             } else {
                 res.send("0");
             }
-            res.send(`El total de egresos del evento ${result.nombre} es: ${suma}`);
+            res.send(suma.toString());
         }
     } catch (error) {
         console.log(error);
@@ -714,7 +714,7 @@ app.get('/get/total', async function (req, res) {
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
 
-            res.send(`El total de ingresos del evento ${result.nombre} es: ${result.total}`);
+            res.send(total.toString());
         }
     } catch (error) {
         console.log(error);

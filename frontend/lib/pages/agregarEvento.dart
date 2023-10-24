@@ -40,23 +40,68 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async{
     String idCaa = '652b4e270f9658f04ee3adba';
-    Future<Map<String, dynamic>> caa = ApiService.getCaa(idCaa);
+    String fakeid = '652b4e270f9658f04ee3adb8';
 
-    //Imprimo el resultado de la consulta
-    caa.then((value) => print(value));
+    // Mapa del Caa con el nombre y total
+    Map<String, dynamic> centroapi = {
+      'nombre': 'Centro prueba api 2',
+      'total': '0',
+    };
 
-    // Map<String, dynamic> CAAInfo = {
-    //   'nombre': 'Centro alumnos prueba api',
-    //   'total': '0',
-    // };
 
-    // Future<Map<String, dynamic>> caa = ApiService.postCaa(CAAInfo);
+    // ApiResponse response = await ApiService.getCaa(idCaa);
 
     // //Imprimo el resultado de la consulta
-    // caa.then((value) => print(value));
-    
+    // if(response.success){
+    //   Map<String, dynamic> CAAInfo = response.data;
+    //   print(CAAInfo);
+
+    // }else{
+    //   print(response.message);
+    // }
+
+    // ApiResponse response = await ApiService.postCaa(centroapi);
+
+    // //Imprimo el resultado de la consulta
+    // if(response.success){
+    //   print(response.message);
+    // }else{
+    //   print(response.message);
+    // }
+
+    // Map<String, dynamic> ingreso = {
+    //   'ingresos': [5000, 'prueba api']
+    // };
+
+    // ApiResponse responseI = await ApiService.postIngresoCaa( idCaa,  ingreso);
+
+    // if (responseI.success) {
+    //   print(responseI.message);
+    // } else {
+    //   print(responseI.message);
+    // }
+
+
+    // ApiResponse response = await ApiService.getIngresosCaa( idCaa );
+
+    // if (response.success) {
+    //   print(response.data);
+    // } else {
+    //   print(response.message);
+    // }
+
+    Map<String, dynamic> evento = {
+      'categoria': 'certamen'
+    };
+    ApiResponse response = await ApiService.getEventosFiltrados( evento);
+
+    if (response.success) {
+      print(response.data);
+    } else {
+      print(response.message);
+    }
   }
 
   @override

@@ -714,7 +714,7 @@ app.get('/get/total', async function (req, res) {
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
 
-            res.send(total.toString());
+            res.send(result.total.toString());
         }
     } catch (error) {
         console.log(error);

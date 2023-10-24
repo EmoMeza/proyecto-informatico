@@ -40,70 +40,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
-  void _submitForm() async{
-    String idCaa = '652b4e270f9658f04ee3adba';
-    String fakeid = '652b4e270f9658f04ee3adb8';
-
-    // Mapa del Caa con el nombre y total
-    Map<String, dynamic> centroapi = {
-      'nombre': 'Centro prueba api 2',
-      'total': '0',
-    };
-
-
-    // ApiResponse response = await ApiService.getCaa(idCaa);
-
-    // //Imprimo el resultado de la consulta
-    // if(response.success){
-    //   Map<String, dynamic> CAAInfo = response.data;
-    //   print(CAAInfo);
-
-    // }else{
-    //   print(response.message);
-    // }
-
-    // ApiResponse response = await ApiService.postCaa(centroapi);
-
-    // //Imprimo el resultado de la consulta
-    // if(response.success){
-    //   print(response.message);
-    // }else{
-    //   print(response.message);
-    // }
-
-    // Map<String, dynamic> ingreso = {
-    //   'ingresos': [5000, 'prueba api']
-    // };
-
-    // ApiResponse responseI = await ApiService.postIngresoCaa( idCaa,  ingreso);
-
-    // if (responseI.success) {
-    //   print(responseI.message);
-    // } else {
-    //   print(responseI.message);
-    // }
-
-
-    // ApiResponse response = await ApiService.getIngresosCaa( idCaa );
-
-    // if (response.success) {
-    //   print(response.data);
-    // } else {
-    //   print(response.message);
-    // }
-
-    Map<String, dynamic> evento = {
-      'categoria': 'certamen'
-    };
-    ApiResponse response = await ApiService.getEventosFiltrados( evento);
-
-    if (response.success) {
-      print(response.data);
-    } else {
-      print(response.message);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,11 +121,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
                 decoration: const InputDecoration(
                   labelText: 'Sala/lugar',
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Enviar'),
               ),
             ],
           ),

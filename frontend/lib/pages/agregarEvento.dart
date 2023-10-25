@@ -12,7 +12,7 @@ class AgregarEvento extends StatefulWidget {
 }
 
 class _AgregarEventoState extends State<AgregarEvento> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? dropdownValue = 'Evaluación';
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
@@ -75,9 +75,35 @@ class _AgregarEventoState extends State<AgregarEvento> {
     return null;
   }
 
-  void _submitForm() async {
+  void showResponseDialog(BuildContext context, String message, bool success) {
+    String title = success ? "Evento agregado" : "Error:";
+    showDialog(
+      // Alerta de respuesta de la API
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message), // Mensage de la respuesta
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                // Cierra el dialogo
+                Navigator.of(dialogContext).pop();
+                if (success) {
+                  //Cierra la pagina si se envio el formulario
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _submitForm(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      print(formatDateTime(selectedDate, selectedTime));
       Map<String, dynamic> postData = {
         'nombre': _nombreController.text,
         'categoria': dropdownValue,
@@ -95,38 +121,18 @@ class _AgregarEventoState extends State<AgregarEvento> {
 
       ApiResponse response = await ApiService.postEvento(postData);
       if (response.success) {
-        print('Form submitted!');
-        print(response.message);
-        showDialog(
-          //alerta de que se envio el formulario
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Form Submitted"),
-              content: Text(
-                  response.message), // Display the message from the response
-              actions: <Widget>[
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    // Navigate to another page
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        showResponseDialog(context, response.message, response.success);
       } else {
-        print('Error in the request: ${response.message}');
+        showResponseDialog(context, response.message, response.success);
       }
     }
   }
 
   ElevatedButton buildSubmitButton() {
     return ElevatedButton(
-      onPressed: _submitForm,
+      onPressed: () {
+        _submitForm(context);
+      },
       child: const Text('Agregar Evento'),
     );
   }

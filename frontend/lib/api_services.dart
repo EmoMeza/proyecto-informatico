@@ -38,7 +38,7 @@ class ApiResponse {
 class ApiService {
 
   // Esto se puede cambiar segun la ip del servidor o el puerto
-  static const String _baseUrl = 'http://127.0.0.1:4040';
+  static const String _baseUrl = 'http://10.0.2.2:4040';
 
   // -----------------Centro de Alumnos-----------------------
 

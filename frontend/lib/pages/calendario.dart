@@ -28,7 +28,26 @@ class Calendario extends StatefulWidget {
 }
 
 
-class _CalendarioState extends State<Calendario> {
+class _CalendarioState extends State<Calendario> with SingleTickerProviderStateMixin{
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300), // Duración de la animación (0.5 segundos en este caso)
+    );
+    _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -59,6 +78,7 @@ class _CalendarioState extends State<Calendario> {
       fechaFinal: DateTime(2023, 10, 21),
       visible: true,
     ),
+    
     
     // Agrega más eventos según sea necesario
   ];
@@ -97,6 +117,8 @@ class _CalendarioState extends State<Calendario> {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
+              _animationController.reset();
+              _animationController.forward();
             },
             eventLoader: (day) {
               var events = eventos.where((evento) {
@@ -157,16 +179,22 @@ class _CalendarioState extends State<Calendario> {
   }
 
   Widget _buildEventList(List<Evento> eventosDelDia) {
-    return ListView.builder(
-      itemCount: eventosDelDia.length,
-      itemBuilder: (context, index) {
-        Evento evento = eventosDelDia[index];
-        return ListTile(
-          title: Text(evento.nombre),
-          subtitle: Text(evento.descripcion),
-          // Puedes mostrar más detalles del evento si es necesario
-        );
-      },
+    return FadeTransition(
+      opacity: _animation,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero).animate(_animation),
+        child: ListView.builder(
+          itemCount: eventosDelDia.length,
+          itemBuilder: (context, index) {
+            Evento evento = eventosDelDia[index];
+            return ListTile(
+              title: Text(evento.nombre),
+              subtitle: Text(evento.descripcion),
+              // se puede mostrar más detalles del evento si es necesario
+            );
+          },
+        ),
+      ),
     );
   }
 }

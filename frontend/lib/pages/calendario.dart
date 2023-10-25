@@ -115,7 +115,7 @@ class _CalendarioState extends State<Calendario> {
                 var eventosDelDia = _getEventosDelDia(day);
                 if (eventosDelDia.isNotEmpty) {
                   return Stack(
-                    alignment: AlignmentGeometry.lerp(Alignment.bottomRight, Alignment.topLeft, 0.8)!
+                    alignment: AlignmentGeometry.lerp(Alignment.bottomRight, Alignment.topLeft, 0.8)!,
                     children: [
                       Container(
                         decoration: const BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../api_services.dart';
 
 class AgregarEvento extends StatefulWidget {
   const AgregarEvento({Key? key}) : super(key: key);
@@ -168,11 +169,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
                 decoration: const InputDecoration(
                   labelText: 'Sala/lugar',
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Enviar'),
               ),
             ],
           ),

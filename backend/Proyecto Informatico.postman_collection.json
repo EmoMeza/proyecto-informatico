@@ -28,7 +28,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/get/alumno?matricula=2012123123",
+							"raw": "http://localhost:4040/get/alumno?matricula=2010123123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -41,7 +41,7 @@
 							"query": [
 								{
 									"key": "matricula",
-									"value": "2012123123"
+									"value": "2010123123"
 								}
 							]
 						}
@@ -63,7 +63,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/Alumno?nombre=luismiguel&matricula=2012123123",
+							"raw": "http://localhost:4040/add/Alumno?nombre=emo&matricula=69",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -76,11 +76,11 @@
 							"query": [
 								{
 									"key": "nombre",
-									"value": "luismiguel"
+									"value": "emo"
 								},
 								{
 									"key": "matricula",
-									"value": "2012123123"
+									"value": "69"
 								}
 							]
 						}
@@ -168,7 +168,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4040/get/evento?id=652945b24deb42bad8b01411",
+							"raw": "http://localhost:4040/get/evento?id=652b4e660f9658f04ee3adbb",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -181,7 +181,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652945b24deb42bad8b01411"
+									"value": "652b4e660f9658f04ee3adbb"
 								}
 							]
 						}
@@ -195,7 +195,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"tarreo informatica\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\"\r\n}",
+							"raw": "{\r\n    \"nombre\": \"final\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\",\r\n    \"visible\": false,\r\n    \"asistencia\" : []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -239,7 +239,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/update/evento?id=6528ade70dca99270d152e32",
+							"raw": "http://localhost:4040/update/evento?id=652c7ac03e574c327e856069",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -252,7 +252,34 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "6528ade70dca99270d152e32"
+									"value": "652c7ac03e574c327e856069"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Validacion",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/update/validacion/evento?id=652de1acd03e38b13a1feb23",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"update",
+								"validacion",
+								"evento"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "652de1acd03e38b13a1feb23"
 								}
 							]
 						}
@@ -265,7 +292,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4040/delete/evento?id=6528ade70dca99270d152e32",
+							"raw": "http://localhost:4040/delete/evento?id=652c7a0a3e574c327e856068",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -278,7 +305,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "6528ade70dca99270d152e32"
+									"value": "652c7a0a3e574c327e856068"
 								}
 							]
 						}
@@ -387,7 +414,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/ingreso?id=65297a298eab1a7b89d04d09",
+							"raw": "http://localhost:4040/add/ingreso?id=652976834af6fedf26f3493d",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -400,7 +427,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "65297a298eab1a7b89d04d09"
+									"value": "652976834af6fedf26f3493d"
 								}
 							]
 						}
@@ -461,7 +488,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/egreso?id=65297a298eab1a7b89d04d09",
+							"raw": "http://localhost:4040/add/egreso?id=652976834af6fedf26f3493d",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -474,7 +501,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "65297a298eab1a7b89d04d09"
+									"value": "652976834af6fedf26f3493d"
 								}
 							]
 						}
@@ -499,7 +526,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/get/total?id=652946134deb42bad8b01412",
+							"raw": "http://localhost:4040/get/total?id=652b4e660f9658f04ee3adbb",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -512,7 +539,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652946134deb42bad8b01412"
+									"value": "652b4e660f9658f04ee3adbb"
 								}
 							]
 						}
@@ -525,7 +552,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4040/get/all/asistencias/?id=652946134deb42bad8b01412",
+							"raw": "http://localhost:4040/get/all/asistencias/?id=652b4e660f9658f04ee3adbb",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -540,7 +567,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652946134deb42bad8b01412"
+									"value": "652b4e660f9658f04ee3adbb"
 								}
 							]
 						}
@@ -553,7 +580,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4040/add/asistencia/?id=6528bc4f608738791556c167&matricula=2012123123",
+							"raw": "http://localhost:4040/add/asistencia/?id=652de6ac0e494dec1e5ab57d&matricula=2010123123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -567,11 +594,11 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "6528bc4f608738791556c167"
+									"value": "652de6ac0e494dec1e5ab57d"
 								},
 								{
 									"key": "matricula",
-									"value": "2012123123"
+									"value": "2010123123"
 								}
 							]
 						}
@@ -628,7 +655,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombre\" : \"CAINFxd\",\n    \"total\" : 0\n}",
+							"raw": "{\n    \"nombre\" : \"CAINF2\",\n    \"total\" : 0\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -715,6 +742,27 @@
 									"key": "id",
 									"value": "65296a2743d766ad19aae2ce"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recibir CAAs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4040/get/all/caas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4040",
+							"path": [
+								"get",
+								"all",
+								"caas"
 							]
 						}
 					},
@@ -871,24 +919,12 @@
 					"response": []
 				},
 				{
-					"name": "Recibir Egresos CAA Copy",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
+					"name": "Recibir Total",
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"nombre\" : \"CAINF\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:4040/get/total/caa?id=652976834af6fedf26f3493d",
+							"raw": "http://localhost:4040/get/total/caa?id=652b4e270f9658f04ee3adba",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -902,7 +938,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652976834af6fedf26f3493d"
+									"value": "652b4e270f9658f04ee3adba"
 								}
 							]
 						}

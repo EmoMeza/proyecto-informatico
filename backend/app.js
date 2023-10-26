@@ -329,21 +329,39 @@ app.get('/get/evento', async function (req, res) {
 
 app.post('/add/evento', async function (req, res) {
     const data = req.body;
+    let respuestaEnviada = false; // Variable para rastrear si la respuesta se ha enviado.
+
+    if (!data.fecha_inicio || !data.fecha_final) {
+        // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
+        const fechaActual = new Date();
+        data.fecha_inicio = fechaActual.toISOString();
+        data.fecha_final = fechaActual.toISOString();
+        // Agregar un mensaje de aviso en la respuesta.
+        res.send("Se han agregado fechas automáticamente a la fecha y hora actual.");
+        respuestaEnviada = true; // Marcamos que la respuesta se ha enviado.
+    }
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
         //if the nombre doesn't exist, insert it into the collection
         await collection.insertOne(data);
-        //send the result to the client
-        res.send("se ha insertado correctamente");
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía el mensaje de éxito.
+            res.send("Se ha insertado correctamente");
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error en el servidor');
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía un error en el servidor.
+            res.status(500).send('Error en el servidor');
+        }
     } finally {
         await client.close();
     }
 });
+
 
 app.put('/update/evento', async function (req, res) {
     const id = req.query.id;
@@ -653,11 +671,18 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
+<<<<<<< HEAD
                 res.send(suma.toString()); // using the "nombre" field from the result document
             } else {
                 res.send("0");
             }
             res.send(suma.toString());
+=======
+                res.send(suma.toString()); // Send the calculated value as the response
+            } else {
+                res.send("0");
+            }
+>>>>>>> origin/fechas
         }
     } catch (error) {
         console.log(error);
@@ -666,6 +691,7 @@ app.get('/get/all/egresos', async function (req, res) {
         await client.close();
     }
 });
+
 
 app.post('/add/egreso', async function (req, res) {
     const id = req.query.id;

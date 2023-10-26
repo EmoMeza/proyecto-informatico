@@ -159,7 +159,7 @@ app.get('/get/ingresos/caa', async function (req, res) {
         const collection = database.collection("caa");
         const result = await collection.findOne({ _id: new ObjectId(id) });
         if (!result) {
-            res.send(`El id ${id} no existe en la base de datos`);
+            res.status(404).send(`El id ${id} no existe en la base de datos`);
         } else {
             if (!result.ingresos) {
                 res.send("0");
@@ -329,21 +329,39 @@ app.get('/get/evento', async function (req, res) {
 
 app.post('/add/evento', async function (req, res) {
     const data = req.body;
+    let respuestaEnviada = false; // Variable para rastrear si la respuesta se ha enviado.
+
+    if (!data.fecha_inicio || !data.fecha_final) {
+        // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
+        const fechaActual = new Date();
+        data.fecha_inicio = fechaActual.toISOString();
+        data.fecha_final = fechaActual.toISOString();
+        // Agregar un mensaje de aviso en la respuesta.
+        res.send("Se han agregado fechas automáticamente a la fecha y hora actual.");
+        respuestaEnviada = true; // Marcamos que la respuesta se ha enviado.
+    }
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
         //if the nombre doesn't exist, insert it into the collection
         await collection.insertOne(data);
-        //send the result to the client
-        res.send("se ha insertado correctamente");
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía el mensaje de éxito.
+            res.send("Se ha insertado correctamente");
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error en el servidor');
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía un error en el servidor.
+            res.status(500).send('Error en el servidor');
+        }
     } finally {
         await client.close();
     }
 });
+
 
 app.put('/update/evento', async function (req, res) {
     const id = req.query.id;
@@ -581,7 +599,7 @@ app.get('/get/all/ingresos', async function (req, res) {
                         suma += result.ingresos[i][0];
                     }
                 }
-                res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+                res.send(suma.toString()); // using the "nombre" field from the result document
             } else {
                 res.send("0");
             }
@@ -653,11 +671,11 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
-                res.send(`El total de ingresos del evento ${result.nombre} es: ${suma}`); // using the "nombre" field from the result document
+                res.send(suma.toString()); // using the "nombre" field from the result document
             } else {
                 res.send("0");
             }
-            res.send(`El total de egresos del evento ${result.nombre} es: ${suma}`);
+            res.send(suma.toString());
         }
     } catch (error) {
         console.log(error);
@@ -714,7 +732,7 @@ app.get('/get/total', async function (req, res) {
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
 
-            res.send(`El total de ingresos del evento ${result.nombre} es: ${result.total}`);
+            res.send(result.total.toString());
         }
     } catch (error) {
         console.log(error);
@@ -786,37 +804,6 @@ app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre 
         await client.close();
     }
 });
-
-app.put('/update/evento/', async (req, res) => {
-    const id = req.query.id;
-    const data = req.body;
-    try {
-        await client.connect();
-        const database = client.db("proyecto_informatico");
-        const collection = database.collection("test");
-        const result = await collection.findOne({ _id: new ObjectId(id) });
-        if (!result) {
-        res.send(`El evento con el ID ${id} no existe en la base de datos.`);
-        } else {
-        const updateData = {};
-        if (data.fecha_inicio) {
-            updateData.fecha_inicio = new Date(data.fecha_inicio);
-        }
-        if (data.fecha_final) {
-            updateData.fecha_final = new Date(data.fecha_final);
-        }
-        // Realiza la actualización de los campos específicos
-        await collection.updateOne({ _id: new ObjectId(id) }, { $set: updateData });
-        res.send("Se ha actualizado el evento correctamente.");
-    }
-    } catch (error) {
-    console.log(error);
-    res.status(500).send('Error en el servidor');
-    } finally {
-        await client.close();
-    }
-});
-
 
 
 const puerto = process.env.PORT || 4040;

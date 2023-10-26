@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'agregarEvento.dart';
+import 'flujo_de_caja.dart';
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [

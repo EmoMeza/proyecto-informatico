@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:fl_chart/fl_chart.dart';
+//import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
+import '../api_services.dart';
 
 void main() {
   runApp(MyApp());
@@ -48,28 +48,21 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    loadListFromSharedPreferences().then((loadedData) {
-      setState(() {
-        cashFlowData = loadedData;
-        total = cashFlowData.fold(
-            0, (previousValue, element) => previousValue + element.value);
-      });
-    });
+    _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
   }
 
+  /*
   Future<void> saveListToSharedPreferences(List<DataPoint> dataList) async {
     final prefs = await SharedPreferences.getInstance();
     final listMap = dataList.map((data) => data.toMap()).toList();
     await prefs.setStringList(
         'dataPointList', listMap.map((map) => jsonEncode(map)).toList());
   }
-
   Future<List<DataPoint>> loadListFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final listMap = prefs.getStringList('dataPointList') ?? [];
     return listMap.map((json) => DataPoint.fromMap(jsonDecode(json))).toList();
   }
-
   void _updateCashFlowAndSave(
       bool isIncome, double amount, String description) {
     if (isIncome) {
@@ -81,6 +74,65 @@ class _DashboardState extends State<Dashboard> {
         0, (previousValue, element) => previousValue + element.value);
     setState(() {});
     saveListToSharedPreferences(cashFlowData); // Guardar en SharedPreferences
+  }*/
+  // funcion para añadir ingreso o egreso a la base de datos
+  void _addIncomeOrExpense(
+      bool isIncome, double amount, String description) async {
+    final monto = amount;
+    final descripcion = description;
+    final id = '652976834af6fedf26f3493d'; // Replace with the actual CAA ID
+
+    if (isIncome) {
+      ApiResponse response = await ApiService.postIngresoCaa(
+          id, {'ingreso': monto, 'descripcion': descripcion});
+      if (response.success) {
+        // Handle success
+        _LoadIncomeOrExpense(); // Update the list from the server
+      } else {
+        // Handle error
+        print('Error adding income: ${response.message}');
+      }
+    } else {
+      ApiResponse response = await ApiService.postIngresoCaa(
+          id, {'ingreso': monto, 'descripcion': descripcion});
+      if (response.success) {
+        print("se entro al if");
+        _LoadIncomeOrExpense(); // Update the list from the server
+      } else {
+        // Handle error
+        print('Error adding expense: ${response.message}');
+      }
+    }
+  }
+
+  void _LoadIncomeOrExpense() async {
+    final id = '652976834af6fedf26f3493d'; // Replace with the actual CAA ID
+    ApiResponse incomeResponse = await ApiService.getIngresosCaa(id);
+    ApiResponse expenseResponse = await ApiService.getEgresosCaa(id);
+
+    if (incomeResponse.success && expenseResponse.success) {
+      final List<DataPoint> incomeData = incomeResponse.data.map((item) {
+        return DataPoint(item['ingreso'], item['descripcion']);
+      }).toList();
+
+      final List<DataPoint> expenseData = expenseResponse.data.map((item) {
+        return DataPoint(-item['egreso'], item['descripcion']);
+      }).toList();
+
+      setState(() {
+        cashFlowData = [...incomeData, ...expenseData];
+        total = cashFlowData.fold(
+            0, (previousValue, element) => previousValue + element.value);
+      });
+    } else {
+      // Handle error for income or expense data retrieval
+      if (!incomeResponse.success) {
+        print('Error retrieving income data: ${incomeResponse.message}');
+      }
+      if (!expenseResponse.success) {
+        print('Error retrieving expense data: ${expenseResponse.message}');
+      }
+    }
   }
 
   void _openEntryDialog(bool isIncome) async {
@@ -118,7 +170,9 @@ class _DashboardState extends State<Dashboard> {
                 // Guardar los datos en la lista cashFlowData
                 final monto = double.parse(amountController.text);
                 final descripcion = descriptionController.text;
-                _updateCashFlowAndSave(isIncome, monto, descripcion);
+                //_updateCashFlowAndSave(isIncome, monto, descripcion);
+                // Llamar a la función para añadir ingreso o egreso
+                _addIncomeOrExpense(isIncome, monto, descripcion);
                 Navigator.of(context).pop();
               },
               child: Text('Guardar'),

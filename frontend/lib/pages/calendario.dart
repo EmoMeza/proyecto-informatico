@@ -66,6 +66,7 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
   DateTime? _selectedDay;
   Random random = Random();
   late List<Evento> eventos = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -81,14 +82,16 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
   
 
   Future<void> _loadEventos() async {
-    ApiResponse response = await  ApiService.getAllEventos();
+    ApiResponse response = await ApiService.getAllEventos();
     if (response.success) {
       setState(() {
         eventos = (response.data as List<dynamic>).map((e) => Evento.fromJson(e)).toList();
+        isLoading = false; // Establece isLoading como false después de cargar los eventos
       });
     } else {
       // Handle error here
       print('Error cargando eventos: ${response.message}');
+      isLoading = false; // Establece isLoading como false incluso si hay un error para evitar que la barra de carga se quede visible indefinidamente
     }
   }
   
@@ -118,7 +121,20 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
       ),
       body: Column(
         children: [
-          TableCalendar(
+          if (isLoading) // Muestra la barra de carga y el texto de carga mientras isLoading es true
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  SizedBox(height: 200),
+                  CircularProgressIndicator(), // Barra de carga circular
+                  SizedBox(height: 8.0),
+                  Text('Cargando eventos...'), // Texto de carga
+                ],
+              ),
+            ),
+          if(!isLoading)
+            TableCalendar(
             headerStyle: const HeaderStyle(titleCentered: true, formatButtonVisible: false),
             locale: 'es_ES',
             firstDay: DateTime.utc(2023, 1, 1),
@@ -148,8 +164,69 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
               weekendTextStyle: const TextStyle().copyWith(color: Colors.red),
               markersMaxCount: 1,
               markersAlignment: Alignment.bottomRight,
+              cellMargin: const EdgeInsets.all(17.0)
             ),
             calendarBuilders: CalendarBuilders(
+            todayBuilder: (context, day, focusedDay) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Círculo seleccionado
+                  Positioned(
+                    left: 0,
+                    right: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      width: 37.0,
+                      height: 37.0,
+                      child: Center(
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(fontSize: 16.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Otros elementos que quieras agregar encima del círculo
+                ],
+              );
+            },
+              selectedBuilder: (context, day, focusedDay) {
+                return FadeTransition(
+                  opacity: _animation,
+                  child: ScaleTransition(
+                    scale: _animation,
+                    child: Stack(
+                      alignment: Alignment.center, // Puedes ajustar la alineación según tus necesidades
+                      children: [
+                        // Círculo seleccionado
+                        Positioned(
+                          left: 0,
+                          right: 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            width: 37.0,
+                            height: 37.0,
+                            child: Center(
+                              child: Text(
+                                '${day.day}',
+                                style: const TextStyle().copyWith(fontSize: 16.0),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Otros elementos que quieras agregar encima del círculo
+                      ],
+                    ),
+                  ),
+                );
+              },
               singleMarkerBuilder: (context, day, events) {
                 var eventosDelDia = _getEventosDelDia(day);
                 if (eventosDelDia.isNotEmpty) {
@@ -165,7 +242,7 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
                         height: 20.0,
                       ),
                       Positioned(
-                        top: 4,
+                        top: 3,
                         left: 6,
                         child: Text(
                           '${eventosDelDia.length}',
@@ -184,9 +261,10 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
               },
             ),
           ),
+          
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(10.0),
               child: _selectedDay != null ? _buildEventList(_getEventosDelDia(_selectedDay!)) : Container(),
             ),
           ),

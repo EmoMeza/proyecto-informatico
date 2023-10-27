@@ -86,7 +86,7 @@ class _DashboardState extends State<Dashboard> {
       bool isIncome, double amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    final id = '652c2a09d107253c7aacf130'; // Replace with the actual CAA ID
+    const id = '6530ac564fc4cee2752b73ae'; // Replace with the actual CAA ID
 
     if (isIncome) {
       ApiResponse response = await ApiService.postIngresoCaa(
@@ -112,35 +112,42 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _LoadIncomeOrExpense() async {
-    final id = '652c2a09d107253c7aacf130'; // Replace with the actual CAA ID
+    const id = '6530ac564fc4cee2752b73ae'; // Reemplaza con el ID real de CAA
     ApiResponse incomeResponse = await ApiService.getIngresosCaa(id);
     ApiResponse expenseResponse = await ApiService.getEgresosCaa(id);
-
+    print(incomeResponse.data);
     if (incomeResponse.success && expenseResponse.success) {
-      //ahora toma los datos de getIngresosCaa y getEgresosCaa y los guarda en incomeData y expenseData
-      final incomeData = (incomeResponse.data as List<dynamic>)
-          .map(
-              (dynamic item) => DataPoint(item['ingreso'], item['descripcion']))
-          .toList();
-      final expenseData = (expenseResponse.data as List<dynamic>)
-          .map(
-              (dynamic item) => DataPoint(-item['egreso'], item['descripcion']))
-          .toList();
-
+      List<DataPoint> incomeData = []; // Mueve la declaración de la lista aquí
+      List<DataPoint> expenseData = []; // Mueve la declaración de la lista aquí
+      // Ahora toma los datos de getIngresosCaa y getEgresosCaa y los guarda en incomeData y expenseData
+      if (incomeResponse.data is List) {
+        incomeData = (incomeResponse.data as List<dynamic>)
+            .map((dynamic item) =>
+                DataPoint(item['ingreso'], item['descripcion']))
+            .toList();
+      }
+      if (expenseResponse.data is List) {
+        expenseData = (expenseResponse.data as List<dynamic>)
+            .map((dynamic item) =>
+                DataPoint(-item['egreso'], item['descripcion']))
+            .toList();
+      }
       setState(() {
         cashFlowData = [...incomeData, ...expenseData];
         total = cashFlowData.fold(
             0, (previousValue, element) => previousValue + element.value);
       });
-      //imprime los datos de cashFlowData
+      // Imprime los datos de cashFlowData
       print(cashFlowData);
     } else {
-      // Handle error for income or expense data retrieval
+      // Maneja el error para la obtención de datos de ingresos o gastos
       if (!incomeResponse.success) {
-        print('Error retrieving income data: ${incomeResponse.message}');
+        print(
+            'Error al obtener los datos de ingresos: ${incomeResponse.message}');
       }
       if (!expenseResponse.success) {
-        print('Error retrieving expense data: ${expenseResponse.message}');
+        print(
+            'Error al obtener los datos de gastos: ${expenseResponse.message}');
       }
     }
   }

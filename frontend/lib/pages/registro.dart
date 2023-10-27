@@ -1,7 +1,13 @@
+<<<<<<< Updated upstream
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
+=======
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../api_services.dart';
+>>>>>>> Stashed changes
 
 class Registro extends StatefulWidget {
   const Registro({Key? key}) : super(key: key);
@@ -11,24 +17,31 @@ class Registro extends StatefulWidget {
 }
 
 class _RegistroState extends State<Registro> {
-  TextEditingController loginController = TextEditingController();
-  TextEditingController contrasenaController = TextEditingController();
-  TextEditingController repetirContrasenaController = TextEditingController();
   TextEditingController nombreController = TextEditingController();
+<<<<<<< Updated upstream
   String tipoCuenta = 'Estudiante';
 
   void guardarDatos() async {
     final login = loginController.text;
     final contrasena = contrasenaController.text;
-    final nombre = nombreController.text;
+=======
+  TextEditingController apellidoController = TextEditingController();
+  TextEditingController matriculaController = TextEditingController();
+  String tipoCuenta = 'Estudiante';
 
-    if (contrasena != repetirContrasenaController.text) {
+  void guardarDatos() async {
+    final matricula = matriculaController.text;
+>>>>>>> Stashed changes
+    final nombre = nombreController.text;
+    final apellido = apellidoController.text;
+
+    if (matricula.length < 4 || nombre.isEmpty || apellido.isEmpty) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: const Text('Las contraseñas no coinciden.'),
+            content: const Text('La matricula no es válida.'),
             actions: [
               ElevatedButton(
                 onPressed: () {
@@ -43,6 +56,7 @@ class _RegistroState extends State<Registro> {
       return;
     }
 
+<<<<<<< Updated upstream
     // Configurar la conexión MongoDB
     final db = mongo.Db('mongodb+srv://Jose-BA:profevaras@cluster0.trauygm.mongodb.net/?retryWrites=true&w=majority');
 
@@ -58,6 +72,18 @@ class _RegistroState extends State<Registro> {
 
       await db.close();
 
+=======
+    final alumnoData = {
+      'matricula': matricula,
+      'nombre': nombre,
+      'apellido': apellido,
+    };
+
+    ApiResponse responseA = await ApiService.postAlumno(nombre, matricula, apellido, alumnoData);
+
+    if (responseA.success) {
+      // ignore: use_build_context_synchronously
+>>>>>>> Stashed changes
       showDialog(
         context: context,
         builder: (context) {
@@ -76,8 +102,30 @@ class _RegistroState extends State<Registro> {
           );
         },
       );
+<<<<<<< Updated upstream
     } catch (e) {
       debugPrint('Error al guardar los datos en MongoDB: $e');
+=======
+    } else {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text('Error al registrar al alumno: ${responseA.message}'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+>>>>>>> Stashed changes
     }
   }
 
@@ -93,6 +141,7 @@ class _RegistroState extends State<Registro> {
           child: Column(
             children: [
               TextField(
+<<<<<<< Updated upstream
                 controller: loginController,
                 decoration: const InputDecoration(labelText: 'Login'),
               ),
@@ -107,29 +156,19 @@ class _RegistroState extends State<Registro> {
                 decoration: const InputDecoration(labelText: 'Repetir Contraseña'),
               ),
               TextField(
+=======
+>>>>>>> Stashed changes
                 controller: nombreController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: const InputDecoration(labelText: 'Nombre: '),
               ),
-              Row(
-                children: [
-                  const Text('Seleccionar tipo de cuenta:'),
-                  DropdownButton<String>(
-                    value: tipoCuenta,
-                    onChanged: (String? value) {
-                      setState(() {
-                        tipoCuenta = value!;
-                      });
-                    },
-                    items: <String>['Estudiante', 'Centro de Alumnos']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ],
+              TextField(
+                controller: apellidoController,
+                decoration: const InputDecoration(labelText: 'Apellido: '),
               ),
+              TextField(
+                controller: matriculaController,
+                decoration: const InputDecoration(labelText: 'Matricula: '),
+              ),              
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

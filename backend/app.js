@@ -467,11 +467,13 @@ app.get('/get/alumno', async function (req, res) {
 app.post('/add/alumno', async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
+    const apellido = req.query.apellido;
     const data = req.body;
 
     // Unify the data into a single object
     data.nombre = nombre;
     data.matricula = matricula;
+    data.apellido = apellido;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -480,7 +482,7 @@ app.post('/add/alumno', async function (req, res) {
     }
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
-    const password = matricula.substring(0, 4) + nombre.toLowerCase();
+    const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0, 2);
     data.contraseña = password
     try {
         await client.connect();

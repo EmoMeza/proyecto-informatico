@@ -45,7 +45,7 @@ class DataPoint {
 class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
   int total = 0;
-
+  bool isloading = true;
   @override
   void initState() {
     super.initState();
@@ -124,6 +124,7 @@ class _DashboardState extends State<Dashboard> {
       setState(() {
         //convierte getTotal.data a double
         total = getTotal.data;
+        isloading = false;
       });
     } else {
       // ignore: avoid_print
@@ -182,7 +183,7 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Flujo de caja'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,18 +194,29 @@ class _DashboardState extends State<Dashboard> {
               Text('Total: \$${total.toStringAsFixed(0)}'),
             ],
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: cashFlowData.length,
-              itemBuilder: (context, index) {
-                final dataPoint = cashFlowData[index];
-                return ListTile(
-                  title: Text(dataPoint.description),
-                  subtitle: Text('\$${dataPoint.value.toStringAsFixed(0)}'),
-                );
-              },
+          if (isloading)
+            Center(
+              child: Container(
+                width: 75, // Ancho deseado
+                height: 75, // Alto deseado
+                child: const CircularProgressIndicator(
+                  strokeWidth: 7, // Ancho del indicador de progreso
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: cashFlowData.length,
+                itemBuilder: (context, index) {
+                  final dataPoint = cashFlowData[index];
+                  return ListTile(
+                    title: Text(dataPoint.description),
+                    subtitle: Text('\$${dataPoint.value.toStringAsFixed(0)}'),
+                  );
+                },
+              ),
             ),
-          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[

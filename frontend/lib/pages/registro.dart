@@ -1,13 +1,7 @@
-<<<<<<< Updated upstream
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
-=======
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import '../api_services.dart';
->>>>>>> Stashed changes
 
 class Registro extends StatefulWidget {
   const Registro({Key? key}) : super(key: key);
@@ -18,20 +12,12 @@ class Registro extends StatefulWidget {
 
 class _RegistroState extends State<Registro> {
   TextEditingController nombreController = TextEditingController();
-<<<<<<< Updated upstream
-  String tipoCuenta = 'Estudiante';
-
-  void guardarDatos() async {
-    final login = loginController.text;
-    final contrasena = contrasenaController.text;
-=======
   TextEditingController apellidoController = TextEditingController();
   TextEditingController matriculaController = TextEditingController();
   String tipoCuenta = 'Estudiante';
 
   void guardarDatos() async {
     final matricula = matriculaController.text;
->>>>>>> Stashed changes
     final nombre = nombreController.text;
     final apellido = apellidoController.text;
 
@@ -56,23 +42,6 @@ class _RegistroState extends State<Registro> {
       return;
     }
 
-<<<<<<< Updated upstream
-    // Configurar la conexión MongoDB
-    final db = mongo.Db('mongodb+srv://Jose-BA:profevaras@cluster0.trauygm.mongodb.net/?retryWrites=true&w=majority');
-
-    try {
-      await db.open();
-      
-      await db.collection('usuarios').insert({
-        'login': login,
-        'contrasena': contrasena,
-        'nombre': nombre,
-        'tipoCuenta': tipoCuenta,
-      });
-
-      await db.close();
-
-=======
     final alumnoData = {
       'matricula': matricula,
       'nombre': nombre,
@@ -83,7 +52,6 @@ class _RegistroState extends State<Registro> {
 
     if (responseA.success) {
       // ignore: use_build_context_synchronously
->>>>>>> Stashed changes
       showDialog(
         context: context,
         builder: (context) {
@@ -102,10 +70,6 @@ class _RegistroState extends State<Registro> {
           );
         },
       );
-<<<<<<< Updated upstream
-    } catch (e) {
-      debugPrint('Error al guardar los datos en MongoDB: $e');
-=======
     } else {
       // ignore: use_build_context_synchronously
       showDialog(
@@ -125,7 +89,6 @@ class _RegistroState extends State<Registro> {
           );
         },
       );
->>>>>>> Stashed changes
     }
   }
 
@@ -141,23 +104,6 @@ class _RegistroState extends State<Registro> {
           child: Column(
             children: [
               TextField(
-<<<<<<< Updated upstream
-                controller: loginController,
-                decoration: const InputDecoration(labelText: 'Login'),
-              ),
-              TextField(
-                controller: contrasenaController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
-              ),
-              TextField(
-                controller: repetirContrasenaController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Repetir Contraseña'),
-              ),
-              TextField(
-=======
->>>>>>> Stashed changes
                 controller: nombreController,
                 decoration: const InputDecoration(labelText: 'Nombre: '),
               ),

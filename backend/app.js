@@ -187,6 +187,10 @@ app.post('/add/ingreso/caa', async function (req, res) {
     const data = req.body;
     const data2 = data.ingresos;
 
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -247,6 +251,10 @@ app.post('/add/egreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
 
     try {
         await client.connect();
@@ -619,6 +627,13 @@ app.post('/add/ingreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
+
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -692,6 +707,10 @@ app.post('/add/egreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");

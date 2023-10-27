@@ -1,30 +1,31 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-//import 'package:fl_chart/fl_chart.dart';
-import 'dart:async';
-//import 'package:shared_preferences/shared_preferences.dart';
 import '../api_services.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Dashboard(),
     );
   }
 }
 
 class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _DashboardState createState() => _DashboardState();
 }
 
 class DataPoint {
-  final double value;
+  final int value;
   final String description;
 
   DataPoint(this.value, this.description);
@@ -43,7 +44,7 @@ class DataPoint {
 
 class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
-  double total = 0.0;
+  int total = 0;
 
   @override
   void initState() {
@@ -51,104 +52,82 @@ class _DashboardState extends State<Dashboard> {
     _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
   }
 
-  Future<void> getCaa() async {
-    ApiResponse response = await ApiService.getAllCaa();
-    //ahora imprime todos los datos de los Caa que recibio
-    print(response.data);
-  }
-
-  /*
-  Future<void> saveListToSharedPreferences(List<DataPoint> dataList) async {
-    final prefs = await SharedPreferences.getInstance();
-    final listMap = dataList.map((data) => data.toMap()).toList();
-    await prefs.setStringList(
-        'dataPointList', listMap.map((map) => jsonEncode(map)).toList());
-  }
-  Future<List<DataPoint>> loadListFromSharedPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final listMap = prefs.getStringList('dataPointList') ?? [];
-    return listMap.map((json) => DataPoint.fromMap(jsonDecode(json))).toList();
-  }
-  void _updateCashFlowAndSave(
-      bool isIncome, double amount, String description) {
+  void _updateCashFlowAndSave(bool isIncome, int amount, String description) {
     if (isIncome) {
       cashFlowData.add(DataPoint(amount, description));
     } else {
       cashFlowData.add(DataPoint(-amount, description));
     }
-    total = cashFlowData.fold(
-        0, (previousValue, element) => previousValue + element.value);
     setState(() {});
-    saveListToSharedPreferences(cashFlowData); // Guardar en SharedPreferences
-  }*/
+  }
+
   // funcion para añadir ingreso o egreso a la base de datos
   void _addIncomeOrExpense(
-      bool isIncome, double amount, String description) async {
+      bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
     const id = '6530ac564fc4cee2752b73ae'; // Replace with the actual CAA ID
 
     if (isIncome) {
-      ApiResponse response = await ApiService.postIngresoCaa(
-          id, {'ingreso': monto, 'descripcion': descripcion});
+      ApiResponse response = await ApiService.postIngresoCaa(id, {
+        'ingresos': [monto, descripcion]
+      });
       if (response.success) {
-        // Handle success
-        _LoadIncomeOrExpense(); // Update the list from the server
+        //en caso de funcionar se actualiza la lista cashFlowData
+        _updateCashFlowAndSave(isIncome, monto, descripcion);
       } else {
         // Handle error
+        // ignore: avoid_print
         print('Error adding income: ${response.message}');
       }
     } else {
-      ApiResponse response = await ApiService.postIngresoCaa(
-          id, {'ingreso': monto, 'descripcion': descripcion});
+      ApiResponse response = await ApiService.postEgresoCaa(id, {
+        'egresos': [monto, descripcion]
+      });
       if (response.success) {
-        print("se entro al if");
-        _LoadIncomeOrExpense(); // Update the list from the server
+        _updateCashFlowAndSave(isIncome, monto, descripcion);
       } else {
         // Handle error
+        // ignore: avoid_print
         print('Error adding expense: ${response.message}');
       }
     }
   }
 
+  // ignore: non_constant_identifier_names
   void _LoadIncomeOrExpense() async {
     const id = '6530ac564fc4cee2752b73ae'; // Reemplaza con el ID real de CAA
-    ApiResponse incomeResponse = await ApiService.getIngresosCaa(id);
-    ApiResponse expenseResponse = await ApiService.getEgresosCaa(id);
-    print(incomeResponse.data);
-    if (incomeResponse.success && expenseResponse.success) {
-      List<DataPoint> incomeData = []; // Mueve la declaración de la lista aquí
-      List<DataPoint> expenseData = []; // Mueve la declaración de la lista aquí
-      // Ahora toma los datos de getIngresosCaa y getEgresosCaa y los guarda en incomeData y expenseData
-      if (incomeResponse.data is List) {
-        incomeData = (incomeResponse.data as List<dynamic>)
-            .map((dynamic item) =>
-                DataPoint(item['ingreso'], item['descripcion']))
-            .toList();
-      }
-      if (expenseResponse.data is List) {
-        expenseData = (expenseResponse.data as List<dynamic>)
-            .map((dynamic item) =>
-                DataPoint(-item['egreso'], item['descripcion']))
-            .toList();
-      }
+    // ignore: non_constant_identifier_names
+    var Response = await ApiService.getCaa(id);
+
+    if (Response.success) {
+      final income = Response.data['ingresos'];
+      final expense = Response.data['egresos'];
+
+      //ahora usando un iterador se recorre la lista de ingresos y egresos y se van agregando a la lista cashFlowData
+      List<DataPoint> incomeData = (income is List)
+          ? (income)
+              .where((item) => item != null) // Filtrar elementos nulos
+              .map((item) => DataPoint(item[0], item[1]))
+              .toList()
+          : [];
+
+      List<DataPoint> expenseData = (expense is List)
+          ? (expense)
+              .where((item) => item != null) // Filtrar elementos nulos
+              .map((item) => DataPoint(-item[0], item[1]))
+              .toList()
+          : [];
+
+      cashFlowData = [...incomeData, ...expenseData];
+      ApiResponse getTotal = await ApiService.getTotalCaa(id);
       setState(() {
-        cashFlowData = [...incomeData, ...expenseData];
-        total = cashFlowData.fold(
-            0, (previousValue, element) => previousValue + element.value);
+        //convierte getTotal.data a double
+        total = getTotal.data;
       });
-      // Imprime los datos de cashFlowData
-      print(cashFlowData);
     } else {
-      // Maneja el error para la obtención de datos de ingresos o gastos
-      if (!incomeResponse.success) {
-        print(
-            'Error al obtener los datos de ingresos: ${incomeResponse.message}');
-      }
-      if (!expenseResponse.success) {
-        print(
-            'Error al obtener los datos de gastos: ${expenseResponse.message}');
-      }
+      // ignore: avoid_print
+      print('Error al obtener los datos: ${Response.message}');
     }
   }
 
@@ -167,11 +146,11 @@ class _DashboardState extends State<Dashboard> {
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Monto'),
+                decoration: const InputDecoration(labelText: 'Monto'),
               ),
               TextField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Descripción'),
+                decoration: const InputDecoration(labelText: 'Descripción'),
               ),
             ],
           ),
@@ -180,19 +159,18 @@ class _DashboardState extends State<Dashboard> {
               onPressed: () {
                 Navigator.of(context).pop(); // Cerrar el diálogo
               },
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
                 // Guardar los datos en la lista cashFlowData
-                final monto = double.parse(amountController.text);
+                final monto = int.parse(amountController.text);
                 final descripcion = descriptionController.text;
-                //_updateCashFlowAndSave(isIncome, monto, descripcion);
                 // Llamar a la función para añadir ingreso o egreso
                 _addIncomeOrExpense(isIncome, monto, descripcion);
                 Navigator.of(context).pop();
               },
-              child: Text('Guardar'),
+              child: const Text('Guardar'),
             ),
           ],
         );
@@ -204,15 +182,15 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: const Text('Dashboard'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Column(
             children: <Widget>[
-              Text('Flujo de Caja'),
-              Text('Total: \$${total.toStringAsFixed(2)}'),
+              const Text('Flujo de Caja'),
+              Text('Total: \$${total.toStringAsFixed(0)}'),
             ],
           ),
           Expanded(
@@ -222,7 +200,7 @@ class _DashboardState extends State<Dashboard> {
                 final dataPoint = cashFlowData[index];
                 return ListTile(
                   title: Text(dataPoint.description),
-                  subtitle: Text('\$${dataPoint.value.toStringAsFixed(2)}'),
+                  subtitle: Text('\$${dataPoint.value.toStringAsFixed(0)}'),
                 );
               },
             ),
@@ -231,29 +209,29 @@ class _DashboardState extends State<Dashboard> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(bottom: 10.0),
+                margin: const EdgeInsets.only(bottom: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
                     _openEntryDialog(true); // true para ingreso
                   },
-                  child: Text('Añadir Ingreso'),
                   style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(
-                        Size(150, 50)), // Ajusta el ancho y alto del botón
+                    fixedSize: MaterialStateProperty.all(const Size(
+                        150, 50)), // Ajusta el ancho y alto del botón
                   ),
+                  child: const Text('Añadir Ingreso'),
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(bottom: 10.0),
+                margin: const EdgeInsets.only(bottom: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
                     _openEntryDialog(false); // false para egreso
                   },
-                  child: Text('Añadir Egreso'),
                   style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(
-                        Size(150, 50)), // Ajusta el ancho y alto del botón
+                    fixedSize: MaterialStateProperty.all(const Size(
+                        150, 50)), // Ajusta el ancho y alto del botón
                   ),
+                  child: const Text('Añadir Egreso'),
                 ),
               ),
             ],

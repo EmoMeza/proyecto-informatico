@@ -671,18 +671,10 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
-<<<<<<< HEAD
-                res.send(suma.toString()); // using the "nombre" field from the result document
-            } else {
-                res.send("0");
-            }
-            res.send(suma.toString());
-=======
                 res.send(suma.toString()); // Send the calculated value as the response
             } else {
                 res.send("0");
             }
->>>>>>> origin/fechas
         }
     } catch (error) {
         console.log(error);

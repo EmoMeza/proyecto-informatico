@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_informatico/api_services.dart';
 import 'package:proyecto_informatico/pages/registro.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +14,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  TextEditingController usuarioController = TextEditingController();
+  TextEditingController matriculaController = TextEditingController();
   TextEditingController contrasenaController = TextEditingController();
 
   @override
@@ -28,39 +29,65 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Future<Map<String, String?>> obtenerCredenciales() async {
-    final prefs = await SharedPreferences.getInstance();
-    final login = prefs.getString('login');
-    final contrasena = prefs.getString('contrasena');
-    return {'login': login, 'contrasena': contrasena};
-  }
-
   Future<void> verificarCredenciales() async {
-    final nombreUsuario = usuarioController.text;
+    final matricula = matriculaController.text;
     final contrasena = contrasenaController.text;
 
-    final credencialesGuardadas = await obtenerCredenciales();
-    final loginGuardado = credencialesGuardadas['login'];
-    final contrasenaGuardada = credencialesGuardadas['contrasena'];
+    if (matricula.length < 4 || contrasena.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('La matricula o contraseña estan erroneas.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
 
-    if (loginGuardado == nombreUsuario && contrasenaGuardada == contrasena) {
-      final prefs = await SharedPreferences.getInstance();
-      final tipoCuenta = prefs.getString('tipoCuenta');
+    final responseAlumno = await ApiService.getAlumno(matricula);
+    if (responseAlumno.success){
+      final alumnoData = responseAlumno.data;
 
-      if (tipoCuenta == 'Estudiante') {
-        // Redirige a la página de estudiantes
-        Navigator.push(context, MaterialPageRoute(builder: (context) => menuAlumnos()));
-      } else if (tipoCuenta == 'Centro de Alumnos') {
-        // Redirige a la página de centro de alumnos
-        Navigator.push(context, MaterialPageRoute(builder: (context) => menuCAA()));
+      final storedPassword = alumnoData['contraseña'];
+      if (contrasena == storedPassword){
+        // ignore: use_build_context_synchronously
+        Navigator.push(context, MaterialPageRoute(builder: (context) => menuAlumnos(alumnoData: alumnoData)));
       } else {
-        // Tipo de cuenta desconocido, maneja el caso como desees
-        debugPrint('Tipo de cuenta desconocido');
+        showErrorMessage("Contraseña incorrecta");
       }
     } else {
-      // Credenciales incorrectas
-      debugPrint('Credenciales incorrectas');
+      showErrorMessage("No se encontró el alumno con la matricula $matricula");
     }
+  }
+
+  void showErrorMessage(String mensaje) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(mensaje),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -84,12 +111,12 @@ class _LoginState extends State<Login> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(width: 10),
-                const Text("Nombre de usuario: "),
+                const Text("Matricula: "),
                 Container(
                   width: 200,
                   height: 40,
                   child: TextField(
-                    controller: usuarioController,
+                    controller: matriculaController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),

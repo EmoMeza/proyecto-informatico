@@ -16,10 +16,14 @@ class _AgregarEventoState extends State<AgregarEvento> {
   String? dropdownValue = 'Evaluación';
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
+  DateTime selectedEndDate = DateTime.now();
+  TimeOfDay selectedEndTime = TimeOfDay.now();
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
@@ -34,15 +38,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
-  String formatDateTime(DateTime date, TimeOfDay time) {
-    //formato de fecha y hora para enviar a la API
-    final DateTime combined =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    final String formattedDate =
-        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined);
-    return formattedDate;
-  }
-
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
@@ -54,16 +49,89 @@ class _AgregarEventoState extends State<AgregarEvento> {
     }
   }
 
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedEndDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedEndDate) {
+      setState(() {
+        selectedEndDate = picked;
+        _endDateController.text =
+            DateFormat('yyyy-MM-dd').format(selectedEndDate);
+      });
+    }
+  }
+
+  Future<void> _selectEndTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedEndTime,
+    );
+    if (picked != null && picked != selectedEndTime) {
+      setState(() {
+        selectedEndTime = picked;
+        _endTimeController.text = selectedEndTime.format(context);
+      });
+    }
+  }
+
+  String formatDateTime(DateTime date, TimeOfDay time) {
+    //formato de fecha y hora para enviar a la API
+    final DateTime combined =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final String formattedDate =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(combined);
+    return formattedDate;
+  }
+
   String? _validateFecha(DateTime? date) {
     if (date == null) {
-      return 'Please select a date';
+      return 'Seleccione una fecha inicial';
     }
     return null;
   }
 
   String? _validateHora(TimeOfDay? time) {
     if (time == null) {
-      return 'Please select a time';
+      return 'Seleccione una hora inicial';
+    }
+    return null;
+  }
+
+  String? _validateEndDate(DateTime? date) {
+    if (date == null) {
+      return 'Seleccione una fecha final';
+    }
+    if (date.isBefore(selectedDate)) {
+      return 'Fecha final no puede ser antes de la fecha inicial';
+    }
+    return null;
+  }
+
+  String? _validateEndTime(TimeOfDay? time) {
+    if (time == null) {
+      return 'Seleccione una hora final';
+    }
+
+    final DateTime selectedDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedTime.hour,
+        selectedTime.minute);
+    final DateTime selectedEndDateTime = DateTime(
+        selectedEndDate.year,
+        selectedEndDate.month,
+        selectedEndDate.day,
+        selectedEndTime.hour,
+        selectedEndTime.minute);
+
+    if (selectedDateTime.isAfter(selectedEndDateTime) &&
+        selectedDate == selectedEndDate) {
+      return 'Hora final no puede ser antes de la hora inicial';
     }
     return null;
   }
@@ -198,6 +266,60 @@ class _AgregarEventoState extends State<AgregarEvento> {
                     _selectTime(context);
                   },
                 ),
+                if (dropdownValue == 'Actividad')
+                  Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _endDateController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Fecha Final',
+                          suffixIcon: IconButton(
+                            onPressed: () => _selectEndDate(context),
+                            icon: const Icon(Icons.calendar_today),
+                          ),
+                        ),
+                        validator: (value) => _validateEndDate(selectedEndDate),
+                        onTap: () {
+                          _selectEndDate(context);
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _endTimeController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Hora Final',
+                          suffixIcon: IconButton(
+                            onPressed: () => _selectEndTime(context),
+                            icon: const Icon(Icons.access_time),
+                          ),
+                        ),
+                        validator: (value) => _validateEndTime(selectedEndTime),
+                        onTap: () {
+                          _selectEndTime(context);
+                        },
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20),
+                if (dropdownValue == 'Evaluación')
+                  TextFormField(
+                    controller: _endTimeController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Hora Final',
+                      suffixIcon: IconButton(
+                        onPressed: () => _selectEndTime(context),
+                        icon: const Icon(Icons.access_time),
+                      ),
+                    ),
+                    validator: (value) => _validateEndTime(selectedEndTime),
+                    onTap: () {
+                      _selectEndTime(context);
+                    },
+                  ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _nombreController,
@@ -216,18 +338,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
                     labelText: 'Descripción',
                   ),
                   validator: (value) => _validateField(value, 'Descripción'),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Entidad Encargada',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Sala/lugar',
-                  ),
                 ),
                 const SizedBox(height: 20),
                 buildSubmitButton(),

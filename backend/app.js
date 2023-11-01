@@ -187,6 +187,10 @@ app.post('/add/ingreso/caa', async function (req, res) {
     const data = req.body;
     const data2 = data.ingresos;
 
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -247,6 +251,10 @@ app.post('/add/egreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
 
     try {
         await client.connect();
@@ -485,11 +493,14 @@ app.get('/get/alumno', async function (req, res) {
 app.post('/add/alumno', async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
+    const apellido = req.query.apellido;
+
     const data = req.body;
 
     // Unify the data into a single object
     data.nombre = nombre;
     data.matricula = matricula;
+    data.apellido = apellido;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -498,7 +509,7 @@ app.post('/add/alumno', async function (req, res) {
     }
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
-    const password = matricula.substring(0, 4) + nombre.toLowerCase();
+    const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
     data.contraseña = password
     try {
         await client.connect();
@@ -616,6 +627,13 @@ app.post('/add/ingreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
+
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -689,6 +707,10 @@ app.post('/add/egreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../api_services.dart';
 
 void main() {
@@ -27,18 +28,21 @@ class Dashboard extends StatefulWidget {
 class DataPoint {
   final int value;
   final String description;
+  // guardamos un tipo de dato ISOS de fecha
+  final String date;
 
-  DataPoint(this.value, this.description);
+  DataPoint(this.value, this.description, this.date);
 
   Map<String, dynamic> toMap() {
     return {
       'value': value,
       'description': description,
+      'date': date,
     };
   }
 
   factory DataPoint.fromMap(Map<String, dynamic> map) {
-    return DataPoint(map['value'], map['description']);
+    return DataPoint(map['value'], map['description'], map['date']);
   }
 }
 
@@ -50,15 +54,6 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
-  }
-
-  void _updateCashFlowAndSave(bool isIncome, int amount, String description) {
-    if (isIncome) {
-      cashFlowData.add(DataPoint(amount, description));
-    } else {
-      cashFlowData.add(DataPoint(-amount, description));
-    }
-    setState(() {});
   }
 
   // funcion para añadir ingreso o egreso a la base de datos
@@ -74,7 +69,7 @@ class _DashboardState extends State<Dashboard> {
       });
       if (response.success) {
         //en caso de funcionar se actualiza la lista cashFlowData
-        _updateCashFlowAndSave(isIncome, monto, descripcion);
+        _LoadIncomeOrExpense();
       } else {
         // Handle error
         // ignore: avoid_print
@@ -85,13 +80,14 @@ class _DashboardState extends State<Dashboard> {
         'egresos': [monto, descripcion]
       });
       if (response.success) {
-        _updateCashFlowAndSave(isIncome, monto, descripcion);
+        _LoadIncomeOrExpense();
       } else {
         // Handle error
         // ignore: avoid_print
         print('Error adding expense: ${response.message}');
       }
     }
+    setState(() {});
   }
 
   // ignore: non_constant_identifier_names
@@ -108,18 +104,21 @@ class _DashboardState extends State<Dashboard> {
       List<DataPoint> incomeData = (income is List)
           ? (income)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(item[0], item[1]))
+              .map((item) => DataPoint(item[0], item[1], item[2]))
               .toList()
           : [];
 
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(-item[0], item[1]))
+              .map((item) => DataPoint(-item[0], item[1], item[2]))
               .toList()
           : [];
 
       cashFlowData = [...incomeData, ...expenseData];
+      // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
+      cashFlowData.sort((a, b) => b.date.compareTo(a.date));
+
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       setState(() {
         //convierte getTotal.data a double
@@ -183,72 +182,146 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flujo de caja'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              const Text('Flujo de Caja'),
-              Text('Total: \$${total.toStringAsFixed(0)}'),
-            ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // Icono del botón de devolución
+          onPressed: () {
+            // Agrega la lógica para manejar la acción de devolución
+            Navigator.of(context).pop();
+          },
+          color: Colors.black, // Cambia el color del icono
+        ),
+        title: const Text(
+          'Flujo de caja',
+          style: TextStyle(
+            color: Colors.black, // Cambia el color del texto a blanco
           ),
-          if (isloading)
-            Center(
-              child: Container(
-                width: 75, // Ancho deseado
-                height: 75, // Alto deseado
-                child: const CircularProgressIndicator(
-                  strokeWidth: 7, // Ancho del indicador de progreso
-                ),
+        ),
+      ),
+      body: DefaultTextStyle(
+        style: const TextStyle(
+          color: Colors.black, // Color de texto predeterminado
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              height: 40.0,
+              decoration: const BoxDecoration(
+                color: Colors.deepPurple,
               ),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                itemCount: cashFlowData.length,
-                itemBuilder: (context, index) {
-                  final dataPoint = cashFlowData[index];
-                  return ListTile(
-                    title: Text(dataPoint.description),
-                    subtitle: Text('\$${dataPoint.value.toStringAsFixed(0)}'),
-                  );
-                },
+              child: Center(
+                child: Container(
+                  child: Text(
+                    'Total: \$${total.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 18.0,
+                    ),
+                  ),
+                ),
               ),
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Container(
-                margin: const EdgeInsets.only(bottom: 10.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    _openEntryDialog(true); // true para ingreso
-                  },
-                  style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(const Size(
-                        150, 50)), // Ajusta el ancho y alto del botón
+            if (isloading)
+              Center(
+                child: Container(
+                  width: 75,
+                  height: 75,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 7,
                   ),
-                  child: const Text('Añadir Ingreso'),
+                ),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cashFlowData.length,
+                  itemBuilder: (context, index) {
+                    final dataPoint = cashFlowData[index];
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 2.0,
+                          color: Colors.white,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: ListTile(
+                        tileColor: dataPoint.value > 0
+                            ? const Color(0xFF07CB9A)
+                            : const Color(0xFFFA4B68),
+                        title: Text(
+                          dataPoint.description,
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '\$${dataPoint.value.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        trailing: Text(
+                          DateFormat('yyyy-MM-dd HH:mm')
+                              .format(DateTime.parse(dataPoint.date)),
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(2),
+                      ),
+                    );
+                  },
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 10.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    _openEntryDialog(false); // false para egreso
-                  },
-                  style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(const Size(
-                        150, 50)), // Ajusta el ancho y alto del botón
+            Container(
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _openEntryDialog(true);
+                      },
+                      style: ButtonStyle(
+                        fixedSize:
+                            MaterialStateProperty.all(const Size(150, 50)),
+                      ),
+                      child: const Text(
+                        'Añadir Ingreso',
+                        style: TextStyle(
+                          color: Colors
+                              .black, // Cambia el color del texto a blanco
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Text('Añadir Egreso'),
-                ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _openEntryDialog(false);
+                      },
+                      style: ButtonStyle(
+                        fixedSize:
+                            MaterialStateProperty.all(const Size(150, 50)),
+                      ),
+                      child: const Text(
+                        'Añadir Egreso',
+                        style: TextStyle(
+                          color: Colors
+                              .black, // Cambia el color del texto a blanco
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

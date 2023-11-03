@@ -278,7 +278,6 @@ class _DashboardState extends State<Dashboard> {
                       child: ExpansionTile(
                         tilePadding:
                             const EdgeInsets.symmetric(horizontal: 16.0),
-                        backgroundColor: Colors.white,
                         title: Text(
                           dataPoint.description.length <=
                                   20 // Establece el límite de caracteres, por ejemplo, 20.
@@ -287,7 +286,7 @@ class _DashboardState extends State<Dashboard> {
                               : '${dataPoint.description.substring(0, 30)}...', // Si es mayor que el límite, muestra los primeros 20 caracteres seguidos de "...". Puedes ajustar el número 20 según tus necesidades.
                           style: const TextStyle(
                             fontSize: 18.0,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                         subtitle: Text(
@@ -296,7 +295,7 @@ class _DashboardState extends State<Dashboard> {
                             fontSize: 18.0,
                             color: dataPoint.value > 0
                                 ? const Color(0xFF05B488)
-                                : const Color(0xFFFF002B),
+                                : const Color(0xFFFF2C4F),
                           ),
                         ),
                         children: <Widget>[
@@ -323,7 +322,6 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             Container(
-              color: Colors.white,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
@@ -358,10 +356,6 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       child: const Text(
                         'Añadir Egreso',
-                        style: TextStyle(
-                          color: Colors
-                              .white, // Cambia el color del texto a blanco
-                        ),
                       ),
                     ),
                   ),

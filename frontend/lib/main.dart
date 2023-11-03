@@ -16,10 +16,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'EventiCAA',
-      theme: ThemeData(
+      theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.deepPurple, // Set the primary swatch color
-        ).copyWith(secondary: Colors.deepPurple), // Set the secondary color
+          primarySwatch: Colors.deepPurple, // Establece el color principal
+        ).copyWith(
+            secondary: Colors.deepPurple), // Establece el color secundario
       ),
       initialRoute: '/login',
       routes: {

@@ -25,6 +25,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
   Future<void> _selectDate(BuildContext context) async {
+    //seleccionar fecha inicial
     final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
@@ -39,6 +40,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   Future<void> _selectTime(BuildContext context) async {
+    //seleccionar hora inicio
     final TimeOfDay? picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null && picked != selectedTime) {
@@ -50,6 +52,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   Future<void> _selectEndDate(BuildContext context) async {
+    //seleccionar fecha final
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedEndDate,
@@ -66,6 +69,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   Future<void> _selectEndTime(BuildContext context) async {
+    //Seleccionar hora fin
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedEndTime,
@@ -88,6 +92,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   String? _validateFecha(DateTime? date) {
+    //validar seleccion de fecha
     if (date == null) {
       return 'Seleccione una fecha inicial';
     }
@@ -95,6 +100,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   String? _validateHora(TimeOfDay? time) {
+    //validar hora inicial
     if (time == null) {
       return 'Seleccione una hora inicial';
     }
@@ -102,6 +108,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   String? _validateEndDate(DateTime? date) {
+    //validar fecha final
     if (date == null) {
       return 'Seleccione una fecha final';
     }
@@ -112,6 +119,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   String? _validateEndTime(TimeOfDay? time) {
+    //validar hora final
     if (time == null) {
       return 'Seleccione una hora final';
     }
@@ -144,6 +152,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   void showResponseDialog(BuildContext context, String message, bool success) {
+    //Popup de error/exito al enviar evento
     String title = success ? "Evento agregado" : "Error:";
     showDialog(
       // Alerta de respuesta de la API
@@ -171,6 +180,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   void _submitForm(BuildContext context) async {
+    //controlador para enviar datos a la API
     if (_formKey.currentState!.validate()) {
       Map<String, dynamic> postData = {
         'nombre': _nombreController.text,
@@ -197,6 +207,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   }
 
   ElevatedButton buildSubmitButton() {
+    // boton de enviar
     return ElevatedButton(
       onPressed: () {
         _submitForm(context);
@@ -326,13 +337,13 @@ class _AgregarEventoState extends State<AgregarEvento> {
                   decoration: const InputDecoration(
                     labelText: 'Nombre ramo/actividad',
                   ),
+                  maxLength: 50, // Limite de 50 caracteres
                   validator: (value) =>
                       _validateField(value, 'Nombre ramo/actividad'),
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  maxLines:
-                      4, // Adjust the number of lines for the description field
+                  maxLines: 6, // Numero de lineas para la descripcion
                   controller: _descripcionController,
                   decoration: const InputDecoration(
                     labelText: 'Descripción',

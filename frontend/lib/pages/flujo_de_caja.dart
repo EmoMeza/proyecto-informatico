@@ -163,12 +163,59 @@ class _DashboardState extends State<Dashboard> {
             ),
             TextButton(
               onPressed: () async {
-                // Guardar los datos en la lista cashFlowData
-                final monto = int.parse(amountController.text);
-                final descripcion = descriptionController.text;
-                // Llamar a la función para añadir ingreso o egreso
-                _addIncomeOrExpense(isIncome, monto, descripcion);
-                Navigator.of(context).pop();
+                final monto = int.tryParse(amountController.text);
+
+                if (monto != null && monto > 0 && monto < 10000000) {
+                  final descripcion = descriptionController.text;
+
+                  if (descripcion.length <= 250) {
+                    // La descripción tiene 250 caracteres o menos.
+                    _addIncomeOrExpense(isIncome, monto, descripcion);
+                    Navigator.of(context).pop();
+                  } else {
+                    // Mostrar un mensaje de error si la descripción supera los 250 caracteres.
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Error'),
+                          content: const Text(
+                              'La descripción debe tener 250 caracteres o menos.'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pop(); // Cerrar el mensaje de error.
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                } else {
+                  // Mostrar un mensaje de error si el monto no es válido.
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content:
+                            const Text('El monto debe ser menor a 10,000,000.'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pop(); // Cerrar el mensaje de error.
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
               child: const Text('Guardar'),
             ),
@@ -182,24 +229,13 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // Icono del botón de devolución
-          onPressed: () {
-            // Agrega la lógica para manejar la acción de devolución
-            Navigator.of(context).pop();
-          },
-          color: Colors.black, // Cambia el color del icono
-        ),
         title: const Text(
           'Flujo de caja',
-          style: TextStyle(
-            color: Colors.black, // Cambia el color del texto a blanco
-          ),
         ),
       ),
       body: DefaultTextStyle(
         style: const TextStyle(
-          color: Colors.black, // Color de texto predeterminado
+          color: Colors.white, // Color de texto predeterminado
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,18 +247,17 @@ class _DashboardState extends State<Dashboard> {
                 color: Colors.deepPurple,
               ),
               child: Center(
-                child: Container(
-                  child: Text(
-                    'Total: \$${total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 18.0,
-                    ),
+                child: Text(
+                  'Total: \$${total.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontSize: 18.0,
                   ),
                 ),
               ),
             ),
             if (isloading)
               Center(
+                // ignore: sized_box_for_whitespace
                 child: Container(
                   width: 75,
                   height: 75,
@@ -237,38 +272,51 @@ class _DashboardState extends State<Dashboard> {
                   itemCount: cashFlowData.length,
                   itemBuilder: (context, index) {
                     final dataPoint = cashFlowData[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2.0,
-                          color: Colors.white,
-                        ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: ListTile(
-                        tileColor: dataPoint.value > 0
-                            ? const Color(0xFF07CB9A)
-                            : const Color(0xFFFA4B68),
+                    return Card(
+                      elevation: 4.0,
+                      margin: const EdgeInsets.all(8.0),
+                      child: ExpansionTile(
+                        tilePadding:
+                            const EdgeInsets.symmetric(horizontal: 16.0),
+                        backgroundColor: Colors.white,
                         title: Text(
-                          dataPoint.description,
+                          dataPoint.description.length <=
+                                  20 // Establece el límite de caracteres, por ejemplo, 20.
+                              ? dataPoint
+                                  .description // Si es menor o igual al límite, muestra el texto completo.
+                              : '${dataPoint.description.substring(0, 30)}...', // Si es mayor que el límite, muestra los primeros 20 caracteres seguidos de "...". Puedes ajustar el número 20 según tus necesidades.
                           style: const TextStyle(
                             fontSize: 18.0,
+                            color: Colors.black,
                           ),
                         ),
                         subtitle: Text(
                           '\$${dataPoint.value.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 16.0,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            color: dataPoint.value > 0
+                                ? const Color(0xFF05B488)
+                                : const Color(0xFFFF002B),
                           ),
                         ),
-                        trailing: Text(
-                          DateFormat('yyyy-MM-dd HH:mm')
-                              .format(DateTime.parse(dataPoint.date)),
-                          style: const TextStyle(
-                            fontSize: 16.0,
+                        children: <Widget>[
+                          ListTile(
+                            title: Text(
+                              dataPoint.description,
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                              ),
+                            ),
                           ),
-                        ),
-                        contentPadding: const EdgeInsets.all(2),
+                          ListTile(
+                            title: Text(
+                              'Fecha: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(dataPoint.date))}',
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -293,7 +341,7 @@ class _DashboardState extends State<Dashboard> {
                         'Añadir Ingreso',
                         style: TextStyle(
                           color: Colors
-                              .black, // Cambia el color del texto a blanco
+                              .white, // Cambia el color del texto a blanco
                         ),
                       ),
                     ),
@@ -312,7 +360,7 @@ class _DashboardState extends State<Dashboard> {
                         'Añadir Egreso',
                         style: TextStyle(
                           color: Colors
-                              .black, // Cambia el color del texto a blanco
+                              .white, // Cambia el color del texto a blanco
                         ),
                       ),
                     ),

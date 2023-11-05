@@ -1,7 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
 const path = require('path');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
@@ -33,40 +32,6 @@ app.use(express.json()) // Nos permite trabajar con el formato json.
 //app.use(express.static(path.join(__dirname, 'public')));
 
 
-const users = [];
-
-app.get('/users', function (req, res) {
-    res.json(users);
-});
-
-app.post('/users', async function (req, res) {
-    try{
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        console.log(hashedPassword);
-        const user = { name: req.body.name, password: hashedPassword };
-        res.status(201).send();
-    } catch
-    {
-        res.status(500).send();
-    }
-});
-
-app.post('/users/login', async function (req, res) {
-    const user = users.find(user => user.name = req.body.name);
-    if (user == null) {
-        return res.status(400).send('Cannot find user');
-    }
-    try {
-        if (await bcrypt.compare(req.body.password, user.password)) {
-            res.send('Success');
-        }
-        else {
-            res.send('Not Allowed');
-        }
-    } catch {
-        res.status(500).send();
-    }
-});
 
 
 
@@ -518,10 +483,10 @@ app.get('/get/filter/eventos', async (req, res) => {
         for (const param in parametrosFiltro) {
             filtroFinal[param] = parametrosFiltro[param];
         }
-        console.log(req.query.visible);
+        //console.log(req.query.visible);
         // Realiza la consulta en la colección utilizando el filtro final
         const result = await collection.find(filtroFinal).toArray();
-        console.log(result);
+        //console.log(result);
         if (result.length === 0) {
             res.send('No se encontraron eventos que cumplan con los criterios de filtro.');
         } else {
@@ -569,11 +534,8 @@ app.post('/add/alumno', async function (req, res) {
 
     // Unify the data into a single object
     data.nombre = nombre;
-
     data.matricula = matricula;
     data.apellido = apellido;
-    data.matricula = parseInt(matricula);
-
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -583,7 +545,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
-
+    data.contraseña = password
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -596,7 +558,6 @@ app.post('/add/alumno', async function (req, res) {
             res.send(`El alumno ${data.matricula} ya existe en la base de datos`);
         } else {
             // If the alumno doesn't exist, insert it into the collection
-            data.contraseña = await bcrypt.hash(password, 10);
             const insertResult = await collection.insertOne(data);
 
             // Send the result to the client
@@ -661,6 +622,8 @@ app.delete('/delete/alumno', async function (req, res) {
         await client.close();
     }
 });
+
+// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
 
 app.get('/get/all/ingresos', async function (req, res) {
     const id = req.query.id; // assuming the query parameter is named "id"

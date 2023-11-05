@@ -560,8 +560,7 @@ app.post('/add/alumno', async function (req, res) {
         } else {
             // If the alumno doesn't exist, insert it into the collection
             data.contraseña = await bcrypt.hash(password, 10);
-            const insertResult = await collection.insertOne(data);
-
+            await collection.insertOne(data);
             // Send the result to the client
             res.send("se ha insertado correctamente");
         }

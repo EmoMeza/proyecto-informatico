@@ -541,6 +541,7 @@ app.post('/add/alumno', async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
+    const id_caa = req.query.id_caa;
 
     const data = req.body;
 
@@ -548,7 +549,7 @@ app.post('/add/alumno', async function (req, res) {
     data.nombre = nombre;
     data.apellido = apellido;
     data.matricula = parseInt(matricula);
-
+    data.id_caa = id_caa;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

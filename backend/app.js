@@ -506,7 +506,7 @@ app.post('/add/alumno', async function (req, res) {
 
     // Unify the data into a single object
     data.nombre = nombre;
-    data.matricula = matricula;
+    data.matricula = parseInt(matricula);
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const path = require('path');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
@@ -32,6 +33,40 @@ app.use(express.json()) // Nos permite trabajar con el formato json.
 //app.use(express.static(path.join(__dirname, 'public')));
 
 
+const users = [];
+
+app.get('/users', function (req, res) {
+    res.json(users);
+});
+
+app.post('/users', async function (req, res) {
+    try{
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        console.log(hashedPassword);
+        const user = { name: req.body.name, password: hashedPassword };
+        res.status(201).send();
+    } catch
+    {
+        res.status(500).send();
+    }
+});
+
+app.post('/users/login', async function (req, res) {
+    const user = users.find(user => user.name = req.body.name);
+    if (user == null) {
+        return res.status(400).send('Cannot find user');
+    }
+    try {
+        if (await bcrypt.compare(req.body.password, user.password)) {
+            res.send('Success');
+        }
+        else {
+            res.send('Not Allowed');
+        }
+    } catch {
+        res.status(500).send();
+    }
+});
 
 
 
@@ -481,7 +516,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase();
-    data.contraseña = password
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -494,6 +529,7 @@ app.post('/add/alumno', async function (req, res) {
             res.send(`El alumno ${data.matricula} ya existe en la base de datos`);
         } else {
             // If the alumno doesn't exist, insert it into the collection
+            data.contraseña = await bcrypt.hash(password, 10);
             const insertResult = await collection.insertOne(data);
 
             // Send the result to the client

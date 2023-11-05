@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:proyecto_informatico/api_services.dart';
 import 'package:proyecto_informatico/pages/registro.dart';
 
@@ -52,21 +53,24 @@ class _LoginState extends State<Login> {
       );
       return;
     }
-
+    final responseContrasena = await ApiService.login(matricula, contrasena);
+    if (responseContrasena.success){
+      debugPrint('contra success');
+    }
     final responseAlumno = await ApiService.getAlumno(matricula);
     if (responseAlumno.success){
-      final alumnoData = responseAlumno.data;
-
-      final storedPassword = alumnoData['contraseña'];
-      if (contrasena == storedPassword){
-        // ignore: use_build_context_synchronously
-        Navigator.push(context, MaterialPageRoute(builder: (context) => menuAlumnos(alumnoData: alumnoData)));
-      } else {
-        showErrorMessage("Contraseña incorrecta");
-      }
-    } else {
-      showErrorMessage("No se encontró el alumno con la matricula $matricula");
+      debugPrint('alumno success');
     }
+    if (responseContrasena.success && responseAlumno.success) {
+      final alumnoData = responseAlumno.data;
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => menuAlumnos(alumnoData: alumnoData)));
+    } else {
+      showErrorMessage("Contraseña o matricula incorrectas");
+    }    
   }
 
   void showErrorMessage(String mensaje) {
@@ -116,6 +120,8 @@ class _LoginState extends State<Login> {
                   height: 40,
                   child: TextField(
                     controller: matriculaController,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),

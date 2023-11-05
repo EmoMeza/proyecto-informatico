@@ -982,4 +982,40 @@ class ApiService {
       return ApiResponse(false, {}, 'Error en la peticion');
     }
   }
+
+  // Función para realizar el inicio de sesión
+  // Parametros: username, password
+  // Retorna: success
+  static Future<ApiResponse> login(String matricula, String password) async {
+    final url = Uri.parse('$_baseUrl/users/login?matricula=$matricula&password=$password');
+
+    // Crear un mapa con las credenciales del usuario
+    final credentials = {
+      'matricula': matricula,
+      'password': password,
+    };
+
+    final jsonBody = json.encode(credentials);
+
+    // Realiza la solicitud POST para autenticar al usuario
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonBody,
+    );
+
+    if (response.statusCode == 200) {
+      final responseBody = response.body;
+
+      if (responseBody.startsWith('Suc')) {
+        return ApiResponse(true, {}, 'Inicio de sesión exitoso');
+      } else {
+        return ApiResponse(false, {}, 'Credenciales incorrectas');
+      }
+    } else {
+      return ApiResponse(false, {}, 'Error en la petición de inicio de sesión');
+    }
+  } 
 }

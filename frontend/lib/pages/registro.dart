@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../api_services.dart';
 
 class Registro extends StatefulWidget {
@@ -17,11 +18,11 @@ class _RegistroState extends State<Registro> {
   String tipoCuenta = 'Estudiante';
 
   void guardarDatos() async {
-    final matricula = matriculaController.text;
+    final matricula = int.tryParse(matriculaController.text) ?? 0000;
     final nombre = nombreController.text;
     final apellido = apellidoController.text;
 
-    if (matricula.length < 4 || nombre.isEmpty || apellido.isEmpty) {
+    if ('$matricula'.length < 4 || nombre.isEmpty || apellido.isEmpty) {
       showDialog(
         context: context,
         builder: (context) {
@@ -113,6 +114,8 @@ class _RegistroState extends State<Registro> {
               ),
               TextField(
                 controller: matriculaController,
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Matricula: '),
               ),              
               const SizedBox(height: 20),

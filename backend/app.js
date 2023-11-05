@@ -222,6 +222,10 @@ app.post('/add/ingreso/caa', async function (req, res) {
     const data = req.body;
     const data2 = data.ingresos;
 
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -282,6 +286,10 @@ app.post('/add/egreso/caa', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
 
     try {
         await client.connect();
@@ -364,21 +372,39 @@ app.get('/get/evento', async function (req, res) {
 
 app.post('/add/evento', async function (req, res) {
     const data = req.body;
+    let respuestaEnviada = false; // Variable para rastrear si la respuesta se ha enviado.
+
+    if (!data.fecha_inicio || !data.fecha_final) {
+        // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
+        const fechaActual = new Date();
+        data.fecha_inicio = fechaActual.toISOString();
+        data.fecha_final = fechaActual.toISOString();
+        // Agregar un mensaje de aviso en la respuesta.
+        res.send("Se han agregado fechas automáticamente a la fecha y hora actual.");
+        respuestaEnviada = true; // Marcamos que la respuesta se ha enviado.
+    }
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
         //if the nombre doesn't exist, insert it into the collection
         await collection.insertOne(data);
-        //send the result to the client
-        res.send("se ha insertado correctamente");
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía el mensaje de éxito.
+            res.send("Se ha insertado correctamente");
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).send('Error en el servidor');
+        if (!respuestaEnviada) {
+            // Solo si la respuesta no se ha enviado antes, envía un error en el servidor.
+            res.status(500).send('Error en el servidor');
+        }
     } finally {
         await client.close();
     }
 });
+
 
 app.put('/update/evento', async function (req, res) {
     const id = req.query.id;
@@ -502,11 +528,17 @@ app.get('/get/alumno', async function (req, res) {
 app.post('/add/alumno', async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
+    const apellido = req.query.apellido;
+
     const data = req.body;
 
     // Unify the data into a single object
     data.nombre = nombre;
+
+    data.matricula = matricula;
+    data.apellido = apellido;
     data.matricula = parseInt(matricula);
+
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -515,7 +547,7 @@ app.post('/add/alumno', async function (req, res) {
     }
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
-    const password = matricula.substring(0, 4) + nombre.toLowerCase();
+    const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
 
     try {
         await client.connect();
@@ -632,6 +664,13 @@ app.post('/add/ingreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.ingresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
+
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -687,11 +726,10 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
-                res.send(suma.toString()); // using the "nombre" field from the result document
+                res.send(suma.toString()); // Send the calculated value as the response
             } else {
                 res.send("0");
             }
-            res.send(suma.toString());
         }
     } catch (error) {
         console.log(error);
@@ -701,10 +739,15 @@ app.get('/get/all/egresos', async function (req, res) {
     }
 });
 
+
 app.post('/add/egreso', async function (req, res) {
     const id = req.query.id;
     const data = req.body;
     const data2 = data.egresos;
+
+    // Agrega la fecha actual en formato ISO 8601
+    const currentDate = new Date().toISOString();
+    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");

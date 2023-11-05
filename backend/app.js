@@ -534,8 +534,6 @@ app.post('/add/alumno', async function (req, res) {
 
     // Unify the data into a single object
     data.nombre = nombre;
-
-    data.matricula = matricula;
     data.apellido = apellido;
     data.matricula = parseInt(matricula);
 

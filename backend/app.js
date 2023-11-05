@@ -441,7 +441,7 @@ app.get('/get/all/eventos', async function (req, res) {
     }
 });
 
-app.get('/get/filter/eventos', async function (req, res) {
+/*app.get('/get/filter/eventos', async function (req, res) {
     const categoria = req.query.categoria;
     if (categoria != "certamen" && categoria != "actividad") {
         res.send(`La categoria ${categoria} no existe en la base de datos`);
@@ -465,7 +465,42 @@ app.get('/get/filter/eventos', async function (req, res) {
             await client.close();
         }
     }
+});*/
+
+app.get('/get/filter/eventos', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("test");
+
+        // Obtén todos los parámetros de filtro de la URL
+        const parametrosFiltro = req.query;
+
+        // Inicializa un objeto de filtro vacío
+        const filtroFinal = {};
+
+        // Agrega parámetros al filtro final según sea necesario
+        for (const param in parametrosFiltro) {
+            filtroFinal[param] = parametrosFiltro[param];
+        }
+        console.log(req.query.visible);
+        // Realiza la consulta en la colección utilizando el filtro final
+        const result = await collection.find(filtroFinal).toArray();
+        console.log(result);
+        if (result.length === 0) {
+            res.send('No se encontraron eventos que cumplan con los criterios de filtro.');
+        } else {
+            res.send(result);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    } finally {
+        await client.close();
+    }
 });
+
+
 
 app.get('/get/alumno', async function (req, res) {
     const matricula = req.query.matricula;

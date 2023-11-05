@@ -504,6 +504,7 @@ app.get('/get/filter/eventos', async function (req, res) {
 
 app.get('/get/alumno', async function (req, res) {
     const matricula = req.query.matricula;
+    matricula = parseInt(matricula);
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");

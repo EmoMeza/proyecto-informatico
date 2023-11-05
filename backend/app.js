@@ -53,7 +53,7 @@ app.post('/users', async function (req, res) {
 
 app.post('/users/login', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
-    const password = req.query.password;
+    const contraseña = req.query.password;
 
     try {
         await client.connect();
@@ -66,15 +66,12 @@ app.post('/users/login', async function (req, res) {
             res.send(`El alumno con la matricula "${matricula}" no existe en la base de datos`);
         } else {
             // If the alumno doesn't exist, insert it into the collection
-            bcrypt.compare(password, result.password, function(err, isMatch) {
-                if (err) {
-                    throw err
-                } else if (!isMatch) {
-                    res.send('Not Allowed');
-                } else {
-                    res.send('Success');
-                }
-            })
+            if (await bcrypt.compare(contraseña, result.contraseña)) {
+                res.send('Success');
+            }
+            else {
+                res.send('Not Allowed');
+            }
         }
     } catch {
         res.status(500).send();

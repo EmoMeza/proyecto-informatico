@@ -580,6 +580,57 @@ class ApiService {
 
   // -----------------Alumnos-----------------------
 
+  // Función para añadir un alumno
+  // Parametros: nombre, matricula, Map<String, dynamic> data
+  // Retorna: success, data, message
+  static Future<ApiResponse> postAlumno(String nombre, String apellido,
+      int matricula, Map<String, dynamic> data) async {
+    // Unify the data into a single object
+    data['nombre'] = nombre;
+    data['apellido'] = apellido;
+    data['matricula'] = matricula;
+
+    // Check if the matricula has at least 4 digits
+    if ('$matricula'.length < 4) {
+      return ApiResponse(
+          false, {}, 'La matricula $matricula no tiene el mínimo de 4 dígitos');
+    }
+
+    // password = 4 primeros digitos de la matricula + 2 primeras letras del nombre + 2 primeras letras del apellido
+    final password = '$matricula'.substring(0, 4) +
+        nombre.toLowerCase().substring(0, 2) +
+        apellido.toLowerCase().substring(0, 2);
+    data['contraseña'] = password;
+
+    final url = Uri.parse(
+        '$_baseUrl/add/alumno?nombre=$nombre&matricula=$matricula&apellido=$apellido');
+    final jsonBody = json.encode(data);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonBody,
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = response.body;
+        // Ya existe el alumno en la bdd
+        if (responseBody.startsWith('El alumno')) {
+          return ApiResponse(false, {}, responseBody);
+        } else {
+          return ApiResponse(true, {}, 'Se ha insertado correctamente');
+        }
+      } else {
+        return ApiResponse(false, {}, 'Error en el servidor');
+      }
+    } catch (error) {
+      return ApiResponse(false, {}, 'Error en la petición: $error');
+    }
+  }
+
   // Funcion para obtener un alumno
   // Parametros: matricula
   // Retorna: success, data, message
@@ -942,6 +993,43 @@ class ApiService {
     } else {
       // Si esta respuesta no fue OK, lanza un error.
       return ApiResponse(false, {}, 'Error en la peticion');
+    }
+  }
+
+  // Función para realizar el inicio de sesión
+  // Parametros: username, password
+  // Retorna: success
+  static Future<ApiResponse> login(String matricula, String password) async {
+    final url = Uri.parse(
+        '$_baseUrl/users/login?matricula=$matricula&password=$password');
+
+    // Crear un mapa con las credenciales del usuario
+    final credentials = {
+      'matricula': matricula,
+      'password': password,
+    };
+
+    final jsonBody = json.encode(credentials);
+
+    // Realiza la solicitud POST para autenticar al usuario
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonBody,
+    );
+
+    if (response.statusCode == 200) {
+      final responseBody = response.body;
+
+      if (responseBody.startsWith('Suc')) {
+        return ApiResponse(true, {}, 'Inicio de sesión exitoso');
+      } else {
+        return ApiResponse(false, {}, 'Credenciales incorrectas');
+      }
+    } else {
+      return ApiResponse(false, {}, 'Error en la petición de inicio de sesión');
     }
   }
 }

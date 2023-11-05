@@ -27,6 +27,12 @@ class _LoginState extends State<Login> {
       MaterialPageRoute(builder: (context) => const Registro()),
     );
   }
+  void irACAA() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => menuCAA()),
+    );
+  }
 
   Future<Map<String, String?>> obtenerCredenciales() async {
     final prefs = await SharedPreferences.getInstance();
@@ -136,6 +142,19 @@ class _LoginState extends State<Login> {
                 onTap: irARegistro,
                 child: const Text(
                   'Registrarse',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 80),
+            Center(
+              child: InkWell(
+                onTap: irACAA,
+                child: const Text(
+                  'ir a menu CAA (temporal)',
                   style: TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,

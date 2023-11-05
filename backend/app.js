@@ -595,8 +595,6 @@ app.delete('/delete/alumno', async function (req, res) {
     }
 });
 
-// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
-
 app.get('/get/all/ingresos', async function (req, res) {
     const id = req.query.id; // assuming the query parameter is named "id"
     try {

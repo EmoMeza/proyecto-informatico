@@ -580,19 +580,19 @@ class ApiService {
   // Función para añadir un alumno
   // Parametros: nombre, matricula, Map<String, dynamic> data
   // Retorna: success, data, message 
-  static Future<ApiResponse> postAlumno(String nombre, String apellido, String matricula, Map<String, dynamic> data) async {
+  static Future<ApiResponse> postAlumno(String nombre, String apellido, int matricula, Map<String, dynamic> data) async {
     // Unify the data into a single object
     data['nombre'] = nombre;
     data['apellido'] = apellido;
     data['matricula'] = matricula;
 
     // Check if the matricula has at least 4 digits
-    if (matricula.length < 4) {
+    if ('$matricula'.length < 4) {
       return ApiResponse(false, {}, 'La matricula $matricula no tiene el mínimo de 4 dígitos');
     }
 
     // password = 4 primeros digitos de la matricula + 2 primeras letras del nombre + 2 primeras letras del apellido
-    final password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0,2) + apellido.toLowerCase().substring(0,2);
+    final password = '$matricula'.substring(0, 4) + nombre.toLowerCase().substring(0,2) + apellido.toLowerCase().substring(0,2);
     data['contraseña'] = password;
 
     final url = Uri.parse('$_baseUrl/add/alumno?nombre=$nombre&matricula=$matricula&apellido=$apellido');

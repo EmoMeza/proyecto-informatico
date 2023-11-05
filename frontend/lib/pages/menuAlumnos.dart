@@ -9,14 +9,13 @@ class menuAlumnos extends StatelessWidget {
     // Placeholders de 200x200
   ];
 
-  final Map<String, dynamic> alumnoData;
-  menuAlumnos({Key ? key, required this.alumnoData}) : super(key: key);
+  menuAlumnos({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}'),
+        title: const Text('Alumno: "nombre"'),
       ),
       body: SingleChildScrollView(
         child: Column(

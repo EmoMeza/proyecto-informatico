@@ -63,7 +63,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/Alumno?nombre=omo&matricula=69692",
+							"raw": "http://localhost:4040/add/Alumno?nombre=emo&matricula=69",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -76,11 +76,11 @@
 							"query": [
 								{
 									"key": "nombre",
-									"value": "omo"
+									"value": "emo"
 								},
 								{
 									"key": "matricula",
-									"value": "69692"
+									"value": "69"
 								}
 							]
 						}
@@ -168,7 +168,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:4040/get/evento?id=652c7ca4a6a9ca2734b001bf",
+							"raw": "http://localhost:4040/get/evento?id=652b4e660f9658f04ee3adbb",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -181,7 +181,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652c7ca4a6a9ca2734b001bf"
+									"value": "652b4e660f9658f04ee3adbb"
 								}
 							]
 						}
@@ -195,7 +195,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"probacion6\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\",\r\n    \"visible\": false,\r\n    \"asistencia\" : []\r\n}",
+							"raw": "{\r\n    \"nombre\": \"final\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\",\r\n    \"visible\": false,\r\n    \"asistencia\" : []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -231,7 +231,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"sexo 2\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"2022-11-15T10:00:00\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\"\r\n}",
+							"raw": "{\r\n    \"nombre\": \"sexo\",\r\n    \"categoria\": \"certamen\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"descripcion\": \"este es un test para la descripcion owowowow\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -253,42 +253,6 @@
 								{
 									"key": "id",
 									"value": "652c7ac03e574c327e856069"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Editar Fechas",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"fecha_inicio\": \"2024-10-15T10:00:00\",\r\n    \"fecha_final\": \"\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4040/update/evento/?id=652de6ac0e494dec1e5ab57d",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4040",
-							"path": [
-								"update",
-								"evento",
-								""
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "652de6ac0e494dec1e5ab57d"
 								}
 							]
 						}
@@ -371,18 +335,11 @@
 				},
 				{
 					"name": "Filtrar Eventos por Categoria",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\" : \"CAINF4\",\r\n    \"total\" : \"0\"\r\n}"
-						},
 						"url": {
-							"raw": "http://localhost:4040/get/filter/eventos",
+							"raw": "http://localhost:4040/get/filter/eventos?categoria=actividad",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -396,8 +353,7 @@
 							"query": [
 								{
 									"key": "categoria",
-									"value": "actividad",
-									"disabled": true
+									"value": "actividad"
 								}
 							]
 						}
@@ -422,7 +378,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/get/all/ingresos?id=652c7ca4a6a9ca2734b001bf",
+							"raw": "http://localhost:4040/get/all/ingresos?id=65297a298eab1a7b89d04d09",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -436,7 +392,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652c7ca4a6a9ca2734b001bf"
+									"value": "65297a298eab1a7b89d04d09"
 								}
 							]
 						}
@@ -496,7 +452,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/get/all/egresos?id=652c7ca4a6a9ca2734b001bf",
+							"raw": "http://localhost:4040/get/all/egresos?id=652946134deb42bad8b01412",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -510,7 +466,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652c7ca4a6a9ca2734b001bf"
+									"value": "652946134deb42bad8b01412"
 								}
 							]
 						}
@@ -532,7 +488,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/egreso?id=652c7ca4a6a9ca2734b001bf",
+							"raw": "http://localhost:4040/add/egreso?id=652976834af6fedf26f3493d",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -545,7 +501,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652c7ca4a6a9ca2734b001bf"
+									"value": "652976834af6fedf26f3493d"
 								}
 							]
 						}
@@ -570,7 +526,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/get/total?id=652c7ca4a6a9ca2734b001bf",
+							"raw": "http://localhost:4040/get/total?id=652b4e660f9658f04ee3adbb",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -583,7 +539,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "652c7ca4a6a9ca2734b001bf"
+									"value": "652b4e660f9658f04ee3adbb"
 								}
 							]
 						}
@@ -699,7 +655,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombre\" : \"CAINF4\",\n    \"total\" : 0\n}",
+							"raw": "{\n    \"nombre\" : \"CAINF2\",\n    \"total\" : 0\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -990,53 +946,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:4040/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "New Request Copy",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"emo\",\n    \"password\": \"password\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4040/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4040",
-					"path": [
-						"users"
-					]
-				}
-			},
-			"response": []
 		}
 	]
 }

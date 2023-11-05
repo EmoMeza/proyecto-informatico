@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:proyecto_informatico/api_services.dart';
 import 'package:proyecto_informatico/pages/registro.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'menuAlumnos.dart';
 import 'menuCAA.dart';
@@ -14,7 +13,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  TextEditingController matriculaController = TextEditingController();
+  TextEditingController usuarioController = TextEditingController();
   TextEditingController contrasenaController = TextEditingController();
 
   @override
@@ -29,68 +28,39 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Future<void> verificarCredenciales() async {
-    final matricula = matriculaController.text;
-    final contrasena = contrasenaController.text;
-
-    if (matricula.length < 4 || contrasena.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: const Text('La matricula o contraseña estan erroneas.'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-    final responseContrasena = await ApiService.login(matricula, contrasena);
-    if (responseContrasena.success){
-      debugPrint('contra success');
-    }
-    final responseAlumno = await ApiService.getAlumno(matricula);
-    if (responseAlumno.success){
-      debugPrint('alumno success');
-    }
-    if (responseContrasena.success && responseAlumno.success) {
-      final alumnoData = responseAlumno.data;
-      // ignore: use_build_context_synchronously
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => menuAlumnos(alumnoData: alumnoData)));
-    } else {
-      showErrorMessage("Contraseña o matricula incorrectas");
-    }    
+  Future<Map<String, String?>> obtenerCredenciales() async {
+    final prefs = await SharedPreferences.getInstance();
+    final login = prefs.getString('login');
+    final contrasena = prefs.getString('contrasena');
+    return {'login': login, 'contrasena': contrasena};
   }
 
-  void showErrorMessage(String mensaje) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(mensaje),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> verificarCredenciales() async {
+    final nombreUsuario = usuarioController.text;
+    final contrasena = contrasenaController.text;
+
+    final credencialesGuardadas = await obtenerCredenciales();
+    final loginGuardado = credencialesGuardadas['login'];
+    final contrasenaGuardada = credencialesGuardadas['contrasena'];
+
+    if (loginGuardado == nombreUsuario && contrasenaGuardada == contrasena) {
+      final prefs = await SharedPreferences.getInstance();
+      final tipoCuenta = prefs.getString('tipoCuenta');
+
+      if (tipoCuenta == 'Estudiante') {
+        // Redirige a la página de estudiantes
+        Navigator.push(context, MaterialPageRoute(builder: (context) => menuAlumnos()));
+      } else if (tipoCuenta == 'Centro de Alumnos') {
+        // Redirige a la página de centro de alumnos
+        Navigator.push(context, MaterialPageRoute(builder: (context) => menuCAA()));
+      } else {
+        // Tipo de cuenta desconocido, maneja el caso como desees
+        debugPrint('Tipo de cuenta desconocido');
+      }
+    } else {
+      // Credenciales incorrectas
+      debugPrint('Credenciales incorrectas');
+    }
   }
 
   @override
@@ -114,14 +84,12 @@ class _LoginState extends State<Login> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(width: 10),
-                const Text("Matricula: "),
+                const Text("Nombre de usuario: "),
                 Container(
                   width: 200,
                   height: 40,
                   child: TextField(
-                    controller: matriculaController,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
-                    keyboardType: TextInputType.number,
+                    controller: usuarioController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),

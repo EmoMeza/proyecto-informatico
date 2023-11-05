@@ -52,19 +52,31 @@ app.post('/users', async function (req, res) {
 });
 
 app.post('/users/login', async function (req, res) {
-    const user = users.find(user => user.name = req.body.name);
-    if (user == null) {
-        return res.status(400).send('Cannot find user');
-    }
+    const matricula = parseInt(req.query.matricula);
+    const contraseña = req.query.password;
+
     try {
-        if (await bcrypt.compare(req.body.password, user.password)) {
-            res.send('Success');
-        }
-        else {
-            res.send('Not Allowed');
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("alumnos");
+        // Check if the alumno already exists in the collection
+        const result = await collection.findOne({ matricula: matricula });
+        if (!result) {
+            // If the alumno already exists, send a message to the client
+            res.send(`El alumno con la matricula "${matricula}" no existe en la base de datos`);
+        } else {
+            // If the alumno doesn't exist, insert it into the collection
+            if (await bcrypt.compare(contraseña, result.contraseña)) {
+                res.send('Success');
+            }
+            else {
+                res.send('Not Allowed');
+            }
         }
     } catch {
         res.status(500).send();
+    } finally {
+        await client.close();
     }
 });
 
@@ -533,7 +545,6 @@ app.post('/add/alumno', async function (req, res) {
 
     // Unify the data into a single object
     data.nombre = nombre;
-
     data.apellido = apellido;
     data.matricula = parseInt(matricula);
 
@@ -560,8 +571,7 @@ app.post('/add/alumno', async function (req, res) {
         } else {
             // If the alumno doesn't exist, insert it into the collection
             data.contraseña = await bcrypt.hash(password, 10);
-            const insertResult = await collection.insertOne(data);
-
+            await collection.insertOne(data);
             // Send the result to the client
             res.send("se ha insertado correctamente");
         }

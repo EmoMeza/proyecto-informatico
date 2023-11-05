@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_informatico/api_services.dart';
 import 'package:proyecto_informatico/pages/registro.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'menuAlumnos.dart';
 import 'menuCAA.dart';

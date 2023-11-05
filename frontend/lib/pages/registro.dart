@@ -48,7 +48,7 @@ class _RegistroState extends State<Registro> {
       'apellido': apellido,
     };
 
-    ApiResponse responseA = await ApiService.postAlumno(nombre, matricula, apellido, alumnoData);
+    ApiResponse responseA = await ApiService.postAlumno(nombre, apellido, matricula, alumnoData);
 
     if (responseA.success) {
       // ignore: use_build_context_synchronously

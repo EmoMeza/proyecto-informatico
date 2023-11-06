@@ -28,7 +28,7 @@ class Evento {
       descripcion: json['descripcion'],
       fechaInicio: parseDate(json['fecha_inicio']),
       fechaFinal: parseDate(json['fecha_final']),
-      visible: json['visible']??true,
+      visible: json['visible'],
     );
   }
   static DateTime parseDate(String dateString) {
@@ -47,6 +47,9 @@ class Evento {
     int day = int.parse(dateParts[2]);
 
     return DateTime(year, month, day);
+  }
+  String toString() {
+    return 'Evento{nombre: $nombre, categoria: $categoria, descripcion: $descripcion, fechaInicio: $fechaInicio, fechaFinal: $fechaFinal, visible: $visible}';
   }
 
 }
@@ -109,6 +112,7 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
     setState(() {
       if (eventosVisibleFalse.isNotEmpty || eventosVisibleTrue.isNotEmpty) {
         eventos = [...eventosVisibleFalse, ...eventosVisibleTrue];
+        debugPrint(eventos.toString());
       } else {
         eventos = []; // Calendario vacío
       }

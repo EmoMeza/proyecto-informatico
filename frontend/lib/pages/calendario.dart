@@ -59,6 +59,7 @@ class Calendario extends StatefulWidget {
 
 
 class _CalendarioState extends State<Calendario> with SingleTickerProviderStateMixin{
+  String id_caa = "652976834af6fedf26f3493t";
   late AnimationController _animationController;
   late Animation<double> _animation;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -82,17 +83,37 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
   
 
   Future<void> _loadEventos() async {
-    ApiResponse response = await ApiService.getAllEventos();
-    if (response.success) {
-      setState(() {
-        eventos = (response.data as List<dynamic>).map((e) => Evento.fromJson(e)).toList();
-        isLoading = false; // Establece isLoading como false después de cargar los eventos
-      });
-    } else {
-      // Handle error here
-      print('Error cargando eventos: ${response.message}');
-      isLoading = false; // Establece isLoading como false incluso si hay un error para evitar que la barra de carga se quede visible indefinidamente
+    Map<String, dynamic> filterDataVisibleFalse = {
+      "id_caa": id_caa,
+      "visible": false.toString(),
+    };
+
+    Map<String, dynamic> filterDataVisibleTrue = {
+      "visible": true.toString(),
+    };
+
+    ApiResponse responseVisibleFalse = await ApiService.getEventosFiltrados(filterDataVisibleFalse);
+    ApiResponse responseVisibleTrue = await ApiService.getEventosFiltrados(filterDataVisibleTrue);
+
+    List<Evento> eventosVisibleFalse = [];
+    List<Evento> eventosVisibleTrue = [];
+
+    if (responseVisibleFalse.success && responseVisibleFalse.data is List) {
+      eventosVisibleFalse = (responseVisibleFalse.data as List<dynamic>).map((e) => Evento.fromJson(e)).toList();
     }
+
+    if (responseVisibleTrue.success && responseVisibleTrue.data is List) {
+      eventosVisibleTrue = (responseVisibleTrue.data as List<dynamic>).map((e) => Evento.fromJson(e)).toList();
+    }
+
+    setState(() {
+      if (eventosVisibleFalse.isNotEmpty || eventosVisibleTrue.isNotEmpty) {
+        eventos = [...eventosVisibleFalse, ...eventosVisibleTrue];
+      } else {
+        eventos = []; // Calendario vacío
+      }
+      isLoading = false;
+    });
   }
   
 

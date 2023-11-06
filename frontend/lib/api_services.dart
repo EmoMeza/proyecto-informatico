@@ -36,7 +36,7 @@ class ApiResponse {
 
 class ApiService {
   // Esto se puede cambiar segun la ip del servidor o el puerto
-  static const String _baseUrl = 'http://127.0.0.1:4040';
+  static const String _baseUrl = 'http://10.0.2.2:4040';
 
   // -----------------Centro de Alumnos-----------------------
 
@@ -565,7 +565,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final responseBody = response.body;
       // Si el servidor retorna un mensaje no retorna data
-      if(responseBody.startsWith('No hay eventos')){
+      if(responseBody.startsWith('No se encontraron')){
         return ApiResponse(false, {}, responseBody);
       } else {
         // Si el servidor encuentra el id retorna los datos

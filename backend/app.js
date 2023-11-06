@@ -526,9 +526,20 @@ app.get('/get/filter/eventos', async (req, res) => {
         const filtroFinal = {};
 
         // Agrega parámetros al filtro final según sea necesario
+        const booleanMapping = {
+            'true': true,
+            'false': false
+        };
+        
         for (const param in parametrosFiltro) {
-            filtroFinal[param] = parametrosFiltro[param];
+            if (param === 'visible') {
+                // Si el parámetro es 'visible', mapear el valor al formato correcto
+                filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
+            } else {
+                filtroFinal[param] = parametrosFiltro[param];
+            }
         }
+        
         //console.log(req.query.visible);
         // Realiza la consulta en la colección utilizando el filtro final
         const result = await collection.find(filtroFinal).toArray();

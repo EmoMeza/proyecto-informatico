@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/menuCAA': (context) => menuCAA(),
-        '/menuAlumnos': (context) => menuAlumnos(),
         '/agregarEvento': (context) => AgregarEvento(),
         '/calendario': (context) => Calendario(),
       },

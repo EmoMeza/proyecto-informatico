@@ -565,7 +565,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final responseBody = response.body;
       // Si el servidor retorna un mensaje no retorna data
-      if (responseBody.startsWith('No hay eventos')) {
+      if(responseBody.startsWith('No se encontraron')){
         return ApiResponse(false, {}, responseBody);
       } else {
         // Si el servidor encuentra el id retorna los datos

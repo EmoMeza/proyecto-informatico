@@ -1,7 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
 const path = require('path');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
@@ -488,7 +487,7 @@ app.get('/get/all/eventos', async function (req, res) {
     }
 });
 
-app.get('/get/filter/eventos', async function (req, res) {
+/*app.get('/get/filter/eventos', async function (req, res) {
     const categoria = req.query.categoria;
     if (categoria != "certamen" && categoria != "actividad") {
         res.send(`La categoria ${categoria} no existe en la base de datos`);
@@ -512,7 +511,53 @@ app.get('/get/filter/eventos', async function (req, res) {
             await client.close();
         }
     }
+});*/
+
+app.get('/get/filter/eventos', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("test");
+
+        // Obtén todos los parámetros de filtro de la URL
+        const parametrosFiltro = req.query;
+
+        // Inicializa un objeto de filtro vacío
+        const filtroFinal = {};
+
+        // Agrega parámetros al filtro final según sea necesario
+        const booleanMapping = {
+            'true': true,
+            'false': false
+        };
+        
+        for (const param in parametrosFiltro) {
+            if (param === 'visible') {
+                // Si el parámetro es 'visible', mapear el valor al formato correcto
+                filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
+            } else {
+                filtroFinal[param] = parametrosFiltro[param];
+            }
+        }
+        
+        //console.log(req.query.visible);
+        // Realiza la consulta en la colección utilizando el filtro final
+        const result = await collection.find(filtroFinal).toArray();
+        //console.log(result);
+        if (result.length === 0) {
+            res.send('No se encontraron eventos que cumplan con los criterios de filtro.');
+        } else {
+            res.send(result);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    } finally {
+        await client.close();
+    }
 });
+
+
 
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
@@ -542,7 +587,7 @@ app.post('/add/alumno', async function (req, res) {
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
     const id_caa = req.query.id_caa;
-
+    const es_caa = req.query.es_caa;
     const data = req.body;
 
     // Unify the data into a single object
@@ -550,6 +595,7 @@ app.post('/add/alumno', async function (req, res) {
     data.apellido = apellido;
     data.matricula = parseInt(matricula);
     data.id_caa = id_caa;
+    data.es_caa = es_caa;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -559,7 +605,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
-
+    data.contraseña = password
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -636,6 +682,8 @@ app.delete('/delete/alumno', async function (req, res) {
         await client.close();
     }
 });
+
+// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
 
 app.get('/get/all/ingresos', async function (req, res) {
     const id = req.query.id; // assuming the query parameter is named "id"

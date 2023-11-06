@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_informatico/pages/calendario.dart';
 import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/menuAlumnos.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 
 void main() {
-  runApp(const MyApp());
+  initializeDateFormatting().then((_) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -26,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const Login(),
         '/menuCAA': (context) => menuCAA(),
         '/agregarEvento': (context) => AgregarEvento(),
+        '/calendario': (context) => Calendario(),
       },
     );
   }

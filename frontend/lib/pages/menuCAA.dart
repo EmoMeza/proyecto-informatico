@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:proyecto_informatico/pages/calendario.dart';
 import 'agregarEvento.dart';
+
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [
@@ -69,6 +71,8 @@ class menuCAA extends StatelessWidget {
               title: const Text('Ver calendario'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Calendario()));
               },
             ),
             ListTile(

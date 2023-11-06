@@ -185,8 +185,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'categoria': dropdownValue,
         'descripcion': _descripcionController.text,
         'fecha_inicio': formatDateTime(selectedDate, selectedTime),
-        'fecha_final': formatDateTime(
-            selectedDate, selectedTime), // Assuming the same start and end time
+        'fecha_final': formatDateTime(selectedEndDate, selectedEndTime),
         'ingresos': [],
         'egresos': [],
         'total': 0,

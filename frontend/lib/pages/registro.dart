@@ -49,16 +49,17 @@ class _RegistroState extends State<Registro> {
       'apellido': apellido,
     };
 
-    ApiResponse responseA = await ApiService.postAlumno(nombre, apellido, matricula, alumnoData);
+    ApiResponse responseA =
+        await ApiService.postAlumno(nombre, apellido, matricula, alumnoData);
 
     if (responseA.success) {
-      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Éxito'),
-            content: const Text('Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
+            content: const Text(
+                'Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
             actions: [
               ElevatedButton(
                 onPressed: () {
@@ -72,7 +73,6 @@ class _RegistroState extends State<Registro> {
         },
       );
     } else {
-      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (context) {
@@ -114,10 +114,12 @@ class _RegistroState extends State<Registro> {
               ),
               TextField(
                 controller: matriculaController,
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+                ],
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Matricula: '),
-              ),              
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

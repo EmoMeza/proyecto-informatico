@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_informatico/pages/calendario.dart';
 import 'agregarEvento.dart';
+import 'flujo_de_caja.dart';
 
 
 class menuCAA extends StatelessWidget {
@@ -79,7 +80,9 @@ class menuCAA extends StatelessWidget {
               leading: const Icon(Icons.attach_money),
               title: const Text('Ver flujo de caja'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => Dashboard()),
+                );
               },
             ),
             const Divider(),

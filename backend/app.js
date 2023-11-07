@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;

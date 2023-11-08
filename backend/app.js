@@ -545,7 +545,7 @@ app.get('/get/filter/eventos', async (req, res) => {
         };
         
         for (const param in parametrosFiltro) {
-            if (param === 'visible') {
+            if (param === 'visible' || param ==='global') {
                 // Si el parámetro es 'visible', mapear el valor al formato correcto
                 filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
             } else {

@@ -33,24 +33,6 @@ app.use(express.json()) // Nos permite trabajar con el formato json.
 //app.use(express.static(path.join(__dirname, 'public')));
 
 
-const users = [];
-
-app.get('/users', function (req, res) {
-    res.json(users);
-});
-
-app.post('/users', async function (req, res) {
-    try{
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        console.log(hashedPassword);
-        const user = { name: req.body.name, password: hashedPassword };
-        res.status(201).send();
-    } catch
-    {
-        res.status(500).send();
-    }
-});
-
 app.post('/users/login', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
     const contraseña = req.query.password;
@@ -383,35 +365,65 @@ app.get('/get/evento', async function (req, res) {
 });
 
 app.post('/add/evento', async function (req, res) {
+    const id_creador = req.query.id_creador;
     const data = req.body;
-    let respuestaEnviada = false; // Variable para rastrear si la respuesta se ha enviado.
 
     if (!data.fecha_inicio || !data.fecha_final) {
         // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
         const fechaActual = new Date();
         data.fecha_inicio = fechaActual.toISOString();
         data.fecha_final = fechaActual.toISOString();
-        // Agregar un mensaje de aviso en la respuesta.
-        res.send("Se han agregado fechas automáticamente a la fecha y hora actual.");
-        respuestaEnviada = true; // Marcamos que la respuesta se ha enviado.
     }
 
     try {
+
+
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
-        //if the nombre doesn't exist, insert it into the collection
-        await collection.insertOne(data);
-        if (!respuestaEnviada) {
-            // Solo si la respuesta no se ha enviado antes, envía el mensaje de éxito.
-            res.send("Se ha insertado correctamente");
+        console.log(id_creador.length);
+        let es_alumno = false;
+        if (id_creador.length < 24) {
+            console.log("entro");
+            es_alumno = true;
+        }
+        //check if the id_creador exists either in alumnos or caa
+        if (es_alumno) {
+            const alumnos = database.collection("alumnos");
+            const result = await alumnos.findOne({ matricula: parseInt(id_creador) });
+            if (!result) {
+                res.send(`El id ${id_creador} no existe en la base de datos`);
+                respuestaEnviada = true;
+            } else {
+                //if the id_creador exists, insert it into the collection
+                data.id_creador = id_creador;
+                //insert the event into the collection
+                await collection.insertOne(data);
+                res.send("se ha insertado correctamente");
+
+                //add the id of the event to the array mis_eventos of the alumno
+                const mis_eventos = result.mis_eventos;
+                mis_eventos.push(data._id);
+                await alumnos.updateOne({ matricula: parseInt(id_creador) }, { $set: { mis_eventos: mis_eventos } });
+            }
+        } else {
+            const caa = database.collection("caa");
+            const result = await caa.findOne({ _id: new ObjectId(id_creador) });
+            if (!result) {
+                res.send(`El id ${id_creador} no existe en la base de datos`);
+                respuestaEnviada = true;
+            } else {
+                //if the id_creador exists, insert it into the collection
+                data.id_creador = id_creador;
+                //insert the event into the collection
+                await collection.insertOne(data);
+                res.send("se ha insertado correctamente");
+                respuestaEnviada = true;
+            }
         }
     } catch (error) {
         console.log(error);
-        if (!respuestaEnviada) {
-            // Solo si la respuesta no se ha enviado antes, envía un error en el servidor.
-            res.status(500).send('Error en el servidor');
-        }
+        res.status(500).send('Error en el servidor');
     } finally {
         await client.close();
     }
@@ -590,6 +602,7 @@ app.post('/add/alumno', async function (req, res) {
     const id_caa = req.query.id_caa;
     const es_caa = req.query.es_caa;
     const data = req.body;
+    const mis_eventos = [];
 
     // Unify the data into a single object
     data.nombre = nombre;
@@ -597,6 +610,7 @@ app.post('/add/alumno', async function (req, res) {
     data.matricula = parseInt(matricula);
     data.id_caa = id_caa;
     data.es_caa = es_caa;
+    data.mis_eventos = mis_eventos;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -909,7 +923,7 @@ app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre 
                     //calculate the length of result.asistencia
                     const result = await collection.findOne({ _id: new ObjectId(id) });
                     if (result.asistencia.length >= 5){
-                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {visible: true}});
+                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {global: true}});
                     }
                     res.send("se ha insertado correctamente");
                 }

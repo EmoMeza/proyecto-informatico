@@ -63,7 +63,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/Alumno?nombre=omo&matricula=69692",
+							"raw": "http://localhost:4040/add/Alumno?nombre=omo&matricula=696969&apellido=meme",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -80,7 +80,11 @@
 								},
 								{
 									"key": "matricula",
-									"value": "69692"
+									"value": "696969"
+								},
+								{
+									"key": "apellido",
+									"value": "meme"
 								}
 							]
 						}
@@ -195,7 +199,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"probacion6\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"id_caa\" : \"652976834af6fedf26f3493d\",\r\n    \"visible\": false,\r\n    \"asistencia\" : []\r\n}",
+							"raw": "{\r\n    \"nombre\": \"probacion6\",\r\n    \"categoria\": \"actividad\",\r\n    \"descripcion\": \"este es un test para la descripcion\",\r\n    \"fecha_inicio\": \"\",\r\n    \"fecha_final\": \"\",\r\n    \"ingresos\" : [],\r\n    \"egresos\" : [],\r\n    \"total\" : 0,\r\n    \"global\": false,\r\n    \"asistencia\" : []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -203,7 +207,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4040/add/evento",
+							"raw": "http://localhost:4040/add/evento?id_creador=652976834af6fedf26f3493d",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -215,9 +219,8 @@
 							],
 							"query": [
 								{
-									"key": "",
-									"value": null,
-									"disabled": true
+									"key": "id_creador",
+									"value": "652976834af6fedf26f3493d"
 								}
 							]
 						}

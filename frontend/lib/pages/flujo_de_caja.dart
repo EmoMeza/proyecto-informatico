@@ -295,7 +295,7 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(
                             fontSize: 18.0,
                             color: dataPoint.value > 0
-                                ? const Color(0xFF00B295)
+                                ? const Color(0xFF05B488)
                                 : const Color(0xFFF75C03),
                           ),
                         ),

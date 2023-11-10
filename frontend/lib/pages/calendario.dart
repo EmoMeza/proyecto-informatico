@@ -6,35 +6,29 @@ import '../api_services.dart';
 
 
 class Evento {
-  String id;
   String nombre;
   String categoria;
   String descripcion;
   DateTime fechaInicio;
   DateTime fechaFinal;
   bool visible;
-  bool global;
 
   Evento({
-    required this.id,
     required this.nombre,
     required this.categoria,
     required this.descripcion,
     required this.fechaInicio,
     required this.fechaFinal,
     required this.visible,
-    required this.global
   });
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
-      id: json['_id'],
       nombre: json['nombre'],
       categoria: json['categoria'],
       descripcion: json['descripcion'],
       fechaInicio: parseDate(json['fecha_inicio']),
       fechaFinal: parseDate(json['fecha_final']),
       visible: json['visible'],
-      global: json['global']
     );
   }
   static DateTime parseDate(String dateString) {
@@ -94,11 +88,11 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataVisibleFalse = {
       "id_caa": id_caa,
-      "global": false.toString(),
+      "visible": false.toString(),
     };
 
     Map<String, dynamic> filterDataVisibleTrue = {
-      "global": true.toString(),
+      "visible": true.toString(),
     };
 
     ApiResponse responseVisibleFalse = await ApiService.getEventosFiltrados(filterDataVisibleFalse);

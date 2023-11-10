@@ -10,13 +10,14 @@ class menuAlumnos extends StatelessWidget {
   ];
 
   final Map<String, dynamic> alumnoData;
-  menuAlumnos({Key ? key, required this.alumnoData}) : super(key: key);
+  menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}'),
+        title:
+            Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -40,7 +41,7 @@ class menuAlumnos extends StatelessWidget {
           children: <Widget>[
             const DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Color(0xFF09184d),
               ),
               child: Text(
                 'Menú Alumno',

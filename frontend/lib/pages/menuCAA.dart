@@ -4,7 +4,6 @@ import 'package:proyecto_informatico/pages/calendario.dart';
 import 'agregarEvento.dart';
 import 'flujo_de_caja.dart';
 
-
 class menuCAA extends StatelessWidget {
   final List<String> images = [
     'https://via.placeholder.com/200',
@@ -43,7 +42,7 @@ class menuCAA extends StatelessWidget {
           children: <Widget>[
             const DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Color(0xFF09184d),
               ),
               child: Text(
                 'Menú CAA',

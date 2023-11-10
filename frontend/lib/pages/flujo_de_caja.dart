@@ -243,8 +243,8 @@ class _DashboardState extends State<Dashboard> {
             Container(
               width: double.infinity,
               height: 40.0,
-              decoration: const BoxDecoration(
-                color: Colors.deepPurple,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
               ),
               child: Center(
                 child: Text(
@@ -278,7 +278,6 @@ class _DashboardState extends State<Dashboard> {
                       child: ExpansionTile(
                         tilePadding:
                             const EdgeInsets.symmetric(horizontal: 16.0),
-                        backgroundColor: Colors.white,
                         title: Text(
                           dataPoint.description.length <=
                                   20 // Establece el límite de caracteres, por ejemplo, 20.
@@ -295,8 +294,8 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(
                             fontSize: 18.0,
                             color: dataPoint.value > 0
-                                ? const Color(0xFF05B488)
-                                : const Color(0xFFF75C03),
+                                ? const Color(0xFF00B295)
+                                : const Color(0xFFF18F01),
                           ),
                         ),
                         children: <Widget>[
@@ -323,7 +322,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.secondary,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[

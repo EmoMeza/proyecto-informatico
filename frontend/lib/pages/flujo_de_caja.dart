@@ -229,13 +229,22 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Flujo de caja',
+        title: Text('Flujo de caja',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimary, // Cambia el color según tu necesidad
         ),
       ),
       body: DefaultTextStyle(
-        style: const TextStyle(
-          color: Colors.white, // Color de texto predeterminado
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.brightness != Brightness.light
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context)
+                  .colorScheme
+                  .onSecondary, // Color de texto predeterminado
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -243,9 +252,6 @@ class _DashboardState extends State<Dashboard> {
             Container(
               width: double.infinity,
               height: 40.0,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
               child: Center(
                 child: Text(
                   'Total: \$${total.toStringAsFixed(0)}',
@@ -286,7 +292,6 @@ class _DashboardState extends State<Dashboard> {
                               : '${dataPoint.description.substring(0, 30)}...', // Si es mayor que el límite, muestra los primeros 20 caracteres seguidos de "...". Puedes ajustar el número 20 según tus necesidades.
                           style: const TextStyle(
                             fontSize: 18.0,
-                            color: Colors.black,
                           ),
                         ),
                         subtitle: Text(
@@ -322,7 +327,6 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             Container(
-              color: Theme.of(context).colorScheme.secondary,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[

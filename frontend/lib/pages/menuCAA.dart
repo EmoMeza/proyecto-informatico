@@ -18,7 +18,14 @@ class menuCAA extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CAA "nombre"'),
+        title: Text('CAA "nombre"',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimary, // Cambia el color según tu necesidad
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -40,11 +47,11 @@ class menuCAA extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Color(0xFF09184d),
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
+              child: const Text(
                 'Menú CAA',
                 style: TextStyle(
                   color: Colors.white,

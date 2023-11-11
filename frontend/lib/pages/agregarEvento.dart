@@ -217,7 +217,14 @@ class _AgregarEventoState extends State<AgregarEvento> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Evento'),
+        title: Text('Agregar Evento',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimary, // Cambia el color según tu necesidad
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(

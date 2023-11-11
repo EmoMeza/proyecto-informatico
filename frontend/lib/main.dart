@@ -19,15 +19,17 @@ class MyApp extends StatelessWidget {
       title: 'EventiCAA',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: generateMaterialColor(const Color(0xFF09184d)),
+          primarySwatch: Colors.deepPurple,
         ).copyWith(
-          secondary: const Color(0xFF7B5BF2),
+          secondary: const Color(0xFF119DA4),
           background: Colors.white, // Cambia el color de fondo
-          surface: Colors.grey, // Cambia el color de superficie
+          surface: Colors.deepPurple, // Cambia el color de superficie
+          onBackground: Colors.black, // Cambia el color del texto en el fondo
+          // onSurface cambia de color dependiendo del brillo del tema
           onPrimary:
               Colors.white, // Cambia el color del texto en el color principal
           onSecondary:
-              Colors.grey, // Cambia el color del texto en el color secundario
+              Colors.black, // Cambia el color del texto en el color secundario
           brightness: Brightness.light, // Cambia el brillo del tema
         ),
       ),

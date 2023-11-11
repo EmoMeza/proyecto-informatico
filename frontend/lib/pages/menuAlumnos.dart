@@ -16,8 +16,14 @@ class menuAlumnos extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}'),
+        title: Text('CAA "nombre"',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimary, // Cambia el color según tu necesidad
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -39,11 +45,11 @@ class menuAlumnos extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Color(0xFF09184d),
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
+              child: const Text(
                 'Menú Alumno',
                 style: TextStyle(
                   color: Colors.white,

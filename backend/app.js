@@ -2,10 +2,13 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
 const { ObjectId } = require('mongodb');
+const storage = multer.memoryStorage(); // Almacena la imagen en memoria
+const upload = multder({ storage: storage });
 require('dotenv').config();
 
 const app = express(); // Inicializamos express.
@@ -536,18 +539,13 @@ app.get('/get/alumno', async function (req, res) {
     }
 });
 
-app.post('/add/alumno', async function (req, res) {
+app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
-
-    const data = req.body;
-
-    // Unify the data into a single object
-    data.nombre = nombre;
-    data.matricula = matricula;
-    data.apellido = apellido;
-
+    const imagen = req.file; // Obtiene los datos de la imagen cargada
+    
+    
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
         res.send(`La matricula ${matricula} no tiene el minimo de 4 digitos`);
@@ -556,7 +554,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
-    data.contraseña = password
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -568,11 +566,19 @@ app.post('/add/alumno', async function (req, res) {
             // If the alumno already exists, send a message to the client
             res.send(`El alumno ${data.matricula} ya existe en la base de datos`);
         } else {
-            // If the alumno doesn't exist, insert it into the collection
-            const insertResult = await collection.insertOne(data);
+            const data = {
+                nombre: nombre,
+                matricula: matricula,
+                apellido: apellido,
+                contraseña: password,
+                imagen: {
+                    data: imagen.buffer.toString('base64'), // Almacena la imagen como base64
+                    contentType: imagen.mimetype // Guarda el tipo de contenido
+                }
+            };
 
-            // Send the result to the client
-            res.send("se ha insertado correctamente");
+            const insertResult = await collection.insertOne(data);
+            res.send("Alumno insertado correctamente");
         }
     } catch (error) {
         console.log(error);

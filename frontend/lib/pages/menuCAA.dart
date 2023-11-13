@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_informatico/pages/calendario.dart';
 import 'agregarEvento.dart';
 import 'flujo_de_caja.dart';
+import 'notificaciones.dart';
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [
@@ -88,6 +89,19 @@ class menuCAA extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => Dashboard()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Ver notificaciones'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const Notificacion()), // Replace NotificacionesPage with the actual name of your notificaciones page
                 );
               },
             ),

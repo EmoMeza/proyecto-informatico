@@ -5,12 +5,28 @@ import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
-  initializeDateFormatting().then((_) => runApp(MyApp()));
+import 'package:proyecto_informatico/pages/notificaciones.dart';
+
+void main(){
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  initializeDateFormatting().then((_) {
+    // NotificationManager notificationManager = NotificationManager();
+    // notificationManager.initializeNotifications();
+
+    runApp(const MyApp());
+  });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+class MyApp extends StatefulWidget{
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/menuCAA': (context) => menuCAA(),
         '/agregarEvento': (context) => AgregarEvento(),
         '/calendario': (context) => Calendario(),
+        '/notificaciones': (context) => const Notificacion(),
       },
     );
   }

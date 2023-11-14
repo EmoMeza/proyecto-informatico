@@ -30,19 +30,22 @@ class DataPoint {
   final String description;
   // guardamos un tipo de dato ISOS de fecha
   final String date;
+  String evento = "";
 
-  DataPoint(this.value, this.description, this.date);
+  DataPoint(this.value, this.description, this.date, this.evento);
 
   Map<String, dynamic> toMap() {
     return {
       'value': value,
       'description': description,
       'date': date,
+      'evento': evento,
     };
   }
 
   factory DataPoint.fromMap(Map<String, dynamic> map) {
-    return DataPoint(map['value'], map['description'], map['date']);
+    return DataPoint(
+        map['value'], map['description'], map['date'], map['evento']);
   }
 }
 
@@ -50,10 +53,22 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
   int total = 0;
   bool isloading = true;
+  List<String> eventos = [];
+  List<String> eventosId = [];
+  String? dialogEvent = "General";
+  String? dropdownValue = "General";
+  List<DataPoint> filteredCashFlowData = [];
+
   @override
   void initState() {
     super.initState();
     _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
+  }
+
+  // funcion que retorna un string id de la base de datos
+  String getIdCaa() {
+    //ApiResponse response = ApiService.getCaa(alumno);
+    return '6530ac564fc4cee2752b73ae';
   }
 
   // funcion para añadir ingreso o egreso a la base de datos
@@ -61,19 +76,29 @@ class _DashboardState extends State<Dashboard> {
       bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    const id = '6530ac564fc4cee2752b73ae'; // Replace with the actual CAA ID
+    final id = getIdCaa(); // Replace with the actual CAA ID
+    // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
-      ApiResponse response = await ApiService.postIngresoCaa(id, {
-        'ingresos': [monto, descripcion]
-      });
-      if (response.success) {
-        //en caso de funcionar se actualiza la lista cashFlowData
-        _LoadIncomeOrExpense();
+      if (dialogEvent == "General") {
+        ApiResponse response = await ApiService.postIngresoCaa(id, {
+          'ingresos': [monto, descripcion]
+        });
+        if (response.success) {
+          //en caso de funcionar se actualiza la lista cashFlowData
+          _LoadIncomeOrExpense();
+        } else {
+          // Handle error
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       } else {
-        // Handle error
-        // ignore: avoid_print
-        print('Error adding income: ${response.message}');
+        // usando dialogevent se obtiene el id del evento
+        // ignore: unused_local_variable
+        var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
+        ApiResponse response = await ApiService.postIngresoEvento(id, {
+          'ingresos': [monto, descripcion]
+        });
       }
     } else {
       ApiResponse response = await ApiService.postEgresoCaa(id, {
@@ -92,7 +117,7 @@ class _DashboardState extends State<Dashboard> {
 
   // ignore: non_constant_identifier_names
   void _LoadIncomeOrExpense() async {
-    const id = '6530ac564fc4cee2752b73ae'; // Reemplaza con el ID real de CAA
+    final id = getIdCaa(); // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
 
@@ -104,20 +129,51 @@ class _DashboardState extends State<Dashboard> {
       List<DataPoint> incomeData = (income is List)
           ? (income)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(item[0], item[1], item[2]))
+              .map((item) => DataPoint(
+                    item[0],
+                    item[1],
+                    item[2],
+                    item.length > 3 ? item[3] : "General",
+                  ))
               .toList()
           : [];
 
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(-item[0], item[1], item[2]))
+              .map((item) => DataPoint(
+                    -item[0],
+                    item[1],
+                    item[2],
+                    item.length > 3 ? item[3] : "General",
+                  ))
               .toList()
           : [];
 
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
+      // ordenamos los eventos
+      if (eventos.isEmpty) eventos.add("General");
+      if (eventosId.isEmpty) eventosId.add("General");
+
+      for (var i = 0; i < cashFlowData.length; i++) {
+        if (!eventosId.contains(cashFlowData[i].evento)) {
+          // ignore: non_constant_identifier_names
+          String Evento = cashFlowData[i].evento;
+          eventosId.add(Evento);
+          // ignore: non_constant_identifier_names
+          ApiResponse Response = await ApiService.getEvento(Evento);
+          if (Response.success) {
+            eventos.add(Response.data['nombre']);
+          } else {
+            // ignore: avoid_print
+            print('Error al obtener los datos: ${Response.message}');
+            eventos.add(Evento);
+          }
+        }
+      }
+      _filterCashFlowData();
 
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       setState(() {
@@ -128,6 +184,16 @@ class _DashboardState extends State<Dashboard> {
     } else {
       // ignore: avoid_print
       print('Error al obtener los datos: ${Response.message}');
+    }
+  }
+
+  void _filterCashFlowData() {
+    if (dropdownValue == "General") {
+      filteredCashFlowData = List.from(cashFlowData);
+    } else {
+      filteredCashFlowData = cashFlowData
+          .where((dataPoint) => dataPoint.evento == dropdownValue)
+          .toList();
     }
   }
 
@@ -152,6 +218,28 @@ class _DashboardState extends State<Dashboard> {
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
               ),
+              Container(
+                margin: const EdgeInsets.only(top: 20.0, right: 20.0),
+                child: DropdownButton(
+                  value: dialogEvent,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dialogEvent = newValue;
+                      Navigator.of(context).pop();
+                      _openEntryDialog(isIncome);
+                    });
+                  },
+                  items: eventos.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: SizedBox(
+                        width: 200.0,
+                        child: Text(value),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              )
             ],
           ),
           actions: <Widget>[
@@ -249,6 +337,7 @@ class _DashboardState extends State<Dashboard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
+            // ignore: sized_box_for_whitespace
             Container(
               width: double.infinity,
               height: 40.0,
@@ -260,6 +349,24 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
               ),
+            ),
+            DropdownButton<String>(
+              value: dropdownValue,
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue;
+                  _filterCashFlowData(); // Filtrar datos cuando cambia el valor del dropdown
+                });
+              },
+              items: eventos.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: SizedBox(
+                    width: 300.0, // Establecer el ancho deseado
+                    child: Text(value),
+                  ),
+                );
+              }).toList(),
             ),
             if (isloading)
               Center(
@@ -275,9 +382,9 @@ class _DashboardState extends State<Dashboard> {
             else
               Expanded(
                 child: ListView.builder(
-                  itemCount: cashFlowData.length,
+                  itemCount: filteredCashFlowData.length,
                   itemBuilder: (context, index) {
-                    final dataPoint = cashFlowData[index];
+                    final dataPoint = filteredCashFlowData[index];
                     return Card(
                       elevation: 4.0,
                       margin: const EdgeInsets.all(8.0),

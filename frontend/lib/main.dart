@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_informatico/pages/calendarioAlumos.dart';
 import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
@@ -38,7 +39,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const Login(),
         '/menuCAA': (context) => menuCAA(),
         '/agregarEvento': (context) => AgregarEvento(),
-        '/calendario': (context) => CalendarioCA(),
+        '/calendarioCA': (context) => CalendarioCA(),
+        '/calendarioAlumos': (context) => CalendarioAlumos(),
       },
     );
   }

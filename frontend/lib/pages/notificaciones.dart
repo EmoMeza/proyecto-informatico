@@ -2,14 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
+
+class NotificationStorage {
+  static const String _notificationMapKey = 'notificationMap';
+
+  final SharedPreferences _prefs;
+  Map<String, int> _eventToNotificationIdMap = {};
+
+  NotificationStorage(this._prefs);
+
+  Map<String, int> get eventToNotificationIdMap => _eventToNotificationIdMap;
+
+  Future<void> loadNotificationMap() async {
+    final String? notificationMapString = _prefs.getString(_notificationMapKey);
+    if (notificationMapString != null) {
+      final Map<String, dynamic> notificationMap =
+          Map<String, dynamic>.from(jsonDecode(notificationMapString));
+      _eventToNotificationIdMap = notificationMap.map(
+          (key, value) => MapEntry<String, int>(key, value as int));
+    }
+  }
+
+  Future<void> saveNotificationMap() async {
+    await _prefs.setString(
+        _notificationMapKey, jsonEncode(_eventToNotificationIdMap));
+  }
+
+  Future<void> clearNotificationMap() async {
+    _eventToNotificationIdMap.clear();
+    await saveNotificationMap();
+  }
+}
 class NotificationManager {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> initializeNotifications() async {
+  late SharedPreferences _prefs;
+  late NotificationStorage _notificationStorage;
+
+  NotificationManager() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    _prefs = await SharedPreferences.getInstance();
+    _notificationStorage = NotificationStorage(_prefs);
+    await _notificationStorage.loadNotificationMap();
+
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+    AndroidInitializationSettings('app_icon');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings();
@@ -47,14 +91,19 @@ class NotificationManager {
     );
   }
 
-  Future<void> scheduleNotification() async {
+  Future<void> scheduleNotification(Evento evento, Duration scheduledHour) async {
+
+    // Eliminar notificaciones del mapa que ya pasaron
+    await deleteOldNotifications();
+
+    // ------ Inicializar notificaciones ------ //
     const AndroidNotificationDetails androidNotificationDetails =
-      AndroidNotificationDetails(
-        'channel id',
-        'channel name',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
+        AndroidNotificationDetails(
+      'channel id',
+      'channel name',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
 
     const DarwinNotificationDetails iOSNotificationDetails =
         DarwinNotificationDetails();
@@ -64,32 +113,74 @@ class NotificationManager {
       iOS: iOSNotificationDetails,
     );
 
-    // final DateTime notificationTime = evento.fecha.subtract(notificationDuration);
+    // ------ Calcular fecha de notificación ------ //
+    final DateTime notificationDate = evento.fecha.subtract(scheduledHour);
+    final tz.TZDateTime notificationTZDateTime =
+        tz.TZDateTime.from(notificationDate, tz.local);
 
-    // //convertir a tz
-    // final tz.TZDateTime notificationTZDateTime = tz.TZDateTime.from(notificationTime, tz.local);
+    print('Fecha de evento: ${evento.fecha}.');
+    print('Fecha de notificación: $notificationTZDateTime.');
 
-    // print('Notificación inicial: $notificationTime');
-    // print('Notificación programada para: $notificationTZDateTime');
+    // ------ Guardar id de notificación ------ //
+    int notificationId = -1;
+    if (_notificationStorage.eventToNotificationIdMap.containsKey(evento.id)) {
+      // Cancelar notificación anterior si existe
+      await flutterLocalNotificationsPlugin.cancel(
+          _notificationStorage.eventToNotificationIdMap[evento.id]!);
+      notificationId =
+          _notificationStorage.eventToNotificationIdMap[evento.id]!;
+    } else {
+      // Generar nuevo id de notificación
+      notificationId = DateTime.now().millisecondsSinceEpoch % (1 << 31);
+      _notificationStorage.eventToNotificationIdMap[evento.id] = notificationId;
+    }
 
-    print('ahora: ${tz.TZDateTime.now(tz.local)}');
-    print('5 seg: ${tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5))}');
-    print('Zona horaria actual: ${tz.local}');
-    print('Zona horaria de Santiago: ${tz.getLocation('America/Santiago')}');
+    print('Notificación programada con id $notificationId.');
+
+    // Imprimir el mapa
+    print('Mapa de notificaciones:');
+    _notificationStorage.eventToNotificationIdMap.forEach((key, value) {
+      print('Evento: $key, id de notificación: $value');
+    });
+
+    String message = formatDuration(scheduledHour, evento.nombre);
+
+    // ------ Programar notificaciones ------ //
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      0, // id del evento
-      'prueba', // titulo
-      'body', // cuerpo
-      //notificationTZDateTime, // fecha programada
-      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+      notificationId, // id de notificación
+      evento.nombre, // titulo
+      message,// cuerpo
+      notificationTZDateTime, // fecha programada
       notificationDetails, // detalles5
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
 
-    //print('Notificación programada con id ${evento.id}.');
+    // Guardar el mapa actualizado
+    await _notificationStorage.saveNotificationMap();
   }
+
+  //Funcion para formatear un mensaje segun el tiempo restante
+  String formatDuration(Duration duration, String titulo) {
+    String message = '';
+    String faltanText = duration.inMinutes == 1 ? 'Falta' : 'Faltan';
+
+    if (duration.inDays > 0) {
+      message = '$faltanText ${duration.inDays} día${duration.inDays == 1 ? '' : 's'} para $titulo.';
+    } else if (duration.inHours > 0) {
+      message = '$faltanText ${duration.inHours} hora${duration.inHours == 1 ? '' : 's'} para $titulo.';
+    } else if (duration.inMinutes > 0) {
+      message = '$faltanText ${duration.inMinutes} minuto${duration.inMinutes == 1 ? '' : 's'} para $titulo.';
+    } else if (duration.inSeconds > 0) {
+      message = 'Falta menos de 1 minuto para $titulo.';
+    } else {
+      message = '¡$titulo ya comenzó!';
+    }
+
+    return message;
+  }
+
 
   Future<int> getActiveNotificationsCount() async {
     final List<PendingNotificationRequest> activeNotifications =
@@ -139,11 +230,53 @@ class NotificationManager {
   Future<void> cancelAllNotification() async {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
+  //Eliminar notificaciones del mapa que ya pasaron
+  Future<void> deleteOldNotifications() async {
+
+    final List<PendingNotificationRequest> activeNotifications =
+        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      
+    // Si no hay notificaciones activas, elimino todas las notificaciones del mapa
+    if (activeNotifications.isEmpty) {
+      await _notificationStorage.clearNotificationMap();
+      return;
+    }
+
+    // Obtengo los ids de las notificaciones activas
+    final List<int> activeNotificationIds = 
+      activeNotifications.map((notification) => notification.id).toList();
+
+    // Creo una lista de claves que quiero eliminar
+    final List<String> keysToRemove = [];
+
+    // Recorro el mapa y añado las claves a la lista de claves a eliminar si no están en la lista de notificaciones activas
+    _notificationStorage.eventToNotificationIdMap.forEach((key, value) {
+      if (!activeNotificationIds.contains(value)) {
+        keysToRemove.add(key);
+      }
+    });
+
+    // Elimino las claves de la lista del mapa
+    for (var key in keysToRemove) {
+      _notificationStorage._eventToNotificationIdMap.remove(key);
+    }
+
+    // Guardo el mapa
+    await _notificationStorage.saveNotificationMap();
+  }
+
+  //Imprimir el mapa
+  Future<void> printNotificationMap() async {
+    print('Mapa de notificaciones:');
+    _notificationStorage.eventToNotificationIdMap.forEach((key, value) {
+      print('Evento: $key, id de notificación: $value');
+    });
+  }
 }
 
 
 class Evento {
-  final int id;
+  final String id;
   final String nombre;
   final DateTime fecha;
 
@@ -158,12 +291,12 @@ class Notificacion extends StatefulWidget {
 }
 
 class _NotificacionState extends State<Notificacion> {
-  final NotificationManager notificationManager = NotificationManager();
+  late final NotificationManager notificationManager;
   
   @override
   void initState() {
     super.initState();
-    notificationManager.initializeNotifications();
+    notificationManager = NotificationManager();
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('America/Santiago'));
   }
@@ -180,21 +313,35 @@ class _NotificacionState extends State<Notificacion> {
           onPressed: () async {
 
             //notificationManager.showNotification("Hola", "Mundo");
-            notificationManager.cancelAllNotification();
+            
+            //notificationManager.cancelAllNotification();
             final Evento evento = Evento(
-              id: 8,
+              id: '2',
               nombre: 'funciona',
-              fecha: DateTime.now(),
+              fecha: DateTime.now().add(const Duration(seconds: 30)),
             );
 
-            await notificationManager.scheduleNotification();
+            // final Evento evento2 = Evento(
+            //   id: '2',
+            //   nombre: 'funciona2',
+            //   fecha: DateTime.now().add(const Duration(minutes: 5)),
+            // );
+
+            Duration cuantoFalta = const Duration(seconds: 10);
+            await notificationManager.scheduleNotification(evento, cuantoFalta);
+
+            // await notificationManager.scheduleNotification(evento2, const Duration(seconds: 120));
+
+            //Imprimir mapa
+            //await notificationManager.printNotificationMap();
+
+            //Imprimir notificaciones activas
+            //await notificationManager.printActiveNotifications();
 
             notificacionesActivas = await notificationManager.getActiveNotificationsCount();
             print('Notificaciones activas: $notificacionesActivas');
-
-            await notificationManager.getNotificationDetails(0);
           },
-          child: const Text('Notificación'),
+          child: const Text('Mondongo'),
         ),
       ),
     );

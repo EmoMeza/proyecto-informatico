@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import '../api_services.dart';
 
 class Registro extends StatefulWidget {
   const Registro({Key? key}) : super(key: key);
@@ -9,65 +10,23 @@ class Registro extends StatefulWidget {
 }
 
 class _RegistroState extends State<Registro> {
-  TextEditingController loginController = TextEditingController();
-  TextEditingController contrasenaController = TextEditingController();
-  TextEditingController repetirContrasenaController = TextEditingController();
   TextEditingController nombreController = TextEditingController();
-  String tipoCuenta = 'Estudiante'; // Inicializar con 'Estudiante'
+  TextEditingController apellidoController = TextEditingController();
+  TextEditingController matriculaController = TextEditingController();
+  String tipoCuenta = 'Estudiante';
+  bool esCaa = false;
+  String idCaa = '';
+  late Future<ApiResponse> caaFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia la llamada a la API una vez cuando se inicia el widget
+    caaFuture = ApiService.getAllCaa();
+  }
 
   void guardarDatos() async {
-    final prefs = await SharedPreferences.getInstance();
-    final login = loginController.text;
-    final contrasena = contrasenaController.text;
-    final nombre = nombreController.text;
-
-    if (contrasena != repetirContrasenaController.text) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: const Text('Las contraseñas no coinciden.'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    // Guardar los datos en Shared Preferences
-    await prefs.setString('login', login);
-    await prefs.setString('contrasena', contrasena);
-    await prefs.setString('nombre', nombre);
-    await prefs.setString(
-        'tipoCuenta', tipoCuenta); // Guardar el tipo de cuenta
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Éxito'),
-          content: const Text(
-              'Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    // Resto del código para guardarDatos
   }
 
   @override
@@ -82,41 +41,74 @@ class _RegistroState extends State<Registro> {
           child: Column(
             children: [
               TextField(
-                controller: loginController,
-                decoration: const InputDecoration(labelText: 'Login'),
-              ),
-              TextField(
-                controller: contrasenaController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
-              ),
-              TextField(
-                controller: repetirContrasenaController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Repetir Contraseña'),
-              ),
-              TextField(
                 controller: nombreController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: const InputDecoration(labelText: 'Nombre: '),
               ),
+              TextField(
+                controller: apellidoController,
+                decoration: const InputDecoration(labelText: 'Apellido: '),
+              ),
+              TextField(
+                controller: matriculaController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+                ],
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Matricula: '),
+              ),
+              const SizedBox(height: 20),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Seleccionar tipo de cuenta:'),
-                  DropdownButton<String>(
-                    value: tipoCuenta,
-                    onChanged: (String? value) {
+                  // Casilla de verificación para esCaa
+                  Checkbox(
+                    value: esCaa,
+                    onChanged: (value) {
                       setState(() {
-                        tipoCuenta = value!;
+                        esCaa = value!;
                       });
                     },
-                    items: <String>['Estudiante', 'Centro de Alumnos']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                  ),
+                  const Text('Es CAA'),
+                  const SizedBox(width: 20),
+                  // Lista desplegable para seleccionar idCaa
+                  FutureBuilder<ApiResponse>(
+                    future: caaFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        ApiResponse apiResponse = snapshot.data as ApiResponse;
+                        if (apiResponse.success) {
+                          List<dynamic> caas = apiResponse.data as List<dynamic>;
+
+                          // Verifica si idCaa es válido y establece un valor predeterminado si no lo es
+                          if (idCaa.isEmpty || !caas.any((caa) => caa['_id'] == idCaa)) {
+                            idCaa = caas.first['_id']; // Puedes ajustar esto según tus necesidades
+                          }
+
+                          return DropdownButton<String>(
+                            value: idCaa,
+                            hint: const Text('Seleccionar CAA'),
+                            items: caas.map((caa) {
+                              return DropdownMenuItem<String>(
+                                value: caa['_id'],
+                                child: Text(caa['nombre']),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                idCaa = value!;
+                              });
+                            },
+                          );
+                        } else {
+                          return Text('Error en la respuesta de la API: ${apiResponse.message}');
+                        }
+                      }
+                    },
                   ),
                 ],
               ),

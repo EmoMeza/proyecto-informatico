@@ -62,13 +62,13 @@ class Evento {
 }
 
 
-class Calendario extends StatefulWidget {
+class CalendarioCA extends StatefulWidget {
   @override
   _CalendarioState createState() => _CalendarioState();
 }
 
 
-class _CalendarioState extends State<Calendario> with SingleTickerProviderStateMixin{
+class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStateMixin{
   String id_caa = "652976834af6fedf26f3493d";
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -125,7 +125,7 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
       }
       isLoading = false;
     });
-  }
+}
   
 
   @override

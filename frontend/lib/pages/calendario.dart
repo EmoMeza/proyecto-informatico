@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
 import 'package:intl/intl.dart';
-
+import 'lista_asistencia.dart';
 
 
 class Evento {
@@ -392,7 +392,10 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
         children: [
           const SizedBox(height: 10.0),
           _buildLabelText('Categoría:'),
-          _buildText(eventData['categoria']),
+          if (eventData['categoria'] == 'actividad')
+            _buildText('Actividad')
+          else
+            _buildText(eventData['Evaluación']),
           const SizedBox(height: 10.0),
           _buildLabelText('Descripción:'),
           _buildText(eventData['descripcion']),
@@ -403,10 +406,13 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
           _buildLabelText('Fecha de fin:'),
           _buildText(formattedFechaFinal),
           const SizedBox(height: 10.0),
-          _buildLabelText('Global:'),
-          _buildText(eventData['global'].toString()),
+          _buildLabelText('Tipo de evento:'),
+          if (eventData['global'])
+            _buildText('Publico')
+          else
+            _buildText('De carrera'),
           const SizedBox(height: 10.0),
-          _buildLabelText('Creador:'),
+          _buildLabelText('Anfitrión:'),
           _buildText(creador),
         ],
       ),
@@ -415,6 +421,17 @@ class _CalendarioState extends State<Calendario> with SingleTickerProviderStateM
           onPressed: () => Navigator.pop(context),
           child: const Text('Cerrar'),
         ),
+        ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ListaAsistenciaPage(eventData['_id']),
+            ),
+          );
+        },
+  child: Text('Lista Asistencia'),
+)
       ],
     );
 

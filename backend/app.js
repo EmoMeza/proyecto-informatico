@@ -650,7 +650,7 @@ app.post('/add/alumno', async function (req, res) {
 });
 
 app.put('/update/alumno', async function (req, res) {
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
     const data = req.body;
 
     try {
@@ -677,7 +677,7 @@ app.put('/update/alumno', async function (req, res) {
 });
 
 app.delete('/delete/alumno', async function (req, res) {
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");

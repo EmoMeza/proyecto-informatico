@@ -1,8 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
@@ -397,6 +397,7 @@ app.post('/add/evento', async function (req, res) {
             } else {
                 //if the id_creador exists, insert it into the collection
                 data.id_creador = id_creador;
+                data.global = false;
                 //insert the event into the collection
                 await collection.insertOne(data);
                 res.send("se ha insertado correctamente");
@@ -500,7 +501,7 @@ app.get('/get/all/eventos', async function (req, res) {
     }
 });
 
-app.get('/get/filter/eventos', async function (req, res) {
+/*app.get('/get/filter/eventos', async function (req, res) {
     const categoria = req.query.categoria;
     if (categoria != "certamen" && categoria != "actividad") {
         res.send(`La categoria ${categoria} no existe en la base de datos`);
@@ -524,7 +525,53 @@ app.get('/get/filter/eventos', async function (req, res) {
             await client.close();
         }
     }
+});*/
+
+app.get('/get/filter/eventos', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("test");
+
+        // Obtén todos los parámetros de filtro de la URL
+        const parametrosFiltro = req.query;
+
+        // Inicializa un objeto de filtro vacío
+        const filtroFinal = {};
+
+        // Agrega parámetros al filtro final según sea necesario
+        const booleanMapping = {
+            'true': true,
+            'false': false
+        };
+        
+        for (const param in parametrosFiltro) {
+            if (param === 'visible' || param ==='global') {
+                // Si el parámetro es 'visible', mapear el valor al formato correcto
+                filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
+            } else {
+                filtroFinal[param] = parametrosFiltro[param];
+            }
+        }
+        
+        //console.log(req.query.visible);
+        // Realiza la consulta en la colección utilizando el filtro final
+        const result = await collection.find(filtroFinal).toArray();
+        //console.log(result);
+        if (result.length === 0) {
+            res.send('No se encontraron eventos que cumplan con los criterios de filtro.');
+        } else {
+            res.send(result);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    } finally {
+        await client.close();
+    }
 });
+
+
 
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
@@ -557,6 +604,7 @@ app.post('/add/alumno', async function (req, res) {
     const es_caa = req.query.es_caa;
     const data = req.body;
     const mis_eventos = [];
+    const mis_asistencias = [];
 
     // Unify the data into a single object
     data.nombre = nombre;
@@ -565,6 +613,7 @@ app.post('/add/alumno', async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
+    data.mis_asistencias = mis_asistencias;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -574,7 +623,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
-
+    data.contraseña = password
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -651,6 +700,8 @@ app.delete('/delete/alumno', async function (req, res) {
         await client.close();
     }
 });
+
+// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
 
 app.get('/get/all/ingresos', async function (req, res) {
     const id = req.query.id; // assuming the query parameter is named "id"
@@ -872,11 +923,10 @@ app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre 
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
                     await collection.updateOne({_id: new ObjectId(id)}, {$push: {asistencia: matricula}});
-                    //calculate the length of result.asistencia
-                    const result = await collection.findOne({ _id: new ObjectId(id) });
-                    if (result.asistencia.length >= 5){
-                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {global: true}});
-                    }
+                    // add the id of the event to the array mis_asistencias of the alumno
+                    const mis_asistencias = result2.mis_asistencias;
+                    mis_asistencias.push(id);
+                    await collection2.updateOne({ matricula: parseInt(matricula) }, { $set: { mis_asistencias: mis_asistencias } });
                     res.send("se ha insertado correctamente");
                 }
             }

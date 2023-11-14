@@ -9,13 +9,21 @@ class menuAlumnos extends StatelessWidget {
     // Placeholders de 200x200
   ];
 
-  menuAlumnos({super.key});
+  final Map<String, dynamic> alumnoData;
+  menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alumno: "nombre"'),
+        title: Text('CAA "nombre"',
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: IconThemeData(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimary, // Cambia el color según tu necesidad
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -37,11 +45,11 @@ class menuAlumnos extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
+              child: const Text(
                 'Menú Alumno',
                 style: TextStyle(
                   color: Colors.white,

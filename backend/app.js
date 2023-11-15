@@ -849,7 +849,7 @@ app.get('/get/all/asistencias', async function (req, res) {
 
 app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre del alumno
     const id = req.query.id;
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
 
     try {
         await client.connect();

@@ -39,9 +39,26 @@ class _AgregarEventoState extends State<AgregarEvento> {
 
   Future<void> _selectTime(BuildContext context) async {
     //seleccionar hora inicio
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (picked != null && picked != selectedTime) {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.black, // Set the color you want
+            colorScheme: ColorScheme.light(primary: Colors.black),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Colors.white, // Set the background color
+              hourMinuteTextColor: Colors.black,
+              dayPeriodTextColor: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
       setState(() {
         selectedTime = picked;
         _timeController.text = selectedTime.format(context);
@@ -71,8 +88,23 @@ class _AgregarEventoState extends State<AgregarEvento> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedEndTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.black, // Set the color you want
+            colorScheme: ColorScheme.light(primary: Colors.black),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Colors.white, // Set the background color
+              hourMinuteTextColor: Colors.black,
+              dayPeriodTextColor: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    if (picked != null && picked != selectedEndTime) {
+    if (picked != null) {
       setState(() {
         selectedEndTime = picked;
         _endTimeController.text = selectedEndTime.format(context);

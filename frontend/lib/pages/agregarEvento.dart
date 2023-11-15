@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import '../api_services.dart';
 
 class AgregarEvento extends StatefulWidget {
@@ -22,6 +25,18 @@ class _AgregarEventoState extends State<AgregarEvento> {
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
+  bool _globalCheckboxValue = false;
+  XFile? _pickedImage;
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    setState(() {
+      _pickedImage = pickedFile;
+    });
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     //seleccionar fecha inicial
     final DateTime? picked = await showDatePicker(
@@ -46,9 +61,10 @@ class _AgregarEventoState extends State<AgregarEvento> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: Colors.black, // Set the color you want
-            colorScheme: ColorScheme.light(primary: Colors.black),
-            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.normal),
-            timePickerTheme: TimePickerThemeData(
+            colorScheme: const ColorScheme.light(primary: Colors.black),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: const TimePickerThemeData(
               backgroundColor: Colors.white, // Set the background color
               hourMinuteTextColor: Colors.black,
               dayPeriodTextColor: Colors.black,
@@ -92,9 +108,10 @@ class _AgregarEventoState extends State<AgregarEvento> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: Colors.black, // Set the color you want
-            colorScheme: ColorScheme.light(primary: Colors.black),
-            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.normal),
-            timePickerTheme: TimePickerThemeData(
+            colorScheme: const ColorScheme.light(primary: Colors.black),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: const TimePickerThemeData(
               backgroundColor: Colors.white, // Set the background color
               hourMinuteTextColor: Colors.black,
               dayPeriodTextColor: Colors.black,
@@ -212,6 +229,19 @@ class _AgregarEventoState extends State<AgregarEvento> {
   void _submitForm(BuildContext context) async {
     //controlador para enviar datos a la API
     if (_formKey.currentState!.validate()) {
+      bool isGlobal = false;
+
+      if (dropdownValue == 'actividad') {
+        // Si el evento es actividad, revisar globalCheckboxValue
+        isGlobal = _globalCheckboxValue;
+      }
+      String? base64Image;
+      // Si se selecciono una imagen, convertirla a base64
+      if (_pickedImage != null) {
+        List<int> imageBytes = await _pickedImage!.readAsBytes();
+        base64Image = base64Encode(imageBytes);
+      }
+      // Datos para enviar a la API
       Map<String, dynamic> postData = {
         'nombre': _nombreController.text,
         'categoria': dropdownValue,
@@ -221,9 +251,11 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'ingresos': [],
         'egresos': [],
         'total': 0,
-        'id_caa': "652976834af6fedf26f3493d", //idk how to get this
-        'visible': false,
-        'asistencia': []
+        'id_creador': "6552d3d4ec6e222a40b76125", //idk how to get this
+        'visible': true,
+        'global': isGlobal,
+        'asistencia': [],
+        'imagen': base64Image,
       };
 
       ApiResponse response = await ApiService.postEvento(postData);
@@ -386,7 +418,74 @@ class _AgregarEventoState extends State<AgregarEvento> {
                   ),
                   validator: (value) => _validateField(value, 'Descripción'),
                 ),
-                const SizedBox(height: 20),
+                if (dropdownValue == 'Actividad')
+                  CheckboxListTile(
+                    title: const Text('¿Es un evento global?'),
+                    value: _globalCheckboxValue,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _globalCheckboxValue = value!;
+                      });
+                    },
+                  ), // Checkbox para global
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        IconButton(
+                          onPressed: () => _pickImage(ImageSource.gallery),
+                          icon: Icon(Icons.photo),
+                          tooltip: 'Seleccionar imagen',
+                        ),
+                        Text('Seleccionar de la galería'),
+                      ],
+                    ),
+                    SizedBox(
+                        width: 20), // Add some spacing between icons and text
+                    Column(
+                      children: [
+                        IconButton(
+                          onPressed: () => _pickImage(ImageSource.camera),
+                          icon: Icon(Icons.camera_alt),
+                          tooltip: 'Tomar foto',
+                        ),
+                        Text('Tomar una foto'),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20), // Add some spacing between rows
+                _pickedImage != null
+                    ? Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Imagen seleccionada:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _pickedImage = null;
+                                  });
+                                },
+                                icon: Icon(Icons.delete),
+                                tooltip: 'Eliminar imagen',
+                              ),
+                            ],
+                          ),
+                          Image.file(
+                            File(_pickedImage!.path),
+                            height: 100,
+                            width: 100,
+                          ),
+                        ],
+                      )
+                    : Text('No se ha seleccionado ninguna imagen'),
+                SizedBox(height: 20),
                 buildSubmitButton(),
               ],
             ),

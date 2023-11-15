@@ -754,7 +754,7 @@ app.post('/add/ingreso', async function (req, res) {
         const caa = database.collection("caa");
         //check if the id already exists in the collection, if exists send a message to the client and exit
         const result = await collection.findOne({ _id: new ObjectId(id) });
-        id_caa = result.id_caa;
+        id_caa = result.id_creador;
         const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
 
         if (result) {

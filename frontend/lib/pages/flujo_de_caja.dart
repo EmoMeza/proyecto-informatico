@@ -62,18 +62,18 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
+    _LoadCashFlow(); // Cargar los datos de ingresos y egresos
   }
 
   // funcion que retorna un string id de la base de datos
   String getIdCaa() {
     //ApiResponse response = ApiService.getCaa(alumno);
-    return '6530ac564fc4cee2752b73ae';
+    return '6552d3d4ec6e222a40b76125';
   }
 
   // funcion para añadir ingreso o egreso a la base de datos
-  void _addIncomeOrExpense(
-      bool isIncome, int amount, String description) async {
+  // ignore: non_constant_identifier_names
+  void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
     final id = getIdCaa(); // Replace with the actual CAA ID
@@ -86,7 +86,7 @@ class _DashboardState extends State<Dashboard> {
         });
         if (response.success) {
           //en caso de funcionar se actualiza la lista cashFlowData
-          _LoadIncomeOrExpense();
+          _LoadCashFlow();
         } else {
           // Handle error
           // ignore: avoid_print
@@ -96,27 +96,49 @@ class _DashboardState extends State<Dashboard> {
         // usando dialogevent se obtiene el id del evento
         // ignore: unused_local_variable
         var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
-        ApiResponse response = await ApiService.postIngresoEvento(id, {
+        ApiResponse response = await ApiService.postIngresoEvento(idEvento, {
           'ingresos': [monto, descripcion]
         });
+        if (response.success) {
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       }
     } else {
-      ApiResponse response = await ApiService.postEgresoCaa(id, {
-        'egresos': [monto, descripcion]
-      });
-      if (response.success) {
-        _LoadIncomeOrExpense();
+      if (dialogEvent == "General") {
+        ApiResponse response = await ApiService.postEgresoCaa(id, {
+          'egresos': [monto, descripcion]
+        });
+        if (response.success) {
+          //en caso de funcionar se actualiza la lista cashFlowData
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       } else {
-        // Handle error
-        // ignore: avoid_print
-        print('Error adding expense: ${response.message}');
+        // usando dialogevent se obtiene el id del evento
+        // ignore: unused_local_variable
+        var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
+
+        ApiResponse response = await ApiService.postEgresoEvento(idEvento, {
+          'egresos': [monto, descripcion]
+        });
+        if (response.success) {
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       }
     }
     setState(() {});
   }
 
   // ignore: non_constant_identifier_names
-  void _LoadIncomeOrExpense() async {
+  void _LoadCashFlow() async {
     final id = getIdCaa(); // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
@@ -154,36 +176,37 @@ class _DashboardState extends State<Dashboard> {
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
       // ordenamos los eventos
-      if (eventos.isEmpty) eventos.add("General");
-      if (eventosId.isEmpty) eventosId.add("General");
-
-      for (var i = 0; i < cashFlowData.length; i++) {
-        if (!eventosId.contains(cashFlowData[i].evento)) {
-          // ignore: non_constant_identifier_names
-          String Evento = cashFlowData[i].evento;
-          eventosId.add(Evento);
-          // ignore: non_constant_identifier_names
-          ApiResponse Response = await ApiService.getEvento(Evento);
-          if (Response.success) {
-            eventos.add(Response.data['nombre']);
-          } else {
-            // ignore: avoid_print
-            print('Error al obtener los datos: ${Response.message}');
-            eventos.add(Evento);
-          }
-        }
-      }
-      _filterCashFlowData();
-
+      await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
+      total = getTotal.data;
       setState(() {
-        //convierte getTotal.data a double
-        total = getTotal.data;
+        _filterCashFlowData();
         isloading = false;
       });
     } else {
       // ignore: avoid_print
       print('Error al obtener los datos: ${Response.message}');
+    }
+  }
+
+  Future<void> _loadEventos() async {
+    if (eventos.isEmpty) eventos.add("General");
+    if (eventosId.isEmpty) eventosId.add("General");
+    Map<String, dynamic> filtrarEventos = {
+      "id_creador": getIdCaa(),
+    };
+    ApiResponse response = await ApiService.getEventosFiltrados(filtrarEventos);
+    if (response.success) {
+      //ingresamos los datos _id y nombre de los eventos en un mapa
+      for (var i = 0; i < response.data.length; i++) {
+        if (!eventosId.contains(response.data[i]['_id'])) {
+          eventos.add(response.data[i]['nombre']);
+          eventosId.add(response.data[i]['_id']);
+        }
+      }
+    } else {
+      // ignore: avoid_print
+      print('Error al obtener los datos: ${response.message}');
     }
   }
 
@@ -218,8 +241,9 @@ class _DashboardState extends State<Dashboard> {
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 20.0, right: 20.0),
+              SafeArea(
+                  child: Container(
+                margin: const EdgeInsets.only(top: 5),
                 child: DropdownButton(
                   value: dialogEvent,
                   onChanged: (String? newValue) {
@@ -233,13 +257,13 @@ class _DashboardState extends State<Dashboard> {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: SizedBox(
-                        width: 200.0,
+                        width: 225.0,
                         child: Text(value),
                       ),
                     );
                   }).toList(),
                 ),
-              )
+              )),
             ],
           ),
           actions: <Widget>[
@@ -258,7 +282,7 @@ class _DashboardState extends State<Dashboard> {
 
                   if (descripcion.length <= 250) {
                     // La descripción tiene 250 caracteres o menos.
-                    _addIncomeOrExpense(isIncome, monto, descripcion);
+                    _AddCashFlow(isIncome, monto, descripcion);
                     Navigator.of(context).pop();
                   } else {
                     // Mostrar un mensaje de error si la descripción supera los 250 caracteres.
@@ -337,46 +361,55 @@ class _DashboardState extends State<Dashboard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            // ignore: sized_box_for_whitespace
-            Container(
-              width: double.infinity,
-              height: 40.0,
-              child: Center(
-                child: Text(
-                  'Total: \$${total.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 18.0,
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 40.0,
+                  child: Center(
+                    child: Text(
+                      'Total: \$${total.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                DropdownButton<String>(
+                  value: dropdownValue,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue;
+                      _filterCashFlowData(); // Filtrar datos cuando cambia el valor del dropdown
+                    });
+                  },
+                  items: eventos.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: SizedBox(
+                        width: 300.0, // Establecer el ancho deseado
+                        child: Text(value),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-            DropdownButton<String>(
-              value: dropdownValue,
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownValue = newValue;
-                  _filterCashFlowData(); // Filtrar datos cuando cambia el valor del dropdown
-                });
-              },
-              items: eventos.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: SizedBox(
-                    width: 300.0, // Establecer el ancho deseado
-                    child: Text(value),
-                  ),
-                );
-              }).toList(),
-            ),
-            if (isloading)
-              Center(
-                // ignore: sized_box_for_whitespace
-                child: Container(
-                  width: 75,
-                  height: 75,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 7,
-                  ),
+            if (isloading) // Muestra la barra de carga y el texto de carga mientras isLoading es true
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 65,
+                      height: 65,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 5,
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text('Cargando Flujos...'), // Texto de carga
+                  ],
                 ),
               )
             else
@@ -433,50 +466,46 @@ class _DashboardState extends State<Dashboard> {
                   },
                 ),
               ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Container(
-                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _openEntryDialog(true);
-                      },
-                      style: ButtonStyle(
-                        fixedSize:
-                            MaterialStateProperty.all(const Size(150, 50)),
-                      ),
-                      child: const Text(
-                        'Añadir Ingreso',
-                        style: TextStyle(
-                          color: Colors
-                              .white, // Cambia el color del texto a blanco
-                        ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _openEntryDialog(true);
+                    },
+                    style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
+                    ),
+                    child: const Text(
+                      'Añadir Ingreso',
+                      style: TextStyle(
+                        color:
+                            Colors.white, // Cambia el color del texto a blanco
                       ),
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _openEntryDialog(false);
-                      },
-                      style: ButtonStyle(
-                        fixedSize:
-                            MaterialStateProperty.all(const Size(150, 50)),
-                      ),
-                      child: const Text(
-                        'Añadir Egreso',
-                        style: TextStyle(
-                          color: Colors
-                              .white, // Cambia el color del texto a blanco
-                        ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _openEntryDialog(false);
+                    },
+                    style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
+                    ),
+                    child: const Text(
+                      'Añadir Egreso',
+                      style: TextStyle(
+                        color:
+                            Colors.white, // Cambia el color del texto a blanco
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

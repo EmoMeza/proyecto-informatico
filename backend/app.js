@@ -1,12 +1,14 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
 const path = require('path');
+const multer = require('multer');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
 const { ObjectId } = require('mongodb');
+const storage = multer.memoryStorage(); // Almacena la imagen en memoria
+const upload = multder({ storage: storage });
 require('dotenv').config();
 
 const app = express(); // Inicializamos express.
@@ -500,7 +502,7 @@ app.get('/get/all/eventos', async function (req, res) {
     }
 });
 
-app.get('/get/filter/eventos', async function (req, res) {
+/*app.get('/get/filter/eventos', async function (req, res) {
     const categoria = req.query.categoria;
     if (categoria != "certamen" && categoria != "actividad") {
         res.send(`La categoria ${categoria} no existe en la base de datos`);
@@ -524,7 +526,53 @@ app.get('/get/filter/eventos', async function (req, res) {
             await client.close();
         }
     }
+});*/
+
+app.get('/get/filter/eventos', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("test");
+
+        // Obtén todos los parámetros de filtro de la URL
+        const parametrosFiltro = req.query;
+
+        // Inicializa un objeto de filtro vacío
+        const filtroFinal = {};
+
+        // Agrega parámetros al filtro final según sea necesario
+        const booleanMapping = {
+            'true': true,
+            'false': false
+        };
+        
+        for (const param in parametrosFiltro) {
+            if (param === 'visible') {
+                // Si el parámetro es 'visible', mapear el valor al formato correcto
+                filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
+            } else {
+                filtroFinal[param] = parametrosFiltro[param];
+            }
+        }
+        
+        //console.log(req.query.visible);
+        // Realiza la consulta en la colección utilizando el filtro final
+        const result = await collection.find(filtroFinal).toArray();
+        //console.log(result);
+        if (result.length === 0) {
+            res.send('No se encontraron eventos que cumplan con los criterios de filtro.');
+        } else {
+            res.send(result);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    } finally {
+        await client.close();
+    }
 });
+
+
 
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
@@ -549,10 +597,11 @@ app.get('/get/alumno', async function (req, res) {
     }
 });
 
-app.post('/add/alumno', async function (req, res) {
+app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
+    const imagen = req.file; // Obtiene los datos de la imagen cargada
     const id_caa = req.query.id_caa;
     const es_caa = req.query.es_caa;
     const data = req.body;
@@ -565,6 +614,8 @@ app.post('/add/alumno', async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
+    data.imagen.data = imagen.buffer.toString('base64');
+    data.imagen.contentType = imagen.mimetype;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -651,6 +702,8 @@ app.delete('/delete/alumno', async function (req, res) {
         await client.close();
     }
 });
+
+// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
 
 app.get('/get/all/ingresos', async function (req, res) {
     const id = req.query.id; // assuming the query parameter is named "id"

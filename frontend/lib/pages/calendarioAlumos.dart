@@ -481,15 +481,41 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cerrar'),
-        ),
-        ElevatedButton(
-          onPressed: isAsistireButtonEnabled
-              ? () => _handleAsistireButtonPressed(eventData['_id'])
-              : null, // Deshabilitar el botón si ya asistió
-          child: const Text('Asistiré'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cerrar'),
+            ),
+            SizedBox(width: 8), // Espaciado entre los botones
+            isAsistireButtonEnabled
+                ? ElevatedButton(
+                    onPressed: () => _handleAsistireButtonPressed(eventData['_id']),
+                    child: const Text('Asistiré'),
+                  )
+                : InkWell(
+                    onTap: () {
+                      // Lógica para mostrar notificación o realizar alguna acción
+                      // Puedes agregar aquí la lógica que desees cuando se presiona la campanita
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical:6, horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.notifications, color: Colors.white),
+                          const SizedBox(width: 8),
+                          const Text('Notificar', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
+          ],
         ),
       ],
     );

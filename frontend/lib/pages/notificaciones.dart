@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
+import 'package:proyecto_informatico/api_services.dart';
 
 class NotificationStorage {
   static const String _notificationMapKey = 'notificationMap';
@@ -66,31 +67,6 @@ class NotificationManager {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(String nombre, String tRestante) async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-      'channel id',
-      'channel name',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    const DarwinNotificationDetails iOSNotificationDetails =
-        DarwinNotificationDetails();
-
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-      iOS: iOSNotificationDetails,
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      0, // id
-      nombre, // titulo
-      tRestante, // cuerpo
-      notificationDetails, // detalles
-    );
-  }
-
   Future<void> scheduleNotification(Evento evento, Duration scheduledHour) async {
 
     // Eliminar notificaciones del mapa que ya pasaron
@@ -118,9 +94,6 @@ class NotificationManager {
     final tz.TZDateTime notificationTZDateTime =
         tz.TZDateTime.from(notificationDate, tz.local);
 
-    print('Fecha de evento: ${evento.fecha}.');
-    print('Fecha de notificación: $notificationTZDateTime.');
-
     // ------ Guardar id de notificación ------ //
     int notificationId = -1;
     if (_notificationStorage.eventToNotificationIdMap.containsKey(evento.id)) {
@@ -134,14 +107,6 @@ class NotificationManager {
       notificationId = DateTime.now().millisecondsSinceEpoch % (1 << 31);
       _notificationStorage.eventToNotificationIdMap[evento.id] = notificationId;
     }
-
-    print('Notificación programada con id $notificationId.');
-
-    // Imprimir el mapa
-    print('Mapa de notificaciones:');
-    _notificationStorage.eventToNotificationIdMap.forEach((key, value) {
-      print('Evento: $key, id de notificación: $value');
-    });
 
     String message = formatDuration(scheduledHour, evento.nombre);
 
@@ -181,55 +146,6 @@ class NotificationManager {
     return message;
   }
 
-
-  Future<int> getActiveNotificationsCount() async {
-    final List<PendingNotificationRequest> activeNotifications =
-        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    return activeNotifications.length;
-  }
-
-  Future<void> getNotificationDetails(int notificationId) async {
-    final List<PendingNotificationRequest> activeNotifications =
-        await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-
-    final selectedNotification = activeNotifications
-        .firstWhere((notification) => notification.id == notificationId);
-
-    if (selectedNotification != null) {
-      // Accede a la fecha programada a través de notificationDetails
-
-      // Imprimir detalles de la notificación
-      print('Detalles de la notificación con id $notificationId:');
-      print('Título: ${selectedNotification.title}');
-      print('Cuerpo: ${selectedNotification.body}');
-      // Puedes agregar más detalles según tus necesidades
-
-      // Puedes realizar otras acciones con los detalles de la notificación si es necesario
-    } else {
-      print('No se encontró ninguna notificación con id $notificationId.');
-    }
-  }
-
-  Future<void> printActiveNotifications() async {
-  final List<PendingNotificationRequest> activeNotifications =
-      await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-
-  if (activeNotifications.isNotEmpty) {
-    print('Notificaciones activas:');
-    for (final notification in activeNotifications) {
-      print('ID: ${notification.id}');
-      print('Título: ${notification.title}');
-      print('Cuerpo: ${notification.body}');
-      print('---');
-    }
-  } else {
-    print('No hay notificaciones activas en este momento.');
-  }
-}
-
-  Future<void> cancelAllNotification() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
   //Eliminar notificaciones del mapa que ya pasaron
   Future<void> deleteOldNotifications() async {
 
@@ -264,16 +180,7 @@ class NotificationManager {
     // Guardo el mapa
     await _notificationStorage.saveNotificationMap();
   }
-
-  //Imprimir el mapa
-  Future<void> printNotificationMap() async {
-    print('Mapa de notificaciones:');
-    _notificationStorage.eventToNotificationIdMap.forEach((key, value) {
-      print('Evento: $key, id de notificación: $value');
-    });
-  }
 }
-
 
 class Evento {
   final String id;
@@ -291,16 +198,6 @@ class Notificacion extends StatefulWidget {
 }
 
 class _NotificacionState extends State<Notificacion> {
-  late final NotificationManager notificationManager;
-  
-  @override
-  void initState() {
-    super.initState();
-    notificationManager = NotificationManager();
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/Santiago'));
-  }
-  int notificacionesActivas = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -310,40 +207,246 @@ class _NotificacionState extends State<Notificacion> {
       ),
       body: Center(
         child: ElevatedButton(
-          onPressed: () async {
+          onPressed: () async{
 
-            //notificationManager.showNotification("Hola", "Mundo");
-            
-            //notificationManager.cancelAllNotification();
-            final Evento evento = Evento(
-              id: '2',
-              nombre: 'funciona',
-              fecha: DateTime.now().add(const Duration(seconds: 30)),
-            );
+            // Obtener el evento con id
+            String id = '652de1acd03e38b13a1feb23';
 
-            // final Evento evento2 = Evento(
-            //   id: '2',
-            //   nombre: 'funciona2',
-            //   fecha: DateTime.now().add(const Duration(minutes: 5)),
-            // );
+            ApiResponse response = await ApiService.getEvento(id);
 
-            Duration cuantoFalta = const Duration(seconds: 10);
-            await notificationManager.scheduleNotification(evento, cuantoFalta);
+            if (response.success){
+              Evento evento = Evento(
+                id: response.data['_id'],
+                nombre: response.data['nombre'],
+                fecha: DateTime.parse('2023-11-16T10:00:00.000Z'),
+              );
 
-            // await notificationManager.scheduleNotification(evento2, const Duration(seconds: 120));
-
-            //Imprimir mapa
-            //await notificationManager.printNotificationMap();
-
-            //Imprimir notificaciones activas
-            //await notificationManager.printActiveNotifications();
-
-            notificacionesActivas = await notificationManager.getActiveNotificationsCount();
-            print('Notificaciones activas: $notificacionesActivas');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return NotificationDialog(evento: evento);
+                },
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(response.message),
+                ),
+              );
+            }
           },
           child: const Text('Mondongo'),
         ),
       ),
     );
   }
+}
+
+
+class NotificationDialog extends StatefulWidget {
+
+  final Evento evento;
+
+  const NotificationDialog({Key? key, required this.evento}) : super(key: key);
+
+  @override
+  State<NotificationDialog> createState() => _NotificationDialogState();
+}
+
+class _NotificationDialogState extends State<NotificationDialog> {
+
+  late final NotificationManager notificationManager;
+  final TextEditingController numberController = TextEditingController(text: '10');
+  String? selectedFormat = 'minutos';
+  final _formKey = GlobalKey<FormState>();  
+
+  final List<DropdownMenuEntry<String>> dropdownMenuEntries = 
+    <DropdownMenuEntry<String>>[
+      for (final String format in ['minutos', 'horas', 'dias', 'semanas']) 
+        DropdownMenuEntry<String>(value: format, label: format)
+    ];
+
+  bool isFormTouched = false;
+  bool isFormValid = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    notificationManager = NotificationManager();
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('America/Santiago'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Evento evento = widget.evento;
+    return AlertDialog(
+      title: const Text('Programar notificación'),
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState){
+          return Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: numberController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d{0,5}'))
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Duración',
+                          counterText: '',
+                          counterStyle: TextStyle( fontSize: 0 ),
+                        ),
+                        maxLength: 5,
+                        onChanged: (String value) {
+                          setState(() {
+                            isFormTouched = true;
+                            isFormValid = true;
+                            errorMessage = null;
+                          });
+                        },
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            isFormValid = false;
+                            errorMessage = 'Ingrese un valor.';
+                            return null;
+                          }
+                          int? parsedValue = int.tryParse(value);
+                          if (parsedValue == null || parsedValue <= 0 || !_isValidValue(parsedValue)) {
+                            isFormValid = false;
+                            errorMessage = _getErrorText(selectedFormat);
+                            return '';
+                          }
+
+                          DateTime now = DateTime.now();
+                          DateTime scheduledTime = now.add(_calculateDuration(parsedValue));
+
+                          // Asegurar que la notificación programada ocurra antes de la fecha del evento
+                          if (scheduledTime.isAfter(evento.fecha)) {
+                            isFormValid = false;
+                            errorMessage = 'La notificación debe ocurrir antes de la fecha del evento.';
+                            return '';
+                          }
+
+                          isFormValid = true;
+                          errorMessage = null;
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    DropdownMenu<String>(
+                      dropdownMenuEntries: dropdownMenuEntries,
+                      label: const Text('Formato'),
+                      initialSelection: selectedFormat,
+                      menuStyle: MenuStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          Theme.of(context).colorScheme.background
+                        ),
+                      ),
+                      onSelected: (String? value) {
+                        setState(() {
+                          selectedFormat = value;
+                          isFormTouched = true;
+                        });
+                      },
+                    )
+                  ]
+                ),
+                const SizedBox(height: 16),
+                if (isFormTouched && !(_formKey.currentState?.validate() ?? false))
+                  Text(
+                    errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.red
+                    )
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () async{
+            if (isFormTouched && (_formKey.currentState?.validate() ?? false)){
+              final int selectedNumber = int.parse(numberController.text);
+              final Duration scheduledHour = _calculateDuration(selectedNumber);
+
+              await notificationManager.scheduleNotification(
+                evento,
+                scheduledHour,
+              );
+
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Aceptar'),
+        ),
+      ],
+    );
+  }
+
+  bool _isValidValue(int value) {
+    switch (selectedFormat) {
+      case 'minutos':
+        return value <= 4 * 7 * 24 * 60;
+      case 'horas':
+        return value <= 4 * 7 * 24;
+      case 'dias':
+        return value <= 4 * 7;
+      case 'semanas':
+        return value <= 4;
+      default:
+        return false;
+    }
+  }
+
+  String _getErrorText(String? selectedFormat) {
+    switch (selectedFormat) {
+      case 'minutos':
+        return 'La duracion debe ser mayor a 0 y menor a ${4 * 7 * 24 * 60} minutos.';
+      case 'horas':
+        return 'La duracion debe ser mayor a 0 y menor a ${4 * 7 * 24} horas.';
+      case 'dias':
+        return 'La duracion debe ser mayor a 0 y menor a ${4 * 7} días.';
+      case 'semanas':
+        return 'La duracion debe ser mayor a 0 y menor a 4 semanas.';
+      default:
+        return 'Formato no válido.';
+    }
+  }
+
+  Duration _calculateDuration(int selectedNumber) {
+    if (selectedFormat != null) {
+      switch (selectedFormat) {
+        case 'minutos':
+          return Duration(minutes: selectedNumber);
+        case 'horas':
+          return Duration(hours: selectedNumber);
+        case 'dias':
+          return Duration(days: selectedNumber);
+        case 'semanas':
+          return Duration(days: selectedNumber * 7);
+        default:
+          return Duration.zero;
+      }
+    } else {
+      return Duration.zero;
+    }
+  }
+
 }

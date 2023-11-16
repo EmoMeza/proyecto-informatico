@@ -5,7 +5,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:proyecto_informatico/api_services.dart';
+import 'package:intl/intl.dart';
 
 class NotificationStorage {
   static const String _notificationMapKey = 'notificationMap';
@@ -187,67 +187,32 @@ class Evento {
   final String nombre;
   final DateTime fecha;
 
-  Evento({required this.id, required this.nombre, required this.fecha});
-}
+  Evento({
+    required this.id, 
+    required this.nombre, 
+    required DateTime fecha
+  }) : fecha = _parseFecha(fecha);
 
-class Notificacion extends StatefulWidget {
-  const Notificacion({super.key});
-
-  @override
-  State<Notificacion> createState() => _NotificacionState();
-}
-
-class _NotificacionState extends State<Notificacion> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notificaciones'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () async{
-
-            // Obtener el evento con id
-            String id = '652de1acd03e38b13a1feb23';
-
-            ApiResponse response = await ApiService.getEvento(id);
-
-            if (response.success){
-              Evento evento = Evento(
-                id: response.data['_id'],
-                nombre: response.data['nombre'],
-                fecha: DateTime.parse('2023-11-16T10:00:00.000Z'),
-              );
-
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return NotificationDialog(evento: evento);
-                },
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(response.message),
-                ),
-              );
-            }
-          },
-          child: const Text('Mondongo'),
-        ),
-      ),
-    );
+  static DateTime _parseFecha(DateTime fecha) {
+    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+    String formattedFecha = dateFormat.format(fecha);
+    return dateFormat.parse(formattedFecha);
   }
-}
 
+}
 
 class NotificationDialog extends StatefulWidget {
 
-  final Evento evento;
+  final String id;
+  final String nombre;
+  final DateTime fecha;
 
-  const NotificationDialog({Key? key, required this.evento}) : super(key: key);
+  const NotificationDialog({
+    Key? key, 
+    required this.id, 
+    required this.nombre, 
+    required this.fecha
+  }) : super(key: key);
 
   @override
   State<NotificationDialog> createState() => _NotificationDialogState();
@@ -280,7 +245,14 @@ class _NotificationDialogState extends State<NotificationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    Evento evento = widget.evento;
+    
+    // Transformar el evento en un objeto Evento
+    Evento evento = Evento(
+      id: widget.id,
+      nombre: widget.nombre,
+      fecha: widget.fecha,
+    );
+
     return AlertDialog(
       title: const Text('Programar notificación'),
       content: StatefulBuilder(
@@ -390,7 +362,6 @@ class _NotificationDialogState extends State<NotificationDialog> {
                 evento,
                 scheduledHour,
               );
-
               Navigator.of(context).pop();
             }
           },

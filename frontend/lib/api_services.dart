@@ -36,7 +36,7 @@ class ApiResponse {
 
 class ApiService {
   // Esto se puede cambiar segun la ip del servidor o el puerto
-  static const String _baseUrl = 'https://f2bc-2800-150-107-db6-5830-738a-192a-dd87.ngrok-free.app';
+  static const String _baseUrl = 'http://10.0.2.2:4040';
 
   // -----------------Centro de Alumnos-----------------------
 

@@ -6,15 +6,11 @@ import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'package:proyecto_informatico/pages/notificaciones.dart';
-
 void main(){
 
   WidgetsFlutterBinding.ensureInitialized();
 
   initializeDateFormatting().then((_) {
-    // NotificationManager notificationManager = NotificationManager();
-    // notificationManager.initializeNotifications();
 
     runApp(const MyApp());
   });

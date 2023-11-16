@@ -92,19 +92,6 @@ class menuCAA extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text('Ver notificaciones'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const Notificacion()), // Replace NotificacionesPage with the actual name of your notificaciones page
-                );
-              },
-            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),

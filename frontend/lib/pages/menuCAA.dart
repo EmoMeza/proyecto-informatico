@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:proyecto_informatico/pages/calendario.dart';
+import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'agregarEvento.dart';
 import 'flujo_de_caja.dart';
 import 'notificaciones.dart';
@@ -80,7 +80,7 @@ class menuCAA extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Calendario()));
+                    MaterialPageRoute(builder: (context) => CalendarioCA()));
               },
             ),
             ListTile(

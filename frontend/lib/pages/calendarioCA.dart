@@ -2,6 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
+import 'package:intl/intl.dart';
+import 'lista_asistencia.dart';
+
 
 class Evento {
   String id;
@@ -56,13 +59,14 @@ class Evento {
   }
 }
 
-class Calendario extends StatefulWidget {
+
+class CalendarioCA extends StatefulWidget {
   @override
   _CalendarioState createState() => _CalendarioState();
 }
 
-class _CalendarioState extends State<Calendario>
-    with SingleTickerProviderStateMixin {
+
+class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStateMixin{
   String id_caa = "652976834af6fedf26f3493d";
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -89,7 +93,7 @@ class _CalendarioState extends State<Calendario>
 
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataVisibleFalse = {
-      "id_caa": id_caa,
+      "id_creador": id_caa,
       "global": false.toString(),
     };
 
@@ -126,7 +130,8 @@ class _CalendarioState extends State<Calendario>
       }
       isLoading = false;
     });
-  }
+}
+  
 
   @override
   void dispose() {
@@ -336,11 +341,144 @@ class _CalendarioState extends State<Calendario>
             return ListTile(
               title: Text(evento.nombre),
               subtitle: Text(evento.descripcion),
-              // se puede mostrar más detalles del evento si es necesario
+              onTap: () => _showEventoDetails(evento),
             );
           },
         ),
       ),
+    );
+  }
+
+
+  void _showEventoDetails(Evento evento) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 8.0),
+              Text('Cargando detalles del evento...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    ApiResponse response = await ApiService.getEvento(evento.id);
+
+    Navigator.pop(context);
+
+    if (response.success && response.data != null) {
+      Map<String, dynamic> eventData = response.data;
+      _showEventoPopup(eventData);
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text('Error al cargar detalles del evento'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cerrar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _showEventoPopup(Map<String, dynamic> eventData) async {
+    // Formatear las fechas
+    DateTime fechaInicio = DateTime.parse(eventData['fecha_inicio']);
+    DateTime fechaFinal = DateTime.parse(eventData['fecha_final']);
+
+    // Define a DateFormat instance for the desired format
+    final dateFormat = DateFormat('dd-MM-yyyy  HH:mm', 'es_ES');
+
+    String formattedFechaInicio = dateFormat.format(fechaInicio);
+    String formattedFechaFinal = dateFormat.format(fechaFinal);
+
+    // Obtener la información del creador
+    ApiResponse response = await ApiService.getCaa(eventData['id_creador']);
+    String creador = response.success ? response.data['nombre'] : 'ID no encontrado';
+
+    // Crear y mostrar el AlertDialog
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(eventData['nombre'], style: const TextStyle(fontSize: 22)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 30),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10.0),
+          _buildLabelText('Categoría:'),
+          if (eventData['categoria'] == 'actividad')
+            _buildText('Actividad')
+          else
+            _buildText(eventData['Evaluación']),
+          const SizedBox(height: 10.0),
+          _buildLabelText('Descripción:'),
+          _buildText(eventData['descripcion']),
+          const SizedBox(height: 10.0),
+          _buildLabelText('Fecha de inicio:'),
+          _buildText(formattedFechaInicio),
+          const SizedBox(height: 10.0),
+          _buildLabelText('Fecha de fin:'),
+          _buildText(formattedFechaFinal),
+          const SizedBox(height: 10.0),
+          _buildLabelText('Tipo de evento:'),
+          if (eventData['global'])
+            _buildText('Publico')
+          else
+            _buildText('De carrera'),
+          const SizedBox(height: 10.0),
+          _buildLabelText('Anfitrión:'),
+          _buildText(creador),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+        ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ListaAsistenciaPage(eventData['_id']),
+            ),
+          );
+        },
+  child: Text('Lista Asistencia'),
+)
+      ],
+    );
+
+    // Mostrar el AlertDialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertDialog;
+      },
+    );
+  }
+
+  Widget _buildLabelText(String label) {
+    return Text(
+      label,
+      style: const TextStyle(fontSize: 17, color: Colors.black, fontWeight: FontWeight.bold, decoration: TextDecoration.none),
+    );
+  }
+
+  Widget _buildText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 17, color: Color.fromARGB(166, 0, 0, 0), decoration: TextDecoration.none),
     );
   }
 }

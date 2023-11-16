@@ -30,19 +30,22 @@ class DataPoint {
   final String description;
   // guardamos un tipo de dato ISOS de fecha
   final String date;
+  String evento = "";
 
-  DataPoint(this.value, this.description, this.date);
+  DataPoint(this.value, this.description, this.date, this.evento);
 
   Map<String, dynamic> toMap() {
     return {
       'value': value,
       'description': description,
       'date': date,
+      'evento': evento,
     };
   }
 
   factory DataPoint.fromMap(Map<String, dynamic> map) {
-    return DataPoint(map['value'], map['description'], map['date']);
+    return DataPoint(
+        map['value'], map['description'], map['date'], map['evento']);
   }
 }
 
@@ -50,49 +53,93 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
   int total = 0;
   bool isloading = true;
+  List<String> eventos = [];
+  List<String> eventosId = [];
+  String? dialogEvent = "General";
+  String? dropdownValue = "General";
+  List<DataPoint> filteredCashFlowData = [];
+
   @override
   void initState() {
     super.initState();
-    _LoadIncomeOrExpense(); // Cargar los datos de ingresos y egresos
+    _LoadCashFlow(); // Cargar los datos de ingresos y egresos
+  }
+
+  // funcion que retorna un string id de la base de datos
+  String getIdCaa() {
+    //ApiResponse response = ApiService.getCaa(alumno);
+    return '6552d3d4ec6e222a40b76125';
   }
 
   // funcion para añadir ingreso o egreso a la base de datos
-  void _addIncomeOrExpense(
-      bool isIncome, int amount, String description) async {
+  // ignore: non_constant_identifier_names
+  void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    const id = '6530ac564fc4cee2752b73ae'; // Replace with the actual CAA ID
+    final id = getIdCaa(); // Replace with the actual CAA ID
+    // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
-      ApiResponse response = await ApiService.postIngresoCaa(id, {
-        'ingresos': [monto, descripcion]
-      });
-      if (response.success) {
-        //en caso de funcionar se actualiza la lista cashFlowData
-        _LoadIncomeOrExpense();
+      if (dialogEvent == "General") {
+        ApiResponse response = await ApiService.postIngresoCaa(id, {
+          'ingresos': [monto, descripcion]
+        });
+        if (response.success) {
+          //en caso de funcionar se actualiza la lista cashFlowData
+          _LoadCashFlow();
+        } else {
+          // Handle error
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       } else {
-        // Handle error
-        // ignore: avoid_print
-        print('Error adding income: ${response.message}');
+        // usando dialogevent se obtiene el id del evento
+        // ignore: unused_local_variable
+        var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
+        ApiResponse response = await ApiService.postIngresoEvento(idEvento, {
+          'ingresos': [monto, descripcion]
+        });
+        if (response.success) {
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       }
     } else {
-      ApiResponse response = await ApiService.postEgresoCaa(id, {
-        'egresos': [monto, descripcion]
-      });
-      if (response.success) {
-        _LoadIncomeOrExpense();
+      if (dialogEvent == "General") {
+        ApiResponse response = await ApiService.postEgresoCaa(id, {
+          'egresos': [monto, descripcion]
+        });
+        if (response.success) {
+          //en caso de funcionar se actualiza la lista cashFlowData
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       } else {
-        // Handle error
-        // ignore: avoid_print
-        print('Error adding expense: ${response.message}');
+        // usando dialogevent se obtiene el id del evento
+        // ignore: unused_local_variable
+        var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
+
+        ApiResponse response = await ApiService.postEgresoEvento(idEvento, {
+          'egresos': [monto, descripcion]
+        });
+        if (response.success) {
+          _LoadCashFlow();
+        } else {
+          // ignore: avoid_print
+          print('Error adding income: ${response.message}');
+        }
       }
     }
     setState(() {});
   }
 
   // ignore: non_constant_identifier_names
-  void _LoadIncomeOrExpense() async {
-    const id = '6530ac564fc4cee2752b73ae'; // Reemplaza con el ID real de CAA
+  void _LoadCashFlow() async {
+    final id = getIdCaa(); // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
 
@@ -104,30 +151,72 @@ class _DashboardState extends State<Dashboard> {
       List<DataPoint> incomeData = (income is List)
           ? (income)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(item[0], item[1], item[2]))
+              .map((item) => DataPoint(
+                    item[0],
+                    item[1],
+                    item[2],
+                    item.length > 3 ? item[3] : "General",
+                  ))
               .toList()
           : [];
 
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
-              .map((item) => DataPoint(-item[0], item[1], item[2]))
+              .map((item) => DataPoint(
+                    -item[0],
+                    item[1],
+                    item[2],
+                    item.length > 3 ? item[3] : "General",
+                  ))
               .toList()
           : [];
 
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
-
+      // ordenamos los eventos
+      await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
+      total = getTotal.data;
       setState(() {
-        //convierte getTotal.data a double
-        total = getTotal.data;
+        _filterCashFlowData();
         isloading = false;
       });
     } else {
       // ignore: avoid_print
       print('Error al obtener los datos: ${Response.message}');
+    }
+  }
+
+  Future<void> _loadEventos() async {
+    if (eventos.isEmpty) eventos.add("General");
+    if (eventosId.isEmpty) eventosId.add("General");
+    Map<String, dynamic> filtrarEventos = {
+      "id_creador": getIdCaa(),
+    };
+    ApiResponse response = await ApiService.getEventosFiltrados(filtrarEventos);
+    if (response.success) {
+      //ingresamos los datos _id y nombre de los eventos en un mapa
+      for (var i = 0; i < response.data.length; i++) {
+        if (!eventosId.contains(response.data[i]['_id'])) {
+          eventos.add(response.data[i]['nombre']);
+          eventosId.add(response.data[i]['_id']);
+        }
+      }
+    } else {
+      // ignore: avoid_print
+      print('Error al obtener los datos: ${response.message}');
+    }
+  }
+
+  void _filterCashFlowData() {
+    if (dropdownValue == "General") {
+      filteredCashFlowData = List.from(cashFlowData);
+    } else {
+      filteredCashFlowData = cashFlowData
+          .where((dataPoint) => dataPoint.evento == dropdownValue)
+          .toList();
     }
   }
 
@@ -152,6 +241,29 @@ class _DashboardState extends State<Dashboard> {
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
               ),
+              SafeArea(
+                  child: Container(
+                margin: const EdgeInsets.only(top: 5),
+                child: DropdownButton(
+                  value: dialogEvent,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dialogEvent = newValue;
+                      Navigator.of(context).pop();
+                      _openEntryDialog(isIncome);
+                    });
+                  },
+                  items: eventos.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: SizedBox(
+                        width: 225.0,
+                        child: Text(value),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              )),
             ],
           ),
           actions: <Widget>[
@@ -170,7 +282,7 @@ class _DashboardState extends State<Dashboard> {
 
                   if (descripcion.length <= 250) {
                     // La descripción tiene 250 caracteres o menos.
-                    _addIncomeOrExpense(isIncome, monto, descripcion);
+                    _AddCashFlow(isIncome, monto, descripcion);
                     Navigator.of(context).pop();
                   } else {
                     // Mostrar un mensaje de error si la descripción supera los 250 caracteres.
@@ -249,35 +361,63 @@ class _DashboardState extends State<Dashboard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: 40.0,
-              child: Center(
-                child: Text(
-                  'Total: \$${total.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 18.0,
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 40.0,
+                  child: Center(
+                    child: Text(
+                      'Total: \$${total.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                DropdownButton<String>(
+                  value: dropdownValue,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue;
+                      _filterCashFlowData(); // Filtrar datos cuando cambia el valor del dropdown
+                    });
+                  },
+                  items: eventos.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: SizedBox(
+                        width: 300.0, // Establecer el ancho deseado
+                        child: Text(value),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-            if (isloading)
-              Center(
-                // ignore: sized_box_for_whitespace
-                child: Container(
-                  width: 75,
-                  height: 75,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 7,
-                  ),
+            if (isloading) // Muestra la barra de carga y el texto de carga mientras isLoading es true
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 65,
+                      height: 65,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 5,
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Text('Cargando Flujos...'), // Texto de carga
+                  ],
                 ),
               )
             else
               Expanded(
                 child: ListView.builder(
-                  itemCount: cashFlowData.length,
+                  itemCount: filteredCashFlowData.length,
                   itemBuilder: (context, index) {
-                    final dataPoint = cashFlowData[index];
+                    final dataPoint = filteredCashFlowData[index];
                     return Card(
                       elevation: 4.0,
                       margin: const EdgeInsets.all(8.0),
@@ -326,50 +466,46 @@ class _DashboardState extends State<Dashboard> {
                   },
                 ),
               ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Container(
-                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _openEntryDialog(true);
-                      },
-                      style: ButtonStyle(
-                        fixedSize:
-                            MaterialStateProperty.all(const Size(150, 50)),
-                      ),
-                      child: const Text(
-                        'Añadir Ingreso',
-                        style: TextStyle(
-                          color: Colors
-                              .white, // Cambia el color del texto a blanco
-                        ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _openEntryDialog(true);
+                    },
+                    style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
+                    ),
+                    child: const Text(
+                      'Añadir Ingreso',
+                      style: TextStyle(
+                        color:
+                            Colors.white, // Cambia el color del texto a blanco
                       ),
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _openEntryDialog(false);
-                      },
-                      style: ButtonStyle(
-                        fixedSize:
-                            MaterialStateProperty.all(const Size(150, 50)),
-                      ),
-                      child: const Text(
-                        'Añadir Egreso',
-                        style: TextStyle(
-                          color: Colors
-                              .white, // Cambia el color del texto a blanco
-                        ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _openEntryDialog(false);
+                    },
+                    style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
+                    ),
+                    child: const Text(
+                      'Añadir Egreso',
+                      style: TextStyle(
+                        color:
+                            Colors.white, // Cambia el color del texto a blanco
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

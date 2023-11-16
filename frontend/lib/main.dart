@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_informatico/pages/calendario.dart';
+import 'package:proyecto_informatico/pages/calendarioAlumos.dart';
+import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
@@ -54,8 +55,8 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const Login(),
         '/menuCAA': (context) => menuCAA(),
         '/agregarEvento': (context) => AgregarEvento(),
-        '/calendario': (context) => Calendario(),
-        '/notificaciones': (context) => const Notificacion(),
+        '/calendarioCA': (context) => CalendarioCA(),
+        '/calendarioAlumos': (context) => CalendarioAlumos(),
       },
     );
   }

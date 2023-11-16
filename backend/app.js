@@ -397,6 +397,7 @@ app.post('/add/evento', async function (req, res) {
             } else {
                 //if the id_creador exists, insert it into the collection
                 data.id_creador = id_creador;
+                data.global = false;
                 //insert the event into the collection
                 await collection.insertOne(data);
                 res.send("se ha insertado correctamente");
@@ -603,6 +604,7 @@ app.post('/add/alumno', async function (req, res) {
     const es_caa = req.query.es_caa;
     const data = req.body;
     const mis_eventos = [];
+    const mis_asistencias = [];
 
     // Unify the data into a single object
     data.nombre = nombre;
@@ -611,6 +613,7 @@ app.post('/add/alumno', async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
+    data.mis_asistencias = mis_asistencias;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -647,7 +650,7 @@ app.post('/add/alumno', async function (req, res) {
 });
 
 app.put('/update/alumno', async function (req, res) {
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
     const data = req.body;
 
     try {
@@ -674,7 +677,7 @@ app.put('/update/alumno', async function (req, res) {
 });
 
 app.delete('/delete/alumno', async function (req, res) {
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -751,7 +754,7 @@ app.post('/add/ingreso', async function (req, res) {
         const caa = database.collection("caa");
         //check if the id already exists in the collection, if exists send a message to the client and exit
         const result = await collection.findOne({ _id: new ObjectId(id) });
-        id_caa = result.id_caa;
+        id_caa = result.id_creador;
         const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
 
         if (result) {
@@ -897,7 +900,7 @@ app.get('/get/all/asistencias', async function (req, res) {
 
 app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre del alumno
     const id = req.query.id;
-    const matricula = req.query.matricula;
+    const matricula = parseInt(req.query.matricula);
 
     try {
         await client.connect();
@@ -920,11 +923,10 @@ app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre 
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
                     await collection.updateOne({_id: new ObjectId(id)}, {$push: {asistencia: matricula}});
-                    //calculate the length of result.asistencia
-                    const result = await collection.findOne({ _id: new ObjectId(id) });
-                    if (result.asistencia.length >= 5){
-                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {global: true}});
-                    }
+                    // add the id of the event to the array mis_asistencias of the alumno
+                    const mis_asistencias = result2.mis_asistencias;
+                    mis_asistencias.push(id);
+                    await collection2.updateOne({ matricula: parseInt(matricula) }, { $set: { mis_asistencias: mis_asistencias } });
                     res.send("se ha insertado correctamente");
                 }
             }

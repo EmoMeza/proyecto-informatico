@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
 import 'package:intl/intl.dart';
-
-
+import 'package:proyecto_informatico/pages/notificaciones.dart';
 
 class Evento {
   String id;
@@ -457,28 +456,30 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
     AlertDialog alertDialog = AlertDialog(
       title: Text(eventData['nombre'], style: const TextStyle(fontSize: 22)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 10.0),
-          _buildLabelText('Categoría:'),
-          _buildText(eventData['categoria']),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Descripción:'),
-          _buildText(eventData['descripcion']),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Fecha de inicio:'),
-          _buildText(formattedFechaInicio),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Fecha de fin:'),
-          _buildText(formattedFechaFinal),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Global:'),
-          _buildText(eventData['global'].toString()),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Creador:'),
-          _buildText(creador),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10.0),
+            _buildLabelText('Categoría:'),
+            _buildText(eventData['categoria']),
+            const SizedBox(height: 10.0),
+            _buildLabelText('Descripción:'),
+            _buildText(eventData['descripcion']),
+            const SizedBox(height: 10.0),
+            _buildLabelText('Fecha de inicio:'),
+            _buildText(formattedFechaInicio),
+            const SizedBox(height: 10.0),
+            _buildLabelText('Fecha de fin:'),
+            _buildText(formattedFechaFinal),
+            const SizedBox(height: 10.0),
+            _buildLabelText('Global:'),
+            _buildText(eventData['global'].toString()),
+            const SizedBox(height: 10.0),
+            _buildLabelText('Creador:'),
+            _buildText(creador),
+          ],
+        ),
       ),
       actions: [
         Row(
@@ -488,16 +489,26 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
               onPressed: () => Navigator.pop(context),
               child: const Text('Cerrar'),
             ),
-            SizedBox(width: 8), // Espaciado entre los botones
+            const SizedBox(width: 8), // Espaciado entre los botones
             isAsistireButtonEnabled
                 ? ElevatedButton(
-                    onPressed: () => _handleAsistireButtonPressed(eventData['_id']),
+                    onPressed: (){
+                      _handleAsistireButtonPressed(eventData['_id']);
+                    },
                     child: const Text('Asistiré'),
                   )
                 : InkWell(
                     onTap: () {
-                      // Lógica para mostrar notificación o realizar alguna acción
-                      // Puedes agregar aquí la lógica que desees cuando se presiona la campanita
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return NotificationDialog(
+                            id: eventData['_id'],
+                            nombre: eventData['nombre'],
+                            fecha: fechaInicio,
+                          );
+                        },
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical:6, horizontal: 8),
@@ -505,12 +516,12 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.notifications, color: Colors.white),
-                          const SizedBox(width: 8),
-                          const Text('Notificar', style: TextStyle(color: Colors.white)),
+                          SizedBox(width: 8),
+                          Text('Notificar', style: TextStyle(color: Colors.white)),
                         ],
                       ),
                     ),

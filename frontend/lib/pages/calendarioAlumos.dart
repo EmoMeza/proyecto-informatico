@@ -4,7 +4,6 @@ import 'package:proyecto_informatico/pages/detallesEventoAlumno.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
 import 'package:intl/intl.dart';
-import 'package:proyecto_informatico/pages/notificaciones.dart';
 import 'detallesEventoAlumno.dart';
 
 

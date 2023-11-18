@@ -81,7 +81,8 @@ class _EventoPopupCAState extends State<EventoPopupCA> {
       return AlertDialog(
         title: Text(widget.eventData['nombre'], style: const TextStyle(fontSize: 22)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-        content: Column(
+        content: SingleChildScrollView(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10.0),
@@ -103,6 +104,7 @@ class _EventoPopupCAState extends State<EventoPopupCA> {
             _buildLabelText('Creador:'),
             _buildText(nombreCA),
           ],
+        ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cerrar")),

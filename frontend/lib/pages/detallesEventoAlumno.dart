@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
+import 'package:proyecto_informatico/pages/notificaciones.dart';
 
 class EventoPopup extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -91,7 +92,8 @@ class _EventoPopupState extends State<EventoPopup> {
       return AlertDialog(
         title: Text(widget.eventData['nombre'], style: const TextStyle(fontSize: 22)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-        content: Column(
+        content: SingleChildScrollView(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10.0),
@@ -114,6 +116,7 @@ class _EventoPopupState extends State<EventoPopup> {
             _buildText(nombreCA),
           ],
         ),
+        ),
         actions: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -122,29 +125,39 @@ class _EventoPopupState extends State<EventoPopup> {
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Cerrar'),
               ),
-              SizedBox(width: 8), // Espaciado entre los botones
+              const SizedBox(width: 8), // Espaciado entre los botones
               isAsistireButtonEnabled
                   ? ElevatedButton(
-                      onPressed: () => _handleAsistireButtonPressed(widget.eventData['_id']),
+                      onPressed: (){
+                         _handleAsistireButtonPressed(widget.eventData['_id']);
+                      },
                       child: const Text('Asistiré'),
                     )
                   : InkWell(
-                      onTap: () {
-                        // Lógica para mostrar notificación o realizar alguna acción
-                        // Puedes agregar aquí la lógica que desees cuando se presiona la campanita
-                      },
+                     onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return NotificationDialog(
+                            id: eventData['_id'],
+                            nombre: eventData['nombre'],
+                            fecha: fechaInicio,
+                          );
+                        },
+                      );
+                    },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Row(
+                        child: const  Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.notifications, color: Colors.white),
-                            const SizedBox(width: 8),
-                            const Text('Notificar', style: TextStyle(color: Colors.white)),
+                            SizedBox(width: 8),
+                            Text('Notificar', style: TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),

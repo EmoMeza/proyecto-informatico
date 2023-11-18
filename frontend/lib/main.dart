@@ -5,18 +5,17 @@ import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main(){
-
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   initializeDateFormatting().then((_) {
-
     runApp(const MyApp());
   });
 }
 
-class MyApp extends StatefulWidget{
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
@@ -24,7 +23,6 @@ class MyApp extends StatefulWidget{
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -54,6 +52,8 @@ class _MyAppState extends State<MyApp> {
         '/calendarioCA': (context) => CalendarioCA(),
         '/calendarioAlumos': (context) => CalendarioAlumos(),
       },
+      localizationsDelegates: const [GlobalMaterialLocalizations.delegate],
+      supportedLocales: const [Locale('es')],
     );
   }
 }

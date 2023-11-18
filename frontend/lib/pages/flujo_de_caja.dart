@@ -569,6 +569,7 @@ class _DashboardState extends State<Dashboard> {
                                                 DateTime.now(),
                                             firstDate: DateTime(2000),
                                             lastDate: DateTime(2101),
+                                            locale: const Locale('es', 'ES'),
                                           );
                                           if (pickedDateStart != null &&
                                               pickedDateStart !=
@@ -600,6 +601,7 @@ class _DashboardState extends State<Dashboard> {
                                                 DateTime.now(),
                                             firstDate: DateTime(2000),
                                             lastDate: DateTime(2101),
+                                            locale: const Locale('es', 'ES'),
                                           );
                                           if (pickedDateEnd != null &&
                                               pickedDateEnd !=

@@ -1,14 +1,16 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const path = require('path');
 const bcrypt = require('bcrypt');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
 const { ObjectId } = require('mongodb');
+const multer = require('multer'); // Moved this line up
 const storage = multer.memoryStorage(); // Almacena la imagen en memoria
-const upload = multder({ storage: storage });
+const fs = require('fs');
+const path = require('path');
+const upload = multer({ storage: multer.memoryStorage() });
 require('dotenv').config();
 
 const app = express(); // Inicializamos express.
@@ -574,6 +576,35 @@ app.get('/get/filter/eventos', async (req, res) => {
 
 
 
+app.get('/get/alumno/imagen', async function (req, res) {
+    const matricula = parseInt(req.query.matricula);
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("alumnos");
+        // Check if the alumno already exists in the collection
+        const result = await collection.findOne({ matricula: matricula });
+        console.log(result);
+        if (!result) {
+            // If the alumno doesn't exist, send a 404 status code
+            res.status(404).send('Alumno not found');
+        } else {
+            // If the alumno exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
     try {
@@ -601,11 +632,16 @@ app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
-    const imagen = req.file; // Obtiene los datos de la imagen cargada
     const id_caa = req.query.id_caa;
     const es_caa = req.query.es_caa;
     const data = req.body;
     const mis_eventos = [];
+
+    if (!req.file) {
+        return res.status(400).send('No image file was uploaded');
+    }
+    const imagen = req.file.buffer.toString('base64');
+
 
     // Unify the data into a single object
     data.nombre = nombre;
@@ -614,8 +650,7 @@ app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
-    data.imagen.data = imagen.buffer.toString('base64');
-    data.imagen.contentType = imagen.mimetype;
+    data.imagen = imagen
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

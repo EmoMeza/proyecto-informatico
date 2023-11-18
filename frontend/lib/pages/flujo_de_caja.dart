@@ -60,6 +60,8 @@ class _DashboardState extends State<Dashboard> {
   TextEditingController searchController = TextEditingController();
   TextEditingController dateStartController = TextEditingController();
   TextEditingController dateEndController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   List<DataPoint> filteredCashFlowData = [];
   DateTime? filtroFechaInicio;
   DateTime? filtroFechaFinal;
@@ -273,9 +275,6 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _openEntryDialog(bool isIncome) async {
-    TextEditingController amountController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
-
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -335,6 +334,8 @@ class _DashboardState extends State<Dashboard> {
                   if (descripcion.length <= 250) {
                     // La descripción tiene 250 caracteres o menos.
                     _AddCashFlow(isIncome, monto, descripcion);
+                    amountController.clear();
+                    descriptionController.clear();
                     Navigator.of(context).pop();
                   } else {
                     // Mostrar un mensaje de error si la descripción supera los 250 caracteres.
@@ -569,7 +570,6 @@ class _DashboardState extends State<Dashboard> {
                                                 DateTime.now(),
                                             firstDate: DateTime(2000),
                                             lastDate: DateTime(2101),
-                                            locale: const Locale('es', 'ES'),
                                           );
                                           if (pickedDateStart != null &&
                                               pickedDateStart !=
@@ -601,7 +601,6 @@ class _DashboardState extends State<Dashboard> {
                                                 DateTime.now(),
                                             firstDate: DateTime(2000),
                                             lastDate: DateTime(2101),
-                                            locale: const Locale('es', 'ES'),
                                           );
                                           if (pickedDateEnd != null &&
                                               pickedDateEnd !=

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
+import 'calendarioAlumos.dart';
 
 class menuAlumnos extends StatelessWidget {
 
@@ -67,6 +68,8 @@ class menuAlumnos extends StatelessWidget {
               title: const Text('Ver calendario'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => CalendarioAlumos()));
               },
             ),
             ListTile(

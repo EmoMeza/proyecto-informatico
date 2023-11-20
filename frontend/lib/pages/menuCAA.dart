@@ -6,6 +6,7 @@ import 'package:proyecto_informatico/api_services.dart';
 import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'agregarEvento.dart';
 import 'flujo_de_caja.dart';
+import 'notificaciones.dart';
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [

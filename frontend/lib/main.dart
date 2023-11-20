@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_informatico/pages/calendarioAlumos.dart';
 import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  initializeDateFormatting().then((_) => runApp(MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  initializeDateFormatting().then((_) {
+    runApp(const MyApp());
+  });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,8 +48,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/agregarEvento': (context) => AgregarEvento(),
-        '/calendario': (context) => CalendarioCA(),
+        '/calendarioCA': (context) => CalendarioCA(),
+        '/calendarioAlumos': (context) => CalendarioAlumos(),
       },
+      localizationsDelegates: const [GlobalMaterialLocalizations.delegate],
+      supportedLocales: const [Locale('es')],
     );
   }
 }

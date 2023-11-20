@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../api_services.dart';
@@ -26,8 +28,51 @@ class _RegistroState extends State<Registro> {
   }
 
   void guardarDatos() async {
-    // Resto del código para guardarDatos
+  String nombre = nombreController.text;
+  String apellido = apellidoController.text;
+  int matricula = int.parse(matriculaController.text);
+  Map<String, dynamic> data = {}; // Add any additional data if needed
+
+  ApiResponse response = await ApiService.postAlumno(nombre, apellido, matricula, esCaa, idCaa, data);
+
+  if (response.success) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Exito'),
+            content: const Text('La cuenta se ha creado exitosamente.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+  } else {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text('Ha ocurrido un error al crear la cuenta: ${response.message}.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
   }
+}
 
   @override
   Widget build(BuildContext context) {

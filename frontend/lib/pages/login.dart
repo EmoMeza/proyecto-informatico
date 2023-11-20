@@ -31,13 +31,6 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void irACAA() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => menuCAA()),
-    );
-  }
-
   Future<void> verificarCredenciales() async {
     final matricula = matriculaController.text;
     final contrasena = contrasenaController.text;
@@ -221,19 +214,6 @@ class _LoginState extends State<Login> {
                   onTap: irARegistro,
                   child: const Text(
                     'Registrarse',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 80),
-              Center(
-                child: InkWell(
-                  onTap: irACAA,
-                  child: const Text(
-                    'ir a menu CAA (temporal)',
                     style: TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,

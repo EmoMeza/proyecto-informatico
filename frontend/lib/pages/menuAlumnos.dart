@@ -1,22 +1,18 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:proyecto_informatico/pages/menuCAA.dart';
 
 class menuAlumnos extends StatelessWidget {
-  final List<String> images = [
-    'https://via.placeholder.com/200',
-    'https://via.placeholder.com/200',
-    'https://via.placeholder.com/200',
-    // Placeholders de 200x200
-  ];
 
   final Map<String, dynamic> alumnoData;
-  menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
+  const menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CAA "nombre"',
+        title: Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(
@@ -28,16 +24,7 @@ class menuAlumnos extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            CarouselSlider(
-              items: images.map((url) {
-                return Image.network(url, fit: BoxFit.cover);
-              }).toList(),
-              options: CarouselOptions(
-                height: 200.0,
-                enableInfiniteScroll: true,
-                autoPlay: true,
-              ),
-            ),
+            Text('Alumno data: ${alumnoData['nombre']} ${alumnoData['apellido']}, es caa: ${alumnoData['es_caa']}'),
           ],
         ),
       ),
@@ -49,12 +36,22 @@ class menuAlumnos extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
               ),
-              child: const Text(
-                'Menú Alumno',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage('https://via.placeholder.com/200'),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(child: Text(
+                    '${alumnoData['nombre']} ${alumnoData['apellido']}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),),
+                ],
               ),
             ),
             ListTile(
@@ -80,6 +77,18 @@ class menuAlumnos extends StatelessWidget {
               },
             ),
             const Divider(),
+            if (alumnoData['es_caa'] == 'true')
+              ListTile(
+                leading: const Icon(Icons.now_widgets_outlined),
+                title: const Text('Menú CAA'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => menuCAA(id_caa: alumnoData['id_caa'])));
+                          },
+              ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Cerrar sesión'),
@@ -88,7 +97,6 @@ class menuAlumnos extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            // Agrega más opciones de menú según sea necesario
           ],
         ),
       ),

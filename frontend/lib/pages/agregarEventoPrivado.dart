@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
-//rewrite AgregarEventoPrivado to have the same name AgregarEventoPrivadoPrivado
 
 class AgregarEventoPrivado extends StatefulWidget {
-  const AgregarEventoPrivado({Key? key}) : super(key: key);
+  final Map<String, dynamic> alumnoData;
+  const AgregarEventoPrivado({Key? key, required this.alumnoData})
+      : super(key: key);
 
   @override
   _AgregarEventoPrivadoState createState() => _AgregarEventoPrivadoState();
@@ -23,6 +24,14 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
+  late int matricula;
+  @override
+  void initState() {
+    super.initState();
+    // Extract matricula from alumnoData
+    matricula = widget.alumnoData['matricula'];
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     //seleccionar fecha inicial
     final DateTime? picked = await showDatePicker(
@@ -190,13 +199,14 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
         'ingresos': [],
         'egresos': [],
         'total': 0,
-        'id_caa': "6552d3d4ec6e222a40b76125", //idk how to get this
+        'id_creador': matricula.toString(), //idk how to get this
         'visible': false,
         'global': false,
         'asistencia': []
       };
 
-      ApiResponse response = await ApiService.postEvento(postData);
+      ApiResponse response =
+          await ApiService.postEvento(matricula.toString(), postData);
       if (response.success) {
         showResponseDialog(context, response.message, response.success);
       } else {

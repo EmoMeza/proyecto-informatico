@@ -71,20 +71,41 @@ class menuAlumnos extends StatefulWidget {
 class _menuAlumnosState extends State<menuAlumnos>
     with TickerProviderStateMixin {
   String id_caa = "6552d3d4ec6e222a40b76125";
-  int matricula = 4321;
+  late int matricula;
   late AnimationController _animationController;
   late Animation<double> _animation;
   bool isLoading = true;
   late List<Evento> eventos = []; // Lista para guardar eventos privados
 
+  @override
+  void initState() {
+    super.initState();
+    matricula = widget.alumnoData['matricula'];
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(
+          milliseconds:
+              300), // Duración de la animación (0.5 segundos en este caso)
+    );
+    _animation =
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+    _loadEventos();
+  }
+
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataPersonalEvent = {
       "id_creador": matricula.toString(),
     };
+    // Obtener eventos asistidos por el alumno
+    Map<String, dynamic> filterAssistedEvents = {
+      "matricula": matricula.toString(),
+    };
+
+    // Obtener eventos privados
 
     ApiResponse responsePersonalEvents =
         await ApiService.getEventosFiltrados(filterDataPersonalEvent);
-
+    // Obtener eventos asistidos
     List<Evento> eventosPersonal = [];
 
     if (responsePersonalEvents.success && responsePersonalEvents.data is List) {
@@ -96,26 +117,13 @@ class _menuAlumnosState extends State<menuAlumnos>
     setState(() {
       if (eventosPersonal.isNotEmpty) {
         eventos = eventosPersonal;
+        print(eventosPersonal.toString());
         debugPrint(eventosPersonal.toString());
       } else {
         eventos = [];
       }
       isLoading = false;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(
-          milliseconds:
-              300), // Duración de la animación (0.5 segundos en este caso)
-    );
-    _animation =
-        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
-    _loadEventos();
   }
 
   @override
@@ -138,33 +146,67 @@ class _menuAlumnosState extends State<menuAlumnos>
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            if (isLoading) // Muestra la barra de carga y el texto de carga mientras isLoading es true
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    SizedBox(height: 200),
-                    CircularProgressIndicator(), // Barra de carga circular
-                    SizedBox(height: 8.0),
-                    Text('Cargando eventos...'), // Texto de carga
-                  ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 200),
+                      CircularProgressIndicator(),
+                      SizedBox(height: 8.0),
+                      Text('Cargando eventos...'),
+                    ],
+                  ),
                 ),
-              ),
-            if (!isLoading)
-              // Display the private events
-              if (eventos.isNotEmpty)
-                Column(
-                  children: eventos.map((event) {
+              if (!isLoading && eventos.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('No hay eventos personales.'),
+                ),
+              if (!isLoading && eventos.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const ScrollPhysics(),
+                  itemCount: eventos.length,
+                  itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(event.nombre),
-                      subtitle: Text(event.descripcion),
+                      title: Text(eventos[index].nombre),
+                      subtitle: Text(eventos[index].descripcion),
                       // Add more details as needed
+                      onTap: () {
+                        Map<String, dynamic> eventData = {
+                          '_id': eventos[index].id,
+                          'nombre': eventos[index].nombre,
+                          'categoria': eventos[index].categoria,
+                          'descripcion': eventos[index].descripcion,
+                          'fecha_inicio':
+                              eventos[index].fechaInicio.toIso8601String(),
+                          'fecha_final':
+                              eventos[index].fechaFinal.toIso8601String(),
+                          'visible': eventos[index].visible,
+                          'global': eventos[index].global,
+                        };
+
+                        // Show the EventoPopup when the tile is tapped
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return EventoPopup(
+                              eventData: eventData,
+                              matricula: matricula,
+                            );
+                          },
+                        );
+                      },
                     );
-                  }).toList(),
+                  },
                 ),
-          ],
+            ],
+          ),
         ),
       ),
       drawer: Drawer(
@@ -192,7 +234,8 @@ class _menuAlumnosState extends State<menuAlumnos>
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AgregarEventoPrivado()));
+                        builder: (context) => AgregarEventoPrivado(
+                            alumnoData: widget.alumnoData)));
               },
             ),
             ListTile(

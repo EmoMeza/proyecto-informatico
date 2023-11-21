@@ -258,7 +258,8 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'imagen': base64Image,
       };
 
-      ApiResponse response = await ApiService.postEvento(postData);
+      ApiResponse response =
+          await ApiService.postEvento("6552d3d4ec6e222a40b76125", postData);
       if (response.success) {
         showResponseDialog(context, response.message, response.success);
       } else {

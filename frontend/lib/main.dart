@@ -5,6 +5,7 @@ import 'package:proyecto_informatico/pages/login.dart';
 import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'package:proyecto_informatico/pages/agregarEvento.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +51,14 @@ class _MyAppState extends State<MyApp> {
         '/calendarioCA': (context) => CalendarioCA(),
         '/calendarioAlumos': (context) => CalendarioAlumos(),
       },
+      localizationsDelegates: const [
+        // para habilitar widgets en español
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', ''), // Español
+      ],
     );
   }
 }

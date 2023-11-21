@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -59,7 +61,10 @@ class Evento {
 
 class CalendarioCA extends StatefulWidget {
   final String id_caa;
-  const CalendarioCA({Key? key, required this.id_caa}) : super(key: key);
+  // ignore: prefer_const_constructors_in_immutables
+  CalendarioCA({Key? key, required this.id_caa}) : super(key: key);
+  @override
+  // ignore: library_private_types_in_public_api
   _CalendarioState createState() => _CalendarioState();
 }
 

@@ -5,7 +5,6 @@ import 'package:proyecto_informatico/pages/menuCAA.dart';
 import 'calendarioAlumos.dart';
 
 class menuAlumnos extends StatelessWidget {
-
   final Map<String, dynamic> alumnoData;
   const menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
 
@@ -25,7 +24,8 @@ class menuAlumnos extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text('Alumno data: ${alumnoData['nombre']} ${alumnoData['apellido']}, es caa: ${alumnoData['es_caa']}'),
+            Text(
+                'Alumno data: ${alumnoData['nombre']} ${alumnoData['apellido']}, es caa: ${alumnoData['es_caa']}'),
           ],
         ),
       ),
@@ -42,16 +42,19 @@ class menuAlumnos extends StatelessWidget {
                 children: <Widget>[
                   const CircleAvatar(
                     radius: 50,
-                    backgroundImage: NetworkImage('https://via.placeholder.com/200'),
+                    backgroundImage:
+                        NetworkImage('https://via.placeholder.com/200'),
                   ),
                   const SizedBox(height: 10),
-                  Expanded(child: Text(
-                    '${alumnoData['nombre']} ${alumnoData['apellido']}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
+                  Expanded(
+                    child: Text(
+                      '${alumnoData['nombre']} ${alumnoData['apellido']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
                     ),
-                  ),),
+                  ),
                 ],
               ),
             ),
@@ -68,8 +71,12 @@ class menuAlumnos extends StatelessWidget {
               title: const Text('Ver calendario'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CalendarioAlumos()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CalendarioAlumos(
+                            matricula: alumnoData['matricula'],
+                            id_caa: alumnoData['id_caa'])));
               },
             ),
             ListTile(
@@ -80,18 +87,18 @@ class menuAlumnos extends StatelessWidget {
               },
             ),
             // Cursed code
-            if (alumnoData['es_caa'] == 'true')
-              const Divider(),
+            if (alumnoData['es_caa'] == 'true') const Divider(),
             if (alumnoData['es_caa'] == 'true')
               ListTile(
                 leading: const Icon(Icons.now_widgets_outlined),
                 title: const Text('Menú CAA'),
                 onTap: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => menuCAA(id_caa: alumnoData['id_caa'])));
-                          },
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              menuCAA(id_caa: alumnoData['id_caa'])));
+                },
               ),
             const Divider(),
             ListTile(

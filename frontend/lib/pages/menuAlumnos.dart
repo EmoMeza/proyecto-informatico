@@ -70,7 +70,6 @@ class menuAlumnos extends StatefulWidget {
 
 class _menuAlumnosState extends State<menuAlumnos>
     with TickerProviderStateMixin {
-  String id_caa = "6552d3d4ec6e222a40b76125";
   late int matricula;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -95,6 +94,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataPersonalEvent = {
       "id_creador": matricula.toString(),
+      "visible": "false"
     };
     // Obtener eventos asistidos por el alumno
     Map<String, dynamic> filterAssistedEvents = {
@@ -132,6 +132,37 @@ class _menuAlumnosState extends State<menuAlumnos>
     super.dispose();
   }
 
+  void _showEventoDetails(Evento evento) async {
+    ApiResponse response = await ApiService.getEvento(evento.id);
+
+    if (response.success && response.data != null) {
+      Map<String, dynamic> eventData = response.data;
+      EventoPopup eventoPopup =
+          EventoPopup(eventData: eventData, matricula: matricula);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return eventoPopup;
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text('Error al cargar detalles del evento'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cerrar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,8 +194,8 @@ class _menuAlumnosState extends State<menuAlumnos>
                   ),
                 ),
               if (!isLoading && eventos.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
                   child: Text('No hay eventos personales.'),
                 ),
               if (!isLoading && eventos.isNotEmpty)
@@ -174,35 +205,10 @@ class _menuAlumnosState extends State<menuAlumnos>
                   itemCount: eventos.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(eventos[index].nombre),
-                      subtitle: Text(eventos[index].descripcion),
-                      // Add more details as needed
-                      onTap: () {
-                        Map<String, dynamic> eventData = {
-                          '_id': eventos[index].id,
-                          'nombre': eventos[index].nombre,
-                          'categoria': eventos[index].categoria,
-                          'descripcion': eventos[index].descripcion,
-                          'fecha_inicio':
-                              eventos[index].fechaInicio.toIso8601String(),
-                          'fecha_final':
-                              eventos[index].fechaFinal.toIso8601String(),
-                          'visible': eventos[index].visible,
-                          'global': eventos[index].global,
-                        };
-
-                        // Show the EventoPopup when the tile is tapped
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return EventoPopup(
-                              eventData: eventData,
-                              matricula: matricula,
-                            );
-                          },
-                        );
-                      },
-                    );
+                        title: Text(eventos[index].nombre),
+                        subtitle: Text(eventos[index].descripcion),
+                        // Add more details as needed
+                        onTap: () => _showEventoDetails(eventos[index]));
                   },
                 ),
             ],

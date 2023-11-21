@@ -24,7 +24,7 @@ class menuCAA extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder<ApiResponse>(
       future: ApiService.getCaa(id_caa),
-      builder:(context, snapshot){
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -35,7 +35,8 @@ class menuCAA extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: Text('CAA: ${data_caa['nombre']}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary)),
               backgroundColor: Theme.of(context).colorScheme.primary,
               iconTheme: IconThemeData(
                 color: Theme.of(context)
@@ -85,7 +86,7 @@ class menuCAA extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                const AgregarEvento()),
+                                AgregarEvento(id_caa: id_caa)),
                       );
                     },
                   ),
@@ -94,8 +95,10 @@ class menuCAA extends StatelessWidget {
                     title: const Text('Ver calendario'),
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => CalendarioCA()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CalendarioCA()));
                     },
                   ),
                   ListTile(
@@ -103,7 +106,8 @@ class menuCAA extends StatelessWidget {
                     title: const Text('Ver flujo de caja'),
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const Dashboard()),
+                        MaterialPageRoute(
+                            builder: (context) => const Dashboard()),
                       );
                     },
                   ),

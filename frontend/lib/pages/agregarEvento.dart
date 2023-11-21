@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import '../api_services.dart';
+import 'package:image/image.dart' as img;
+import 'dart:typed_data';
 
 class AgregarEvento extends StatefulWidget {
-  const AgregarEvento({Key? key}) : super(key: key);
+  final String id_caa;
+  const AgregarEvento({Key? key, required this.id_caa}) : super(key: key);
 
   @override
   _AgregarEventoState createState() => _AgregarEventoState();
@@ -27,6 +30,14 @@ class _AgregarEventoState extends State<AgregarEvento> {
   final TextEditingController _endDateController = TextEditingController();
   bool _globalCheckboxValue = false;
   XFile? _pickedImage;
+  late String id_caa;
+
+  //initState para inicializar widget.id_caa
+  @override
+  void initState() {
+    super.initState();
+    id_caa = widget.id_caa;
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -35,6 +46,20 @@ class _AgregarEventoState extends State<AgregarEvento> {
     setState(() {
       _pickedImage = pickedFile;
     });
+  }
+
+  img.Image? convertXFileToImage(XFile? xFile) {
+    if (xFile == null) {
+      return null;
+    }
+
+    // Read the bytes of the image file
+    List<int> imageBytes = File(xFile.path).readAsBytesSync();
+
+    // Decode the bytes into an Image object
+    img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
+
+    return image;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -236,10 +261,12 @@ class _AgregarEventoState extends State<AgregarEvento> {
         isGlobal = _globalCheckboxValue;
       }
       String? base64Image;
+      img.Image? imagetype;
       // Si se selecciono una imagen, convertirla a base64
       if (_pickedImage != null) {
         List<int> imageBytes = await _pickedImage!.readAsBytes();
         base64Image = base64Encode(imageBytes);
+        imagetype = convertXFileToImage(_pickedImage);
       }
       // Datos para enviar a la API
       Map<String, dynamic> postData = {
@@ -251,11 +278,11 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'ingresos': [],
         'egresos': [],
         'total': 0,
-        'id_creador': "6552d3d4ec6e222a40b76125", //idk how to get this
+        'id_creador': id_caa,
         'visible': true,
         'global': isGlobal,
         'asistencia': [],
-        'imagen': base64Image,
+        'imagen': imagetype,
       };
 
       ApiResponse response =

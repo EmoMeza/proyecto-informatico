@@ -47,7 +47,6 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const Login(),
-        '/agregarEvento': (context) => AgregarEvento(),
         '/calendarioCA': (context) => CalendarioCA(),
         '/calendarioAlumos': (context) => CalendarioAlumos(),
       },

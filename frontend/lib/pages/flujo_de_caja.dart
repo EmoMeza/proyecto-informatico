@@ -3,24 +3,11 @@ import 'package:intl/intl.dart';
 import '../api_services.dart';
 import 'package:image_picker/image_picker.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Dashboard(),
-    );
-  }
-}
-
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final String id_caa;
 
+  // ignore: non_constant_identifier_names
+  const Dashboard({Key? key, required this.id_caa}) : super(key: key);
   @override
   // ignore: library_private_types_in_public_api
   _DashboardState createState() => _DashboardState();
@@ -78,18 +65,12 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  // funcion que retorna un string id de la base de datos
-  String getIdCaa() {
-    //ApiResponse response = ApiService.getCaa(alumno);
-    return '6552d3d4ec6e222a40b76125';
-  }
-
   // funcion para añadir ingreso o egreso a la base de datos
   // ignore: non_constant_identifier_names
   void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    final id = getIdCaa(); // Replace with the actual CAA ID
+    final id = widget.id_caa; // Replace with the actual CAA ID
     // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
@@ -152,7 +133,7 @@ class _DashboardState extends State<Dashboard> {
 
   // ignore: non_constant_identifier_names
   void _LoadCashFlow() async {
-    final id = getIdCaa(); // Reemplaza con el ID real de CAA
+    final id = widget.id_caa; // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
 
@@ -206,7 +187,7 @@ class _DashboardState extends State<Dashboard> {
     if (eventos.isEmpty) eventos.add("Vista General");
     if (eventosId.isEmpty) eventosId.add("Vista General");
     Map<String, dynamic> filtrarEventos = {
-      "id_creador": getIdCaa(),
+      "id_creador": widget.id_caa,
     };
     ApiResponse response = await ApiService.getEventosFiltrados(filtrarEventos);
     if (response.success) {

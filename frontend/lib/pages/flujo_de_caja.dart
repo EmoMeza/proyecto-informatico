@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,16 +54,28 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
   int total = 0;
   bool isloading = true;
+  bool isPicked = false;
   List<String> eventos = [];
   List<String> eventosId = [];
-  String? dialogEvent = "General";
-  String? dropdownValue = "General";
+  String? dialogEvent = "Vista General";
+  String? dropdownValue = "Vista General";
+  TextEditingController searchController = TextEditingController();
+  TextEditingController dateStartController = TextEditingController();
+  TextEditingController dateEndController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   List<DataPoint> filteredCashFlowData = [];
+  DateTime? filtroFechaInicio;
+  DateTime? filtroFechaFinal;
+  XFile? image;
 
   @override
   void initState() {
     super.initState();
     _LoadCashFlow(); // Cargar los datos de ingresos y egresos
+    searchController.addListener(() {
+      _setFilterState();
+    });
   }
 
   // funcion que retorna un string id de la base de datos
@@ -80,7 +93,7 @@ class _DashboardState extends State<Dashboard> {
     // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
-      if (dialogEvent == "General") {
+      if (dialogEvent == "Vista General") {
         ApiResponse response = await ApiService.postIngresoCaa(id, {
           'ingresos': [monto, descripcion]
         });
@@ -107,7 +120,7 @@ class _DashboardState extends State<Dashboard> {
         }
       }
     } else {
-      if (dialogEvent == "General") {
+      if (dialogEvent == "Vista General") {
         ApiResponse response = await ApiService.postEgresoCaa(id, {
           'egresos': [monto, descripcion]
         });
@@ -155,7 +168,7 @@ class _DashboardState extends State<Dashboard> {
                     item[0],
                     item[1],
                     item[2],
-                    item.length > 3 ? item[3] : "General",
+                    item.length > 3 ? item[3] : "Vista General",
                   ))
               .toList()
           : [];
@@ -167,7 +180,7 @@ class _DashboardState extends State<Dashboard> {
                     -item[0],
                     item[1],
                     item[2],
-                    item.length > 3 ? item[3] : "General",
+                    item.length > 3 ? item[3] : "Vista General",
                   ))
               .toList()
           : [];
@@ -175,12 +188,12 @@ class _DashboardState extends State<Dashboard> {
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
-      // ordenamos los eventos
+
       await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       total = getTotal.data;
       setState(() {
-        _filterCashFlowData();
+        _setFilterState();
         isloading = false;
       });
     } else {
@@ -190,8 +203,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Future<void> _loadEventos() async {
-    if (eventos.isEmpty) eventos.add("General");
-    if (eventosId.isEmpty) eventosId.add("General");
+    if (eventos.isEmpty) eventos.add("Vista General");
+    if (eventosId.isEmpty) eventosId.add("Vista General");
     Map<String, dynamic> filtrarEventos = {
       "id_creador": getIdCaa(),
     };
@@ -210,65 +223,160 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  void _filterCashFlowData() {
-    if (dropdownValue == "General") {
+  void _filterEvents() {
+    if (dropdownValue == "Vista General") {
       filteredCashFlowData = List.from(cashFlowData);
     } else {
+      var idEvento = eventosId[eventos.indexOf(dropdownValue!)];
       filteredCashFlowData = cashFlowData
-          .where((dataPoint) => dataPoint.evento == dropdownValue)
+          .where((dataPoint) => dataPoint.evento == idEvento)
           .toList();
     }
   }
 
-  void _openEntryDialog(bool isIncome) async {
-    TextEditingController amountController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
+  void _filterSearch() {
+    if (searchController.text.isNotEmpty) {
+      filteredCashFlowData = filteredCashFlowData
+          .where((dataPoint) => dataPoint.description
+              .toLowerCase()
+              .contains(searchController.text.toLowerCase()))
+          .toList();
+    }
+    setState(() {});
+  }
 
+  void _filterDate() {
+    if (filtroFechaInicio != null) {
+      filteredCashFlowData = filteredCashFlowData
+          .where((dataPoint) =>
+              // Comparar si la fecha está en o después de filtroFechaInicio
+              DateTime.parse(dataPoint.date)
+                  .isAtSameMomentAs(filtroFechaInicio!) ||
+              DateTime.parse(dataPoint.date).isAfter(filtroFechaInicio!))
+          .toList();
+    }
+    if (filtroFechaFinal != null) {
+      //le sumamos un dia a la fecha final para que tome en cuenta el dia completo
+      filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
+      filteredCashFlowData = filteredCashFlowData.where((dataPoint) =>
+          // Comparar si la fecha está en o antes de filtroFechaFinal
+          DateTime.parse(dataPoint.date).isBefore(filtroFechaFinal!)).toList();
+      //restamos el dia que sumamos a fecha final
+      filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
+    }
+    setState(() {});
+  }
+
+  void _setFilterState() {
+    _filterEvents();
+    _filterDate();
+    _filterSearch();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      isPicked = true;
+      image = null;
+      // Aquí puedes manejar la imagen seleccionada, como guardarla o mostrarla.
+      // Puedes usar pickedFile.path para obtener la ruta de la imagen.
+      // Por ejemplo, puedes mostrar la imagen con Image.file(File(pickedFile.path)).
+    }
+  }
+
+  void _openDateErrorDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text(
+              'La fecha inicial debe ser menor o igual a la fecha final.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openEntryDialog(bool isIncome) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(isIncome ? 'Añadir Ingreso' : 'Añadir Egreso'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Monto'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Descripción'),
-              ),
-              SafeArea(
-                  child: Container(
-                margin: const EdgeInsets.only(top: 5),
-                child: DropdownButton(
-                  value: dialogEvent,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dialogEvent = newValue;
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Monto'),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Descripción'),
+                ),
+                SafeArea(
+                    child: Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  child: DropdownButton(
+                    value: dialogEvent,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dialogEvent = newValue;
+                        Navigator.of(context).pop();
+                        _openEntryDialog(isIncome);
+                      });
+                    },
+                    items:
+                        eventos.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: SizedBox(
+                          width: 225.0,
+                          child: Text(value),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                )),
+                SizedBox(
+                  width: double
+                      .infinity, // Hace que el botón ocupe todo el ancho disponible
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await _pickImage();
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
                       _openEntryDialog(isIncome);
-                    });
-                  },
-                  items: eventos.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: SizedBox(
-                        width: 225.0,
-                        child: Text(value),
-                      ),
-                    );
-                  }).toList(),
+                    },
+                    icon: Icon(isPicked ? Icons.check : Icons.photo),
+                    label: Text(isPicked
+                        ? 'Cambiar Foto de la galeria'
+                        : 'Subir Foto de la galeria'),
+                  ),
                 ),
-              )),
-            ],
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
+                amountController.clear();
+                descriptionController.clear();
+                dialogEvent = "Vista General";
+                isPicked = false;
+                image = null;
                 Navigator.of(context).pop(); // Cerrar el diálogo
               },
               child: const Text('Cancelar'),
@@ -283,6 +391,8 @@ class _DashboardState extends State<Dashboard> {
                   if (descripcion.length <= 250) {
                     // La descripción tiene 250 caracteres o menos.
                     _AddCashFlow(isIncome, monto, descripcion);
+                    amountController.clear();
+                    descriptionController.clear();
                     Navigator.of(context).pop();
                   } else {
                     // Mostrar un mensaje de error si la descripción supera los 250 caracteres.
@@ -340,6 +450,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Flujo de caja',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
@@ -359,47 +470,15 @@ class _DashboardState extends State<Dashboard> {
                   .onSecondary, // Color de texto predeterminado
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment:
+              MainAxisAlignment.start, // Cambiado a MainAxisAlignment.start
           children: <Widget>[
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 40.0,
-                  child: Center(
-                    child: Text(
-                      'Total: \$${total.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 18.0,
-                      ),
-                    ),
-                  ),
-                ),
-                DropdownButton<String>(
-                  value: dropdownValue,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue;
-                      _filterCashFlowData(); // Filtrar datos cuando cambia el valor del dropdown
-                    });
-                  },
-                  items: eventos.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: SizedBox(
-                        width: 300.0, // Establecer el ancho deseado
-                        child: Text(value),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            if (isloading) // Muestra la barra de carga y el texto de carga mientras isLoading es true
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+            if (isloading)
+              const Center(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(height: 225),
                     SizedBox(
                       width: 65,
                       height: 65,
@@ -408,105 +487,356 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    Text('Cargando Flujos...'), // Texto de carga
+                    Text('Cargando Flujos...'),
                   ],
                 ),
               )
             else
               Expanded(
-                child: ListView.builder(
-                  itemCount: filteredCashFlowData.length,
-                  itemBuilder: (context, index) {
-                    final dataPoint = filteredCashFlowData[index];
-                    return Card(
-                      elevation: 4.0,
-                      margin: const EdgeInsets.all(8.0),
-                      child: ExpansionTile(
-                        tilePadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0),
-                        title: Text(
-                          dataPoint.description.length <=
-                                  20 // Establece el límite de caracteres, por ejemplo, 20.
-                              ? dataPoint
-                                  .description // Si es menor o igual al límite, muestra el texto completo.
-                              : '${dataPoint.description.substring(0, 30)}...', // Si es mayor que el límite, muestra los primeros 20 caracteres seguidos de "...". Puedes ajustar el número 20 según tus necesidades.
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 40.0,
+                      child: Center(
+                        child: Text(
+                          'Total: \$${total.toStringAsFixed(0)}',
                           style: const TextStyle(
-                            fontSize: 18.0,
+                            fontSize: 20.0,
                           ),
                         ),
-                        subtitle: Text(
-                          '\$${dataPoint.value.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            color: dataPoint.value > 0
-                                ? const Color(0xFF00B295)
-                                : const Color(0xFFF18F01),
-                          ),
-                        ),
-                        children: <Widget>[
-                          ListTile(
-                            title: Text(
-                              dataPoint.description,
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            title: Text(
-                              'Fecha: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(dataPoint.date))}',
-                              style: const TextStyle(
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
-                    );
-                  },
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 12.0, top: 8.0, bottom: 8, right: 8),
+                            child: TextField(
+                              controller: searchController,
+                              decoration: InputDecoration(
+                                labelText: 'Buscar',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 20.0,
+                                ),
+                                suffixIcon: const Icon(Icons.search),
+                              ),
+                            ),
+                          ),
+                        ),
+                        //SizedBox(width: 1),
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (BuildContext context) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ListTile(
+                                      tileColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      title: const Text(
+                                        'Filtrar por eventos',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    // Resto de las opciones del evento
+                                    ...eventos.map((String value) {
+                                      bool isSelected = value == dropdownValue;
+                                      return ListTile(
+                                        title: Row(
+                                          children: [
+                                            Text(value),
+                                            if (isSelected)
+                                              Icon(Icons.check,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary),
+                                          ],
+                                        ),
+                                        onTap: () {
+                                          Navigator.pop(context, value);
+                                        },
+                                      );
+                                    }).toList(),
+                                  ],
+                                );
+                              },
+                            ).then((selectedValue) {
+                              if (selectedValue != null) {
+                                setState(() {
+                                  dropdownValue = selectedValue;
+                                  _setFilterState();
+                                });
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: const CircleBorder(),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(top: 12, bottom: 12),
+                            child: Icon(Icons.celebration, color: Colors.white),
+                          ),
+                        ),
+
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ListTile(
+                                      tileColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      title: const Text(
+                                        'Filtrar por Fecha',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: TextField(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Fecha inicial',
+                                        ),
+                                        controller: dateStartController,
+                                        readOnly: true,
+                                        onTap: () async {
+                                          DateTime? pickedDateStart =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate: filtroFechaInicio ??
+                                                DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2101),
+                                          );
+                                          if (pickedDateStart != null &&
+                                              pickedDateStart !=
+                                                  filtroFechaInicio) {
+                                            setState(() {
+                                              filtroFechaInicio =
+                                                  pickedDateStart;
+                                              dateStartController.text =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .format(
+                                                          filtroFechaInicio!);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: TextField(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Fecha final',
+                                        ),
+                                        controller: dateEndController,
+                                        readOnly: true,
+                                        onTap: () async {
+                                          DateTime? pickedDateEnd =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate: filtroFechaFinal ??
+                                                DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2101),
+                                          );
+                                          if (pickedDateEnd != null &&
+                                              pickedDateEnd !=
+                                                  filtroFechaFinal) {
+                                            setState(() {
+                                              filtroFechaFinal = pickedDateEnd;
+                                              dateEndController.text =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .format(
+                                                          filtroFechaFinal!);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10.0),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                filtroFechaInicio = null;
+                                                filtroFechaFinal = null;
+                                                dateStartController.text = "";
+                                                dateEndController.text = "";
+                                                _setFilterState();
+                                              });
+                                            },
+                                            child:
+                                                const Text("Limpiar filtros")),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // comparamos los controladores para ver si la fecha inicial es menor a la final
+                                            if (filtroFechaInicio != null &&
+                                                filtroFechaFinal != null) {
+                                              if (filtroFechaInicio!.isBefore(
+                                                      filtroFechaFinal!) ||
+                                                  filtroFechaInicio!
+                                                      .isAtSameMomentAs(
+                                                          filtroFechaFinal!)) {
+                                                _setFilterState();
+                                                Navigator.pop(context);
+                                              } else {
+                                                _openDateErrorDialog();
+                                              }
+                                            } else {
+                                              _setFilterState();
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                          child: const Text(
+                                            'Aplicar Filtros',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: const CircleBorder(),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(
+                                left: 7, right: 7, top: 12, bottom: 12),
+                            child:
+                                Icon(Icons.calendar_today, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredCashFlowData.length,
+                        itemBuilder: (context, index) {
+                          final dataPoint = filteredCashFlowData[index];
+                          return Card(
+                            elevation: 4.0,
+                            child: ExpansionTile(
+                              tilePadding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              title: Text(
+                                dataPoint.description.length <= 20
+                                    ? dataPoint.description
+                                    : '${dataPoint.description.substring(0, 30)}...',
+                                style: const TextStyle(
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '\$${dataPoint.value.toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: dataPoint.value > 0
+                                      ? const Color(0xFF00B295)
+                                      : const Color(0xFFF18F01),
+                                ),
+                              ),
+                              children: <Widget>[
+                                ListTile(
+                                  title: Text(
+                                    dataPoint.description,
+                                    style: const TextStyle(
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                ),
+                                ListTile(
+                                  title: Text(
+                                    'Fecha: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(dataPoint.date))}',
+                                    style: const TextStyle(
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        Container(
+                          margin:
+                              const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _openEntryDialog(true);
+                            },
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all(
+                                  const Size(150, 50)),
+                            ),
+                            child: const Text(
+                              'Añadir Ingreso',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _openEntryDialog(false);
+                            },
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all(
+                                  const Size(150, 50)),
+                            ),
+                            child: const Text(
+                              'Añadir Egreso',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _openEntryDialog(true);
-                    },
-                    style: ButtonStyle(
-                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
-                    ),
-                    child: const Text(
-                      'Añadir Ingreso',
-                      style: TextStyle(
-                        color:
-                            Colors.white, // Cambia el color del texto a blanco
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _openEntryDialog(false);
-                    },
-                    style: ButtonStyle(
-                      fixedSize: MaterialStateProperty.all(const Size(150, 50)),
-                    ),
-                    child: const Text(
-                      'Añadir Egreso',
-                      style: TextStyle(
-                        color:
-                            Colors.white, // Cambia el color del texto a blanco
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:proyecto_informatico/pages/detallesEventoAlumno.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
-import 'package:intl/intl.dart';
+
 
 
 
@@ -69,7 +70,7 @@ class CalendarioAlumos extends StatefulWidget {
 
 
 class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProviderStateMixin{
-  int matricula = 123456;
+  int matricula = 4321;
   String id_caa = "652976834af6fedf26f3493d";
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -336,29 +337,19 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
 
 
   void _showEventoDetails(Evento evento) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 8.0),
-              Text('Cargando detalles del evento...'),
-            ],
-          ),
-        );
-      },
-    );
 
     ApiResponse response = await ApiService.getEvento(evento.id);
     debugPrint(response.data.toString());
-    Navigator.pop(context);
 
     if (response.success && response.data != null) {
       Map<String, dynamic> eventData = response.data;
-      _showEventoPopup(eventData);
+      EventoPopup eventoPopup = EventoPopup(eventData: eventData, matricula: matricula);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return eventoPopup;
+        },
+      );
     } else {
       showDialog(
         context: context,
@@ -376,171 +367,6 @@ class _CalendarioState extends State<CalendarioAlumos> with SingleTickerProvider
       );
     }
   }
-  
-  void _handleAsistireButtonPressed(String eventId) async {
-    debugPrint('Asistiré al evento $eventId y mi matricula es $matricula');
-    ApiResponse response = await ApiService.postAsistenciaEvento(eventId, matricula.toString());
-
-    if (response.success) {
-      // Muestra una ventana emergente con un mensaje
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Text('Gracias por tu participación'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cerrar'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // Muestra una ventana emergente con un mensaje de error
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Text('Error al registrar asistencia'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cerrar'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
 
 
-
-
-
-  void _showEventoPopup(Map<String, dynamic> eventData) async {
-    // Formatear las fechas
-    DateTime fechaInicio = DateTime.parse(eventData['fecha_inicio']);
-    DateTime fechaFinal = DateTime.parse(eventData['fecha_final']);
-
-    // Define a DateFormat instance for the desired format
-    final dateFormat = DateFormat('dd-MM-yyyy  HH:mm', 'es_ES');
-
-    String formattedFechaInicio = dateFormat.format(fechaInicio);
-    String formattedFechaFinal = dateFormat.format(fechaFinal);
-
-    // Obtener la información del creador
-    ApiResponse response = await ApiService.getCaa(eventData['id_creador']);
-    String creador = response.success ? response.data['nombre'] : 'ID no encontrado';
-    
-    Future<List<String>> _getAsistenciasEvento(String eventId) async {
-      ApiResponse response = await ApiService.getAsistenciasEvento(eventId);
-
-      if (response.success && response.data is List) {
-        List<dynamic> asistenciasData = response.data;
-        return asistenciasData.map((e) => e.toString()).toList();
-      } else {
-        // Manejar el error
-        return [];
-      }
-    }
-    
-    List<String> asistencias = await _getAsistenciasEvento(eventData['_id']);
-    bool isAsistireButtonEnabled = !asistencias.contains(matricula.toString());
-
-    
-
-
-    // Crear y mostrar el AlertDialog
-    AlertDialog alertDialog = AlertDialog(
-      title: Text(eventData['nombre'], style: const TextStyle(fontSize: 22)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 10.0),
-          _buildLabelText('Categoría:'),
-          _buildText(eventData['categoria']),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Descripción:'),
-          _buildText(eventData['descripcion']),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Fecha de inicio:'),
-          _buildText(formattedFechaInicio),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Fecha de fin:'),
-          _buildText(formattedFechaFinal),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Global:'),
-          _buildText(eventData['global'].toString()),
-          const SizedBox(height: 10.0),
-          _buildLabelText('Creador:'),
-          _buildText(creador),
-        ],
-      ),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cerrar'),
-            ),
-            SizedBox(width: 8), // Espaciado entre los botones
-            isAsistireButtonEnabled
-                ? ElevatedButton(
-                    onPressed: () => _handleAsistireButtonPressed(eventData['_id']),
-                    child: const Text('Asistiré'),
-                  )
-                : InkWell(
-                    onTap: () {
-                      // Lógica para mostrar notificación o realizar alguna acción
-                      // Puedes agregar aquí la lógica que desees cuando se presiona la campanita
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical:6, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.notifications, color: Colors.white),
-                          const SizedBox(width: 8),
-                          const Text('Notificar', style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  ),
-          ],
-        ),
-      ],
-    );
-
-    // Mostrar el AlertDialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alertDialog;
-      },
-    );
-  }
-  
-
-  Widget _buildLabelText(String label) {
-    return Text(
-      label,
-      style: const TextStyle(fontSize: 17, color: Colors.black, fontWeight: FontWeight.bold, decoration: TextDecoration.none),
-    );
-  }
-
-  Widget _buildText(String text) {
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 17, color: Color.fromARGB(166, 0, 0, 0), decoration: TextDecoration.none),
-    );
-  }
 }

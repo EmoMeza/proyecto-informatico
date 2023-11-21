@@ -31,13 +31,6 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void irACAA() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => menuCAA()),
-    );
-  }
-
   Future<void> verificarCredenciales() async {
     final matricula = matriculaController.text;
     final contrasena = contrasenaController.text;
@@ -119,9 +112,9 @@ class _LoginState extends State<Login> {
             children: [
               const SizedBox(height: 40),
               Image.asset(
-                'assets/images/logo_udec.jpg',
+                'assets/images/logo_eventiCaa.png',
                 width: MediaQuery.of(context).size.width,
-                height: 150,
+                height: 125,
               ),
               const SizedBox(height: 40),
               Column(
@@ -221,19 +214,6 @@ class _LoginState extends State<Login> {
                   onTap: irARegistro,
                   child: const Text(
                     'Registrarse',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 80),
-              Center(
-                child: InkWell(
-                  onTap: irACAA,
-                  child: const Text(
-                    'ir a menu CAA (temporal)',
                     style: TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,

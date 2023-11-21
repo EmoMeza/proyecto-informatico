@@ -4,12 +4,12 @@ import '../api_services.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Dashboard extends StatefulWidget {
+  // ignore: non_constant_identifier_names
   final String id_caa;
-
   // ignore: non_constant_identifier_names
   const Dashboard({Key? key, required this.id_caa}) : super(key: key);
-  @override
   // ignore: library_private_types_in_public_api
+  @override
   _DashboardState createState() => _DashboardState();
 }
 
@@ -70,7 +70,7 @@ class _DashboardState extends State<Dashboard> {
   void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    final id = widget.id_caa; // Replace with the actual CAA ID
+    final id = widget.id_caa; // recibimos id_caa del contexto
     // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {

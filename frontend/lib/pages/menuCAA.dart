@@ -97,7 +97,8 @@ class menuCAA extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => CalendarioCA()));
+                              builder: (context) =>
+                                  CalendarioCA(id_caa: id_caa)));
                     },
                   ),
                   ListTile(

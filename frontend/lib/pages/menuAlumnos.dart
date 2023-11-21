@@ -79,9 +79,10 @@ class menuAlumnos extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            
+            // Cursed code
             if (alumnoData['es_caa'] == 'true')
-              const Divider(),  
+              const Divider(),
+            if (alumnoData['es_caa'] == 'true')
               ListTile(
                 leading: const Icon(Icons.now_widgets_outlined),
                 title: const Text('Menú CAA'),

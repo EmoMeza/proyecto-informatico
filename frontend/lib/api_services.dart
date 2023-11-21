@@ -420,8 +420,9 @@ class ApiService {
   // Funcion para agregar un evento
   // Parametros: Map<String, dynamic> postData
   // Retorna: success, data, message
-  static Future<ApiResponse> postEvento(Map<String, dynamic> postData) async {
-    final url = Uri.parse('$_baseUrl/add/evento');
+  static Future<ApiResponse> postEvento(
+      String idCreador, Map<String, dynamic> postData) async {
+    final url = Uri.parse('$_baseUrl/add/evento?id_creador=$idCreador');
     final jsonBody = json.encode(postData);
 
     //Realiza la peticion
@@ -565,7 +566,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final responseBody = response.body;
       // Si el servidor retorna un mensaje no retorna data
-      if(responseBody.startsWith('No se encontraron')){
+      if (responseBody.startsWith('No se encontraron')) {
         return ApiResponse(false, {}, responseBody);
       } else {
         // Si el servidor encuentra el id retorna los datos

@@ -140,7 +140,6 @@ class _DashboardState extends State<Dashboard> {
     if (Response.success) {
       final income = Response.data['ingresos'];
       final expense = Response.data['egresos'];
-
       //ahora usando un iterador se recorre la lista de ingresos y egresos y se van agregando a la lista cashFlowData
       List<DataPoint> incomeData = (income is List)
           ? (income)
@@ -153,7 +152,6 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
@@ -165,11 +163,9 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
-
       await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       total = getTotal.data;
@@ -332,8 +328,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 )),
                 SizedBox(
-                  width: double
-                      .infinity, // Hace que el botón ocupe todo el ancho disponible
+                  width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       await _pickImage();

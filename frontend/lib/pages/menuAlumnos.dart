@@ -71,6 +71,7 @@ class menuAlumnos extends StatefulWidget {
 class _menuAlumnosState extends State<menuAlumnos>
     with TickerProviderStateMixin {
   late int matricula;
+  late List asistencias;
   late AnimationController _animationController;
   late Animation<double> _animation;
   bool isLoading = true;
@@ -80,6 +81,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   void initState() {
     super.initState();
     matricula = widget.alumnoData['matricula'];
+    print('Asistencias: ${widget.alumnoData['asistencias'].toString()}');
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(

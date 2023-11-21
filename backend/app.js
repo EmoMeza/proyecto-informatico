@@ -98,8 +98,39 @@ app.get('/get/caa', async function (req, res) {
     }
 });
 
+app.get('/get/caa/imagen', async function (req, res) {
+    const id = req.query.id;
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        const database = client.db("proyecto_informatico"); //schema
+        const collection = database.collection("caa"); //table
+        // Check if the id already exists in the collection
+        const result = await collection.findOne({ _id: new ObjectId(id) });
+        if (!result) {
+            // If the id already exists, send a message to the client
+            res.send(`El id ${id} no existe en la base de datos`);
+        } else {
+            // If the id exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.post('/add/caa', async function (req, res) {
     const data = req.body;
+    const imagen = req.file;
+    data.imagen = imagen.buffer.toString('base64');
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -368,9 +399,42 @@ app.get('/get/evento', async function (req, res) {
     }
 });
 
+app.get('/get/evento/imagen', async function (req, res) {
+    const id = req.query.id;
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        const database = client.db("proyecto_informatico"); //schema
+        const collection = database.collection("test"); //table
+        // Check if the id already exists in the collection
+        const result = await collection.findOne({ _id: new ObjectId(id) });
+        if (!result) {
+            // If the id already exists, send a message to the client
+            res.send(`El id ${id} no existe en la base de datos`);
+        } else {
+            // If the id exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.post('/add/evento', async function (req, res) {
     const id_creador = req.query.id_creador;
     const data = req.body;
+    const imagen = req.file;
+
+
+    data.imagen = imagen.buffer.toString('base64');
 
     if (!data.fecha_inicio || !data.fecha_final) {
         // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.

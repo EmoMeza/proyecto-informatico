@@ -7,7 +7,7 @@ class EventoPopup extends StatefulWidget {
   final Map<String, dynamic> eventData;
   final int matricula;
 
-  EventoPopup({required this.eventData,required this.matricula});
+  EventoPopup({required this.eventData, required this.matricula});
 
   @override
   _EventoPopupState createState() => _EventoPopupState();
@@ -21,7 +21,6 @@ class _EventoPopupState extends State<EventoPopup> {
   late String nombreCA;
   bool isLoading = true;
 
-
   @override
   void initState() {
     super.initState();
@@ -32,11 +31,11 @@ class _EventoPopupState extends State<EventoPopup> {
     nombreCA = '';
     _loadAsistencias();
     _loadnombreCA();
-
   }
 
   Future<void> _loadAsistencias() async {
-    ApiResponse response = await ApiService.getAsistenciasEvento(widget.eventData['_id']);
+    ApiResponse response =
+        await ApiService.getAsistenciasEvento(widget.eventData['_id']);
 
     if (response.success && response.data is List) {
       List<dynamic> asistenciasData = response.data;
@@ -54,7 +53,8 @@ class _EventoPopupState extends State<EventoPopup> {
   }
 
   Future<void> _loadnombreCA() async {
-    ApiResponse response = await ApiService.getCaa(widget.eventData['id_creador']);
+    ApiResponse response =
+        await ApiService.getCaa(widget.eventData['id_creador']);
     if (response.success) {
       // Muestra una ventana emergente con un mensaje
       setState(() {
@@ -72,7 +72,7 @@ class _EventoPopupState extends State<EventoPopup> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     // Formatear las fechas
     DateTime fechaInicio = DateTime.parse(widget.eventData['fecha_inicio']);
     DateTime fechaFinal = DateTime.parse(widget.eventData['fecha_final']);
@@ -84,38 +84,38 @@ class _EventoPopupState extends State<EventoPopup> {
     String formattedFechaFinal = dateFormat.format(fechaFinal);
 
     // Obtener la información del creador
-    
+
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
-    }
-    else{ 
+    } else {
       return AlertDialog(
-        title: Text(widget.eventData['nombre'], style: const TextStyle(fontSize: 22)),
+        title: Text(widget.eventData['nombre'],
+            style: const TextStyle(fontSize: 22)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 30),
         content: SingleChildScrollView(
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10.0),
-            _buildLabelText('Categoría:'),
-            _buildText(widget.eventData['categoria']),
-            const SizedBox(height: 10.0),
-            _buildLabelText('Descripción:'),
-            _buildText(widget.eventData['descripcion']),
-            const SizedBox(height: 10.0),
-            _buildLabelText('Fecha de inicio:'),
-            _buildText(formattedFechaInicio),
-            const SizedBox(height: 10.0),
-            _buildLabelText('Fecha de fin:'),
-            _buildText(formattedFechaFinal),
-            const SizedBox(height: 10.0),
-            _buildLabelText('Global:'),
-            _buildText(widget.eventData['global'].toString()),
-            const SizedBox(height: 10.0),
-            _buildLabelText('Creador:'),
-            _buildText(nombreCA),
-          ],
-        ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10.0),
+              _buildLabelText('Categoría:'),
+              _buildText(widget.eventData['categoria']),
+              const SizedBox(height: 10.0),
+              _buildLabelText('Descripción:'),
+              _buildText(widget.eventData['descripcion']),
+              const SizedBox(height: 10.0),
+              _buildLabelText('Fecha de inicio:'),
+              _buildText(formattedFechaInicio),
+              const SizedBox(height: 10.0),
+              _buildLabelText('Fecha de fin:'),
+              _buildText(formattedFechaFinal),
+              const SizedBox(height: 10.0),
+              _buildLabelText('Global:'),
+              _buildText(widget.eventData['global'].toString()),
+              const SizedBox(height: 10.0),
+              _buildLabelText('Creador:'),
+              _buildText(nombreCA),
+            ],
+          ),
         ),
         actions: [
           Row(
@@ -128,36 +128,38 @@ class _EventoPopupState extends State<EventoPopup> {
               const SizedBox(width: 8), // Espaciado entre los botones
               isAsistireButtonEnabled
                   ? ElevatedButton(
-                      onPressed: (){
-                         _handleAsistireButtonPressed(widget.eventData['_id']);
+                      onPressed: () {
+                        _handleAsistireButtonPressed(widget.eventData['_id']);
                       },
                       child: const Text('Asistiré'),
                     )
                   : InkWell(
-                     onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return NotificationDialog(
-                            id: eventData['_id'],
-                            nombre: eventData['nombre'],
-                            fecha: fechaInicio,
-                          );
-                        },
-                      );
-                    },
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return NotificationDialog(
+                              id: eventData['_id'],
+                              nombre: eventData['nombre'],
+                              fecha: fechaInicio,
+                            );
+                          },
+                        );
+                      },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 8),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const  Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.notifications, color: Colors.white),
                             SizedBox(width: 8),
-                            Text('Notificar', style: TextStyle(color: Colors.white)),
+                            Text('Notificar',
+                                style: TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),
@@ -172,19 +174,28 @@ class _EventoPopupState extends State<EventoPopup> {
   Widget _buildLabelText(String label) {
     return Text(
       label,
-      style: const TextStyle(fontSize: 17, color: Colors.black, fontWeight: FontWeight.bold, decoration: TextDecoration.none),
+      style: const TextStyle(
+          fontSize: 17,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          decoration: TextDecoration.none),
     );
   }
 
   Widget _buildText(String text) {
     return Text(
       text,
-      style: const TextStyle(fontSize: 17, color: Color.fromARGB(166, 0, 0, 0), decoration: TextDecoration.none),
+      style: const TextStyle(
+          fontSize: 17,
+          color: Color.fromARGB(166, 0, 0, 0),
+          decoration: TextDecoration.none),
     );
   }
+
   void _handleAsistireButtonPressed(String eventId) async {
     debugPrint('Asistiré al evento $eventId y mi matricula es $matricula');
-    ApiResponse response = await ApiService.postAsistenciaEvento(eventId, matricula.toString());
+    ApiResponse response =
+        await ApiService.postAsistenciaEvento(eventId, matricula.toString());
 
     if (response.success) {
       // Muestra una ventana emergente con un mensaje
@@ -223,5 +234,4 @@ class _EventoPopupState extends State<EventoPopup> {
       );
     }
   }
-
 }

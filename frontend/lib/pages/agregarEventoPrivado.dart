@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
 
-class AgregarEvento extends StatefulWidget {
-  const AgregarEvento({Key? key}) : super(key: key);
+class AgregarEventoPrivado extends StatefulWidget {
+  final Map<String, dynamic> alumnoData;
+  const AgregarEventoPrivado({Key? key, required this.alumnoData})
+      : super(key: key);
 
   @override
-  _AgregarEventoState createState() => _AgregarEventoState();
+  _AgregarEventoPrivadoState createState() => _AgregarEventoPrivadoState();
 }
 
-class _AgregarEventoState extends State<AgregarEvento> {
+class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? dropdownValue = 'Evaluación';
   DateTime selectedDate = DateTime.now();
@@ -22,6 +24,14 @@ class _AgregarEventoState extends State<AgregarEvento> {
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
+  late int matricula;
+  @override
+  void initState() {
+    super.initState();
+    // Extract matricula from alumnoData
+    matricula = widget.alumnoData['matricula'];
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     //seleccionar fecha inicial
     final DateTime? picked = await showDatePicker(
@@ -39,9 +49,28 @@ class _AgregarEventoState extends State<AgregarEvento> {
 
   Future<void> _selectTime(BuildContext context) async {
     //seleccionar hora inicio
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (picked != null && picked != selectedTime) {
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedEndTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.black, // Set the color you want
+            colorScheme: const ColorScheme.light(primary: Colors.black),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: const TimePickerThemeData(
+              backgroundColor: Colors.white, // Set the background color
+              hourMinuteTextColor: Colors.black,
+              dayPeriodTextColor: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
       setState(() {
         selectedTime = picked;
         _timeController.text = selectedTime.format(context);
@@ -71,8 +100,24 @@ class _AgregarEventoState extends State<AgregarEvento> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedEndTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.black, // Set the color you want
+            colorScheme: const ColorScheme.light(primary: Colors.black),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.normal),
+            timePickerTheme: const TimePickerThemeData(
+              backgroundColor: Colors.white, // Set the background color
+              hourMinuteTextColor: Colors.black,
+              dayPeriodTextColor: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    if (picked != null && picked != selectedEndTime) {
+    if (picked != null) {
       setState(() {
         selectedEndTime = picked;
         _endTimeController.text = selectedEndTime.format(context);
@@ -189,13 +234,14 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'ingresos': [],
         'egresos': [],
         'total': 0,
-        'id_caa': "652976834af6fedf26f3493d", //idk how to get this
+        'id_creador': matricula.toString(), //idk how to get this
         'visible': false,
+        'global': false,
         'asistencia': []
       };
 
       ApiResponse response =
-          await ApiService.postEvento("652976834af6fedf26f3493d", postData);
+          await ApiService.postEvento(matricula.toString(), postData);
       if (response.success) {
         showResponseDialog(context, response.message, response.success);
       } else {
@@ -210,7 +256,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
       onPressed: () {
         _submitForm(context);
       },
-      child: const Text('Agregar Evento'),
+      child: const Text('Agregar Evento Privado'),
     );
   }
 
@@ -218,7 +264,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agregar Evento',
+        title: Text('Agregar Evento Privado',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(

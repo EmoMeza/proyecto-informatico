@@ -268,7 +268,9 @@ class _menuAlumnosState extends State<menuAlumnos>
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => CalendarioAlumos()));
+                        builder: (context) => CalendarioAlumos(
+                            matricula: alumnoData['matricula'],
+                            id_caa: alumnoData['id_caa'])));
               },
             ),
             ListTile(
@@ -279,8 +281,8 @@ class _menuAlumnosState extends State<menuAlumnos>
               },
             ),
             // Cursed code
-            if (widget.alumnoData['es_caa'] == 'true') const Divider(),
-            if (widget.alumnoData['es_caa'] == 'true')
+            if (alumnoData['es_caa'] == 'true') const Divider(),
+            if (alumnoData['es_caa'] == 'true')
               ListTile(
                 leading: const Icon(Icons.now_widgets_outlined),
                 title: const Text('Menú CAA'),

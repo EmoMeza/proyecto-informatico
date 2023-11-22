@@ -7,6 +7,7 @@ import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'agregarEvento.dart';
 import 'flujo_de_caja.dart';
 import 'notificaciones.dart';
+import 'calendarioDisponibilidad.dart';
 
 class menuCAA extends StatelessWidget {
   final List<String> images = [
@@ -109,6 +110,15 @@ class menuCAA extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                             builder: (context) => Dashboard(id_caa: id_caa)),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.punch_clock),
+                    title: const Text('Calendario de disponibilidad'),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => CalendarioDispoibilidad()),
                       );
                     },
                   ),

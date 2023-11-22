@@ -1,12 +1,16 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const path = require('path');
 const bcrypt = require('bcrypt');
 const { json } = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
 const { ObjectId } = require('mongodb');
+const multer = require('multer'); // Moved this line up
+const storage = multer.memoryStorage(); // Almacena la imagen en memoria
+const fs = require('fs');
+const path = require('path');
+const upload = multer({ storage: multer.memoryStorage() });
 require('dotenv').config();
 
 const app = express(); // Inicializamos express.
@@ -94,8 +98,39 @@ app.get('/get/caa', async function (req, res) {
     }
 });
 
+app.get('/get/caa/imagen', async function (req, res) {
+    const id = req.query.id;
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        const database = client.db("proyecto_informatico"); //schema
+        const collection = database.collection("caa"); //table
+        // Check if the id already exists in the collection
+        const result = await collection.findOne({ _id: new ObjectId(id) });
+        if (!result) {
+            // If the id already exists, send a message to the client
+            res.send(`El id ${id} no existe en la base de datos`);
+        } else {
+            // If the id exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.post('/add/caa', async function (req, res) {
     const data = req.body;
+    const imagen = req.file;
+    data.imagen = imagen.buffer.toString('base64');
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -364,9 +399,42 @@ app.get('/get/evento', async function (req, res) {
     }
 });
 
+app.get('/get/evento/imagen', async function (req, res) {
+    const id = req.query.id;
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        const database = client.db("proyecto_informatico"); //schema
+        const collection = database.collection("test"); //table
+        // Check if the id already exists in the collection
+        const result = await collection.findOne({ _id: new ObjectId(id) });
+        if (!result) {
+            // If the id already exists, send a message to the client
+            res.send(`El id ${id} no existe en la base de datos`);
+        } else {
+            // If the id exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.post('/add/evento', async function (req, res) {
     const id_creador = req.query.id_creador;
     const data = req.body;
+    const imagen = req.file;
+
+
+    data.imagen = imagen.buffer.toString('base64');
 
     if (!data.fecha_inicio || !data.fecha_final) {
         // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
@@ -573,6 +641,35 @@ app.get('/get/filter/eventos', async (req, res) => {
 
 
 
+app.get('/get/alumno/imagen', async function (req, res) {
+    const matricula = parseInt(req.query.matricula);
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("alumnos");
+        // Check if the alumno already exists in the collection
+        const result = await collection.findOne({ matricula: matricula });
+        console.log(result);
+        if (!result) {
+            // If the alumno doesn't exist, send a 404 status code
+            res.status(404).send('Alumno not found');
+        } else {
+            // If the alumno exists, send the image data
+            const img = Buffer.from(result.imagen, 'base64');
+            res.writeHead(200, {
+               'Content-Type': 'image/png',
+               'Content-Length': img.length
+            });
+            res.end(img);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server error');
+    } finally {
+        await client.close();
+    }
+});
+
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
     try {
@@ -596,7 +693,7 @@ app.get('/get/alumno', async function (req, res) {
     }
 });
 
-app.post('/add/alumno', async function (req, res) {
+app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
@@ -606,6 +703,12 @@ app.post('/add/alumno', async function (req, res) {
     const mis_eventos = [];
     const mis_asistencias = [];
 
+    if (!req.file) {
+        return res.status(400).send('No image file was uploaded');
+    }
+    const imagen = req.file.buffer.toString('base64');
+
+
     // Unify the data into a single object
     data.nombre = nombre;
     data.apellido = apellido;
@@ -614,6 +717,7 @@ app.post('/add/alumno', async function (req, res) {
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
     data.mis_asistencias = mis_asistencias;
+    data.imagen = imagen
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {
@@ -623,7 +727,7 @@ app.post('/add/alumno', async function (req, res) {
 
     //first two digits of the matricula and first two digits of the nombre in lowercase are the password
     const password = matricula.substring(0, 4) + nombre.toLowerCase().substring(0, 2) + apellido.toLowerCase().substring(0,2);
-    data.contraseña = password
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -745,27 +849,25 @@ app.post('/add/ingreso', async function (req, res) {
     const currentDate = new Date().toISOString();
     data2.push(currentDate); // Push the amount, description, and current date to the data2 array
 
-
-
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
-        const collection = database.collection("test");
+        const eventos = database.collection("test");
         const caa = database.collection("caa");
         //check if the id already exists in the collection, if exists send a message to the client and exit
-        const result = await collection.findOne({ _id: new ObjectId(id) });
+        const result = await eventos.findOne({ _id: new ObjectId(id) });
         id_caa = result.id_creador;
         const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
 
         if (result) {
             // if the id exists, add the data to the array named ingresos inside the one that has the same id
-            await collection.updateOne({ _id: new ObjectId(id) }, { $push: { ingresos: data2 } });
+            await eventos.updateOne({ _id: new ObjectId(id) }, { $push: { ingresos: data2 } });
             data3 = data2;
             data3.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $push: { ingresos: data2 } });
             //send the result to the client
 
-            await collection.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total + data2[0] } });
+            await eventos.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total + data2[0] } });
             //add to the data the id of the event to the array data2
             data2.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $set: { total: caa_result.total + data2[0] } });
@@ -824,26 +926,25 @@ app.post('/add/egreso', async function (req, res) {
     // Agrega la fecha actual en formato ISO 8601
     const currentDate = new Date().toISOString();
     data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
-        //check if the id already exists in the collection, if exists send a message to the client and exit
         const caa = database.collection("caa");
         const result = await collection.findOne({ _id: new ObjectId(id) });
+
         if (result) {
             // if the id exists, add the data to the array named egresos inside the one that has the same id
             await collection.updateOne({ _id: new ObjectId(id) }, { $push: { egresos: data2 } });
-            data3 = data2;
-            data3.push(id);
-            await caa.updateOne({ _id: new ObjectId(result.id_caa) }, { $push: { egresos: data2 } });
-            //update total
-            await collection.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total - data2[0] } });
-            await caa.updateOne({ _id: new ObjectId(result.id_caa) }, { $set: { total: result.total - data2[0] } });
-            res.send("se ha insertado correctamente");
-        }
-        else {
-            res.send(`El id ${id} no existe en la base de datos`);
+
+            // Create a new array with the data and the id of the event it is coming from
+            const data3 = [...data2, id];
+
+            // Update the caa collection with the new array
+            await caa.updateOne({ _id: new ObjectId(result.id_creador) }, { $push: { egresos: data3 } });
+        } else {
+            res.send(`El id ${id} no existe en la base de datos.`);
         }
     } catch (error) {
         console.log(error);

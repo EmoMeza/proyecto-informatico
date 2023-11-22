@@ -29,8 +29,17 @@ class _EventoPopupState extends State<EventoPopup> {
     asistencias = [];
     isAsistireButtonEnabled = true;
     nombreCA = '';
-    _loadAsistencias();
-    _loadnombreCA();
+
+    // Ejecuta código asíncrono después de que initState ha completado
+    Future.delayed(Duration.zero, () async {
+      await _loadAsistencias();
+
+      if (widget.eventData['id_creador'].toString().length < 10) {
+        await _loadnombreAlumno();
+      } else {
+        await _loadnombreCA();
+      }
+    });
   }
 
   Future<void> _loadAsistencias() async {
@@ -42,6 +51,9 @@ class _EventoPopupState extends State<EventoPopup> {
       setState(() {
         asistencias = asistenciasData.map((e) => e.toString()).toList();
         isAsistireButtonEnabled = !asistencias.contains(matricula.toString());
+        if(eventData['visible'] == false){
+          isAsistireButtonEnabled = false;
+        }
       });
     } else {
       // Manejar el error
@@ -51,14 +63,37 @@ class _EventoPopupState extends State<EventoPopup> {
       });
     }
   }
-
   Future<void> _loadnombreCA() async {
+    debugPrint(widget.eventData['id_creador'].toString().length.toString());
     ApiResponse response =
         await ApiService.getCaa(widget.eventData['id_creador']);
     if (response.success) {
       // Muestra una ventana emergente con un mensaje
       setState(() {
         nombreCA = response.data['nombre'];
+      });
+    } else {
+      // Muestra una ventana emergente con un mensaje de error
+      setState(() {
+        nombreCA = 'ID no encontrado';
+      });
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+
+  Future<void> _loadnombreAlumno() async {
+    debugPrint(widget.eventData['id_creador'].toString().length.toString());
+    ApiResponse response =
+        await ApiService.getAlumno(widget.eventData['id_creador']);
+
+
+    if (response.success) {
+      // Muestra una ventana emergente con un mensaje
+      setState(() {
+        nombreCA = response.data['nombre'] + ' ' + response.data['apellido'];
       });
     } else {
       // Muestra una ventana emergente con un mensaje de error

@@ -367,7 +367,7 @@ class _CalendarioState extends State<CalendarioAlumos>
 
   void _showEventoDetails(Evento evento) async {
     ApiResponse response = await ApiService.getEvento(evento.id);
-    debugPrint(response.data.toString());
+    //debugPrint(response.data.toString());
 
     if (response.success && response.data != null) {
       Map<String, dynamic> eventData = response.data;

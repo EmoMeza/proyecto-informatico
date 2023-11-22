@@ -56,13 +56,7 @@ class _LoginState extends State<Login> {
       return;
     }
     final responseContrasena = await ApiService.login(matricula, contrasena);
-    if (responseContrasena.success) {
-      debugPrint('contra success');
-    }
     final responseAlumno = await ApiService.getAlumno(matricula);
-    if (responseAlumno.success) {
-      debugPrint('alumno success');
-    }
     if (responseContrasena.success && responseAlumno.success) {
       final alumnoData = responseAlumno.data;
       // ignore: use_build_context_synchronously

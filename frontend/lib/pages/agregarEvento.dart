@@ -195,7 +195,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
       };
 
       ApiResponse response =
-          await ApiService.postEvento("652976834af6fedf26f3493d", postData);
+          await ApiService.postEvento("652976834af6fedf26f3493d", postData, null);
       if (response.success) {
         showResponseDialog(context, response.message, response.success);
       } else {

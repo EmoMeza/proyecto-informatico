@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_informatico/pages/agregarEventoPrivado.dart';
+import 'menuCAA.dart';
 import 'calendarioAlumos.dart';
 import '../api_services.dart';
 import 'detallesEventoAlumno.dart';
@@ -72,8 +73,7 @@ class menuAlumnos extends StatefulWidget {
 
 class _menuAlumnosState extends State<menuAlumnos>
     with TickerProviderStateMixin {
-  late int matricula;
-  late List asistencias;
+  late Map<String, dynamic> alumnoData;
   late AnimationController _animationController;
   late Animation<double> _animation;
   bool isLoading = true;
@@ -82,8 +82,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   @override
   void initState() {
     super.initState();
-    matricula = widget.alumnoData['matricula'];
-    print('Asistencias: ${widget.alumnoData['asistencias'].toString()}');
+    alumnoData = widget.alumnoData;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(
@@ -97,12 +96,12 @@ class _menuAlumnosState extends State<menuAlumnos>
 
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataPersonalEvent = {
-      "id_creador": matricula.toString(),
+      "id_creador": alumnoData['matricula'].toString(),
       "visible": "false"
     };
     // Obtener eventos asistidos por el alumno
     Map<String, dynamic> filterAssistedEvents = {
-      "matricula": matricula.toString(),
+      "matricula": alumnoData['matricula'].toString(),
     };
 
     // Obtener eventos privados
@@ -142,7 +141,7 @@ class _menuAlumnosState extends State<menuAlumnos>
     if (response.success && response.data != null) {
       Map<String, dynamic> eventData = response.data;
       EventoPopup eventoPopup =
-          EventoPopup(eventData: eventData, matricula: matricula);
+          EventoPopup(eventData: eventData, matricula: alumnoData['matricula']);
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -280,8 +279,8 @@ class _menuAlumnosState extends State<menuAlumnos>
               },
             ),
             // Cursed code
-            if (alumnoData['es_caa'] == 'true') const Divider(),
-            if (alumnoData['es_caa'] == 'true')
+            if (widget.alumnoData['es_caa'] == 'true') const Divider(),
+            if (widget.alumnoData['es_caa'] == 'true')
               ListTile(
                 leading: const Icon(Icons.now_widgets_outlined),
                 title: const Text('Menú CAA'),

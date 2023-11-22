@@ -1,6 +1,9 @@
 // import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 // Se importa de la siguiente manera:
 // import '../api_services.dart';
@@ -36,7 +39,7 @@ class ApiResponse {
 
 class ApiService {
   // Esto se puede cambiar segun la ip del servidor o el puerto
-  static const String _baseUrl = 'http://10.0.2.2:4040';
+  static const String _baseUrl = 'https://ac57-2800-150-107-db6-5dd8-d828-bafc-c856.ngrok-free.app';
 
   // -----------------Centro de Alumnos-----------------------
 
@@ -417,22 +420,74 @@ class ApiService {
     }
   }
 
-  // Funcion para agregar un evento
-  // Parametros: Map<String, dynamic> postData
-  // Retorna: success, data, message
-  static Future<ApiResponse> postEvento(
-      String idCreador, Map<String, dynamic> postData) async {
-    final url = Uri.parse('$_baseUrl/add/evento?id_creador=$idCreador');
-    final jsonBody = json.encode(postData);
+  static Future<ApiResponse> getEventoImagen(String id) async {
+    var url = Uri.parse('$_baseUrl/get/evento/imagen');
+
+    // Agrega los parametros a la url
+    url = url.replace(queryParameters: {
+      'id': id,
+    });
 
     //Realiza la peticion
-    final response = await http.post(
+    final response = await http.get(
       url,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "image/jpeg",
       },
-      body: jsonBody,
     );
+
+    if (response.statusCode == 200) {
+      if (response.body.toLowerCase().contains('no existe')) {
+        return ApiResponse(false, {}, 'Evento no encontrado en la base de datos');
+      }
+
+      Uint8List bytes = response.bodyBytes;
+      if (bytes.isNotEmpty) {
+        ByteData data = ByteData.view(bytes.buffer);
+        ui.Codec codec = await ui.instantiateImageCodec(
+          data.buffer.asUint8List(),
+          targetHeight: 100, // Proporciona la altura deseada
+          targetWidth: 100,  // Proporciona el ancho deseado
+        );
+        ui.FrameInfo fi = await codec.getNextFrame();
+        return ApiResponse(true, {'image': fi.image}, '');
+      } else {
+        // Si los bytes están vacíos, indica que no hay imagen
+        return ApiResponse(true, {}, 'El evento no tiene imagen');
+      }
+    } else {
+      // Maneja el caso en que el evento no fue encontrado basándote en el contenido del mensaje
+      return ApiResponse(false, {}, 'Error en la petición: ${response.statusCode}');
+    }
+  }
+
+  // Funcion para agregar un evento
+  // Parametros: String idCreador, Map<String, dynamic> postData, File imageFile
+  // Retorna: success, data, message
+  static Future<ApiResponse> postEvento(
+      String idCreador, Map<String, dynamic> postData, File? imageFile) async {
+    var url = Uri.parse('$_baseUrl/add/evento');
+    //final jsonBody = json.encode(postData);
+
+    url = url.replace(queryParameters: {
+      'id_creador': idCreador,
+    });
+
+    var request = http.MultipartRequest('POST', url);
+
+    for (var entry in postData.entries) {
+      request.fields[entry.key] = entry.value.toString();
+    }
+
+    if (imageFile != null) {
+      var stream = http.ByteStream(imageFile.openRead());
+      var length = await imageFile.length();
+      var multipartFile = http.MultipartFile('imagen', stream, length,
+          filename: imageFile.path.split('/').last);
+      request.files.add(multipartFile);
+    }
+
+    var response = await http.Response.fromStream(await request.send());
 
     if (response.statusCode == 200) {
       final responseBody = response.body;

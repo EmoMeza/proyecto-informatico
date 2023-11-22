@@ -176,7 +176,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendario de eventos',
+        title: Text('Calendario de disponiblidad',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(
@@ -252,8 +252,8 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
                                 .withOpacity(0.3),
                             shape: BoxShape.circle,
                           ),
-                          width: 37.0,
-                          height: 37.0,
+                          width: 35.0,
+                          height: 35.0,
                           child: Center(
                             child: Text(
                               '${day.day}',
@@ -287,8 +287,8 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
                                     .withOpacity(0.5),
                                 shape: BoxShape.circle,
                               ),
-                              width: 37.0,
-                              height: 37.0,
+                              width: 35.0,
+                              height: 35.0,
                               child: Center(
                                 child: Text(
                                   '${day.day}',
@@ -308,35 +308,23 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
                   var eventosDelDia = _getEventosDelDia(day);
                   if (eventosDelDia.isNotEmpty) {
                     return Stack(
-                      alignment: AlignmentGeometry.lerp(
-                          Alignment.bottomRight, Alignment.topLeft, 0.8)!,
+                      alignment: Alignment.bottomRight,
                       children: [
                         Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.deepPurple,
+                          decoration: BoxDecoration(
+                            color: _calcularColor(eventosDelDia.length, isMarker: true),
                             shape: BoxShape.circle,
                           ),
-                          width: 20.0,
-                          height: 20.0,
+                          width: 17.0,
+                          height: 17.0,
                         ),
-                        Positioned(
-                          top: 3,
-                          left: 6,
-                          child: Text(
-                            '${eventosDelDia.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+    
+                      ]
                     );
                   } else {
                     return Container();
                   }
-                },
+},
               ),
             ),
           Expanded(
@@ -481,13 +469,31 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
   );
 }
 // Función para calcular el color en función del número de eventos
-  Color _calcularColor(int numeroEventos) {
-    List colors = [Colors.red, Colors.green, Colors.yellow];
-    Random random = new Random();
+    Color _calcularColor(int numeroEventos, {bool isMarker = false}) {
+      List<Color?> colors = [
+        Colors.deepPurple[300],
+        Colors.deepPurple[500],
+        Colors.deepPurple[700],
+      ];
 
-    int index = 0;
-    index = random.nextInt(3);
-    return colors[index];
-  }
+      // Filtra los valores nulos
+      colors = colors.where((color) => color != null).toList();
+
+      // Si es un marcador y no una celda, usa colores más sutiles
+      if (isMarker) {
+        colors = [
+          Colors.deepPurple[300]?.withOpacity(0.7),
+          Colors.deepPurple[500]?.withOpacity(0.7),
+          Colors.deepPurple[700]?.withOpacity(0.7),
+        ];
+
+        // Filtra los valores nulos después de aplicar la opacidad
+        colors = colors.where((color) => color != null).toList();
+      }
+
+      Random random = Random();
+      int index = random.nextInt(colors.length);
+      return colors[index] ?? Colors.deepPurple[500]!;
+    }
   
 }

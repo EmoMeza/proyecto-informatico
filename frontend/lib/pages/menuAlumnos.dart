@@ -1,13 +1,11 @@
-// ignore_for_file: camel_case_types
+// ignore_for_file: camel_case_types, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_informatico/pages/agregarEventoPrivado.dart';
 import 'menuCAA.dart';
 import 'calendarioAlumos.dart';
 import '../api_services.dart';
 import 'detallesEventoAlumno.dart';
-import 'dart:math';
 
 class Evento {
   String id;
@@ -65,7 +63,7 @@ class Evento {
 class menuAlumnos extends StatefulWidget {
   final Map<String, dynamic> alumnoData;
 
-  menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
+  const menuAlumnos({Key? key, required this.alumnoData}) : super(key: key);
 
   @override
   _menuAlumnosState createState() => _menuAlumnosState();
@@ -153,11 +151,11 @@ class _menuAlumnosState extends State<menuAlumnos>
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text('Error al cargar detalles del evento'),
+            content: const Text('Error al cargar detalles del evento'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cerrar'),
+                child: const Text('Cerrar'),
               ),
             ],
           );

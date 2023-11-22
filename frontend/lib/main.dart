@@ -48,8 +48,11 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/login': (context) => const Login(),
         '/agregarEvento': (context) => AgregarEvento(),
-        '/calendarioCA': (context) => CalendarioCA(),
-        '/calendarioAlumos': (context) => CalendarioAlumos(),
+        '/calendarioCA': (context) => CalendarioCA(
+              id_caa: '',
+            ),
+        '/calendarioAlumos': (context) =>
+            CalendarioAlumos(matricula: 0, id_caa: ''),
       },
       localizationsDelegates: const [
         // para habilitar widgets en español

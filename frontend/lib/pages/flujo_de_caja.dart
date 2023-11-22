@@ -3,26 +3,13 @@ import 'package:intl/intl.dart';
 import '../api_services.dart';
 import 'package:image_picker/image_picker.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Dashboard(),
-    );
-  }
-}
-
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
-
-  @override
+  // ignore: non_constant_identifier_names
+  final String id_caa;
+  // ignore: non_constant_identifier_names
+  const Dashboard({Key? key, required this.id_caa}) : super(key: key);
   // ignore: library_private_types_in_public_api
+  @override
   _DashboardState createState() => _DashboardState();
 }
 
@@ -78,18 +65,12 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  // funcion que retorna un string id de la base de datos
-  String getIdCaa() {
-    //ApiResponse response = ApiService.getCaa(alumno);
-    return '6552d3d4ec6e222a40b76125';
-  }
-
   // funcion para añadir ingreso o egreso a la base de datos
   // ignore: non_constant_identifier_names
   void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    final id = getIdCaa(); // Replace with the actual CAA ID
+    final id = widget.id_caa; // recibimos id_caa del contexto
     // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
@@ -152,14 +133,13 @@ class _DashboardState extends State<Dashboard> {
 
   // ignore: non_constant_identifier_names
   void _LoadCashFlow() async {
-    final id = getIdCaa(); // Reemplaza con el ID real de CAA
+    final id = widget.id_caa; // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
 
     if (Response.success) {
       final income = Response.data['ingresos'];
       final expense = Response.data['egresos'];
-
       //ahora usando un iterador se recorre la lista de ingresos y egresos y se van agregando a la lista cashFlowData
       List<DataPoint> incomeData = (income is List)
           ? (income)
@@ -172,7 +152,6 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
@@ -184,11 +163,9 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
-
       await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       total = getTotal.data;
@@ -206,7 +183,7 @@ class _DashboardState extends State<Dashboard> {
     if (eventos.isEmpty) eventos.add("Vista General");
     if (eventosId.isEmpty) eventosId.add("Vista General");
     Map<String, dynamic> filtrarEventos = {
-      "id_creador": getIdCaa(),
+      "id_creador": widget.id_caa,
     };
     ApiResponse response = await ApiService.getEventosFiltrados(filtrarEventos);
     if (response.success) {
@@ -351,8 +328,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 )),
                 SizedBox(
-                  width: double
-                      .infinity, // Hace que el botón ocupe todo el ancho disponible
+                  width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       await _pickImage();

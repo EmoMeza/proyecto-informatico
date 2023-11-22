@@ -715,6 +715,7 @@ app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
+    data.mis_asistencias = mis_asistencias;
     data.imagen = imagen
 
     //check if the matricula has at least 4 digits
@@ -847,27 +848,25 @@ app.post('/add/ingreso', async function (req, res) {
     const currentDate = new Date().toISOString();
     data2.push(currentDate); // Push the amount, description, and current date to the data2 array
 
-
-
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
-        const collection = database.collection("test");
+        const eventos = database.collection("test");
         const caa = database.collection("caa");
         //check if the id already exists in the collection, if exists send a message to the client and exit
-        const result = await collection.findOne({ _id: new ObjectId(id) });
+        const result = await eventos.findOne({ _id: new ObjectId(id) });
         id_caa = result.id_creador;
         const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
 
         if (result) {
             // if the id exists, add the data to the array named ingresos inside the one that has the same id
-            await collection.updateOne({ _id: new ObjectId(id) }, { $push: { ingresos: data2 } });
+            await eventos.updateOne({ _id: new ObjectId(id) }, { $push: { ingresos: data2 } });
             data3 = data2;
             data3.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $push: { ingresos: data2 } });
             //send the result to the client
 
-            await collection.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total + data2[0] } });
+            await eventos.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total + data2[0] } });
             //add to the data the id of the event to the array data2
             data2.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $set: { total: caa_result.total + data2[0] } });
@@ -926,26 +925,25 @@ app.post('/add/egreso', async function (req, res) {
     // Agrega la fecha actual en formato ISO 8601
     const currentDate = new Date().toISOString();
     data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
         const collection = database.collection("test");
-        //check if the id already exists in the collection, if exists send a message to the client and exit
         const caa = database.collection("caa");
         const result = await collection.findOne({ _id: new ObjectId(id) });
+
         if (result) {
             // if the id exists, add the data to the array named egresos inside the one that has the same id
             await collection.updateOne({ _id: new ObjectId(id) }, { $push: { egresos: data2 } });
-            data3 = data2;
-            data3.push(id);
-            await caa.updateOne({ _id: new ObjectId(result.id_caa) }, { $push: { egresos: data2 } });
-            //update total
-            await collection.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total - data2[0] } });
-            await caa.updateOne({ _id: new ObjectId(result.id_caa) }, { $set: { total: result.total - data2[0] } });
-            res.send("se ha insertado correctamente");
-        }
-        else {
-            res.send(`El id ${id} no existe en la base de datos`);
+
+            // Create a new array with the data and the id of the event it is coming from
+            const data3 = [...data2, id];
+
+            // Update the caa collection with the new array
+            await caa.updateOne({ _id: new ObjectId(result.id_creador) }, { $push: { egresos: data3 } });
+        } else {
+            res.send(`El id ${id} no existe en la base de datos.`);
         }
     } catch (error) {
         console.log(error);

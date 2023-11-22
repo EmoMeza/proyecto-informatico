@@ -1,9 +1,10 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
 import 'detallesEventoCA.dart';
-
 
 class Evento {
   String id;
@@ -58,15 +59,18 @@ class Evento {
   }
 }
 
-
 class CalendarioCA extends StatefulWidget {
+  final String id_caa;
+  // ignore: prefer_const_constructors_in_immutables
+  CalendarioCA({Key? key, required this.id_caa}) : super(key: key);
   @override
+  // ignore: library_private_types_in_public_api
   _CalendarioState createState() => _CalendarioState();
 }
 
-
-class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStateMixin{
-  String id_caa = "6552d3d4ec6e222a40b76125";
+class _CalendarioState extends State<CalendarioCA>
+    with SingleTickerProviderStateMixin {
+  late String id_caa;
   late AnimationController _animationController;
   late Animation<double> _animation;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -79,6 +83,7 @@ class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
+    id_caa = widget.id_caa;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(
@@ -129,8 +134,7 @@ class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStat
       }
       isLoading = false;
     });
-}
-  
+  }
 
   @override
   void dispose() {
@@ -348,21 +352,19 @@ class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStat
     );
   }
 
-
   void _showEventoDetails(Evento evento) async {
-
     ApiResponse response = await ApiService.getEvento(evento.id);
 
     if (response.success && response.data != null) {
       Map<String, dynamic> eventData = response.data;
-      EventoPopupCA eventoPopup = EventoPopupCA(eventData: eventData, id_caa: id_caa);
+      EventoPopupCA eventoPopup =
+          EventoPopupCA(eventData: eventData, id_caa: id_caa);
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return eventoPopup;
         },
       );
-    
     } else {
       showDialog(
         context: context,
@@ -380,6 +382,4 @@ class _CalendarioState extends State<CalendarioCA> with SingleTickerProviderStat
       );
     }
   }
-
-  
 }

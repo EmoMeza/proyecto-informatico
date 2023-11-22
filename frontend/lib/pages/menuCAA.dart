@@ -98,7 +98,8 @@ class menuCAA extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => CalendarioCA()));
+                              builder: (context) =>
+                                  CalendarioCA(id_caa: id_caa)));
                     },
                   ),
                   ListTile(
@@ -107,7 +108,7 @@ class menuCAA extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => const Dashboard()),
+                            builder: (context) => Dashboard(id_caa: id_caa)),
                       );
                     },
                   ),

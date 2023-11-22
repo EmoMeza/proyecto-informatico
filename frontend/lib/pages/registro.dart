@@ -16,19 +16,50 @@ class _RegistroState extends State<Registro> {
   TextEditingController apellidoController = TextEditingController();
   TextEditingController matriculaController = TextEditingController();
   String tipoCuenta = 'Estudiante';
+  bool esCaa = false;
+  String idCaa = '';
+  late Future<ApiResponse> caaFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia la llamada a la API una vez cuando se inicia el widget
+    caaFuture = ApiService.getAllCaa();
+  }
 
   void guardarDatos() async {
-    final matricula = int.tryParse(matriculaController.text) ?? 0000;
-    final nombre = nombreController.text;
-    final apellido = apellidoController.text;
+  String nombre = nombreController.text;
+  String apellido = apellidoController.text;
+  int matricula = int.parse(matriculaController.text);
+  Map<String, dynamic> data = {}; // Add any additional data if needed
 
-    if ('$matricula'.length < 4 || nombre.isEmpty || apellido.isEmpty) {
-      showDialog(
+  ApiResponse response = await ApiService.postAlumno(nombre, apellido, matricula, esCaa, idCaa, data);
+
+  if (response.success) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Exito'),
+            content: const Text('La cuenta se ha creado exitosamente.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+  } else {
+    showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: const Text('La matricula no es válida.'),
+            content: Text('Ha ocurrido un error al crear la cuenta: ${response.message}.'),
             actions: [
               ElevatedButton(
                 onPressed: () {
@@ -40,58 +71,8 @@ class _RegistroState extends State<Registro> {
           );
         },
       );
-      return;
-    }
-
-    final alumnoData = {
-      'matricula': matricula,
-      'nombre': nombre,
-      'apellido': apellido,
-    };
-
-    ApiResponse responseA =
-        await ApiService.postAlumno(nombre, apellido, matricula, alumnoData);
-
-    if (responseA.success) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Éxito'),
-            content: const Text(
-                'Se ha creado su cuenta con éxito. Puede iniciar sesión.'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: Text('Error al registrar al alumno: ${responseA.message}'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +100,62 @@ class _RegistroState extends State<Registro> {
                 ],
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Matricula: '),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Casilla de verificación para esCaa
+                  Checkbox(
+                    value: esCaa,
+                    onChanged: (value) {
+                      setState(() {
+                        esCaa = value!;
+                      });
+                    },
+                  ),
+                  const Text('Es CAA'),
+                  const SizedBox(width: 20),
+                  // Lista desplegable para seleccionar idCaa
+                  FutureBuilder<ApiResponse>(
+                    future: caaFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        ApiResponse apiResponse = snapshot.data as ApiResponse;
+                        if (apiResponse.success) {
+                          List<dynamic> caas = apiResponse.data as List<dynamic>;
+
+                          // Verifica si idCaa es válido y establece un valor predeterminado si no lo es
+                          if (idCaa.isEmpty || !caas.any((caa) => caa['_id'] == idCaa)) {
+                            idCaa = caas.first['_id']; // Puedes ajustar esto según tus necesidades
+                          }
+
+                          return DropdownButton<String>(
+                            value: idCaa,
+                            hint: const Text('Seleccionar CAA'),
+                            items: caas.map((caa) {
+                              return DropdownMenuItem<String>(
+                                value: caa['_id'],
+                                child: Text(caa['nombre']),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                idCaa = value!;
+                              });
+                            },
+                          );
+                        } else {
+                          return Text('Error en la respuesta de la API: ${apiResponse.message}');
+                        }
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Row(

@@ -1,27 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Dashboard(),
-    );
-  }
-}
+import 'package:image_picker/image_picker.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
-
-  @override
+  // ignore: non_constant_identifier_names
+  final String id_caa;
+  // ignore: non_constant_identifier_names
+  const Dashboard({Key? key, required this.id_caa}) : super(key: key);
   // ignore: library_private_types_in_public_api
+  @override
   _DashboardState createState() => _DashboardState();
 }
 
@@ -53,6 +41,7 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> cashFlowData = []; // Declaración de la lista
   int total = 0;
   bool isloading = true;
+  bool isPicked = false;
   List<String> eventos = [];
   List<String> eventosId = [];
   String? dialogEvent = "Vista General";
@@ -65,6 +54,7 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> filteredCashFlowData = [];
   DateTime? filtroFechaInicio;
   DateTime? filtroFechaFinal;
+  XFile? image;
 
   @override
   void initState() {
@@ -75,18 +65,12 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  // funcion que retorna un string id de la base de datos
-  String getIdCaa() {
-    //ApiResponse response = ApiService.getCaa(alumno);
-    return '6552d3d4ec6e222a40b76125';
-  }
-
   // funcion para añadir ingreso o egreso a la base de datos
   // ignore: non_constant_identifier_names
   void _AddCashFlow(bool isIncome, int amount, String description) async {
     final monto = amount;
     final descripcion = description;
-    final id = getIdCaa(); // Replace with the actual CAA ID
+    final id = widget.id_caa; // recibimos id_caa del contexto
     // guardamos dentro de una lista el id de los eventos que se encuentran en el cashflowdata[3]
 
     if (isIncome) {
@@ -149,14 +133,13 @@ class _DashboardState extends State<Dashboard> {
 
   // ignore: non_constant_identifier_names
   void _LoadCashFlow() async {
-    final id = getIdCaa(); // Reemplaza con el ID real de CAA
+    final id = widget.id_caa; // Reemplaza con el ID real de CAA
     // ignore: non_constant_identifier_names
     var Response = await ApiService.getCaa(id);
 
     if (Response.success) {
       final income = Response.data['ingresos'];
       final expense = Response.data['egresos'];
-
       //ahora usando un iterador se recorre la lista de ingresos y egresos y se van agregando a la lista cashFlowData
       List<DataPoint> incomeData = (income is List)
           ? (income)
@@ -169,7 +152,6 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       List<DataPoint> expenseData = (expense is List)
           ? (expense)
               .where((item) => item != null) // Filtrar elementos nulos
@@ -181,11 +163,9 @@ class _DashboardState extends State<Dashboard> {
                   ))
               .toList()
           : [];
-
       cashFlowData = [...incomeData, ...expenseData];
       // ordenamos cashflowdata por fecha de mas nuevo a mas viejo
       cashFlowData.sort((a, b) => b.date.compareTo(a.date));
-
       await _loadEventos();
       ApiResponse getTotal = await ApiService.getTotalCaa(id);
       total = getTotal.data;
@@ -203,7 +183,7 @@ class _DashboardState extends State<Dashboard> {
     if (eventos.isEmpty) eventos.add("Vista General");
     if (eventosId.isEmpty) eventosId.add("Vista General");
     Map<String, dynamic> filtrarEventos = {
-      "id_creador": getIdCaa(),
+      "id_creador": widget.id_caa,
     };
     ApiResponse response = await ApiService.getEventosFiltrados(filtrarEventos);
     if (response.success) {
@@ -243,29 +223,25 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _filterDate() {
-    if (filtroFechaInicio != null || filtroFechaFinal != null) {
-      if (filtroFechaInicio != null) {
-        filteredCashFlowData = filteredCashFlowData
-            .where((dataPoint) =>
-                // Comparar si la fecha está en o después de filtroFechaInicio
-                DateTime.parse(dataPoint.date)
-                    .isAtSameMomentAs(filtroFechaInicio!) ||
-                DateTime.parse(dataPoint.date).isAfter(filtroFechaInicio!))
-            .toList();
-      }
-      if (filtroFechaFinal != null) {
-        //le sumamos un dia a la fecha final para que tome en cuenta el dia completo
-        filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
-        filteredCashFlowData = filteredCashFlowData
-            .where((dataPoint) =>
-                // Comparar si la fecha está en o antes de filtroFechaFinal
-                DateTime.parse(dataPoint.date).isBefore(filtroFechaFinal!))
-            .toList();
-        //restamos el dia que sumamos a fecha final
-        filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
-      }
-      setState(() {});
+    if (filtroFechaInicio != null) {
+      filteredCashFlowData = filteredCashFlowData
+          .where((dataPoint) =>
+              // Comparar si la fecha está en o después de filtroFechaInicio
+              DateTime.parse(dataPoint.date)
+                  .isAtSameMomentAs(filtroFechaInicio!) ||
+              DateTime.parse(dataPoint.date).isAfter(filtroFechaInicio!))
+          .toList();
     }
+    if (filtroFechaFinal != null) {
+      //le sumamos un dia a la fecha final para que tome en cuenta el dia completo
+      filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
+      filteredCashFlowData = filteredCashFlowData.where((dataPoint) =>
+          // Comparar si la fecha está en o antes de filtroFechaFinal
+          DateTime.parse(dataPoint.date).isBefore(filtroFechaFinal!)).toList();
+      //restamos el dia que sumamos a fecha final
+      filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
+    }
+    setState(() {});
   }
 
   void _setFilterState() {
@@ -274,52 +250,109 @@ class _DashboardState extends State<Dashboard> {
     _filterSearch();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      isPicked = true;
+      image = null;
+      // Aquí puedes manejar la imagen seleccionada, como guardarla o mostrarla.
+      // Puedes usar pickedFile.path para obtener la ruta de la imagen.
+      // Por ejemplo, puedes mostrar la imagen con Image.file(File(pickedFile.path)).
+    }
+  }
+
+  void _openDateErrorDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text(
+              'La fecha inicial debe ser menor o igual a la fecha final.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _openEntryDialog(bool isIncome) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(isIncome ? 'Añadir Ingreso' : 'Añadir Egreso'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Monto'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Descripción'),
-              ),
-              SafeArea(
-                  child: Container(
-                margin: const EdgeInsets.only(top: 5),
-                child: DropdownButton(
-                  value: dialogEvent,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dialogEvent = newValue;
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Monto'),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Descripción'),
+                ),
+                SafeArea(
+                    child: Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  child: DropdownButton(
+                    value: dialogEvent,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dialogEvent = newValue;
+                        Navigator.of(context).pop();
+                        _openEntryDialog(isIncome);
+                      });
+                    },
+                    items:
+                        eventos.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: SizedBox(
+                          width: 225.0,
+                          child: Text(value),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                )),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await _pickImage();
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
                       _openEntryDialog(isIncome);
-                    });
-                  },
-                  items: eventos.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: SizedBox(
-                        width: 225.0,
-                        child: Text(value),
-                      ),
-                    );
-                  }).toList(),
+                    },
+                    icon: Icon(isPicked ? Icons.check : Icons.photo),
+                    label: Text(isPicked
+                        ? 'Cambiar Foto de la galeria'
+                        : 'Subir Foto de la galeria'),
+                  ),
                 ),
-              )),
-            ],
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
+                amountController.clear();
+                descriptionController.clear();
+                dialogEvent = "Vista General";
+                isPicked = false;
+                image = null;
                 Navigator.of(context).pop(); // Cerrar el diálogo
               },
               child: const Text('Cancelar'),
@@ -393,6 +426,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Flujo de caja',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
@@ -635,8 +669,23 @@ class _DashboardState extends State<Dashboard> {
                                                 const Text("Limpiar filtros")),
                                         ElevatedButton(
                                           onPressed: () {
-                                            _setFilterState();
-                                            Navigator.pop(context);
+                                            // comparamos los controladores para ver si la fecha inicial es menor a la final
+                                            if (filtroFechaInicio != null &&
+                                                filtroFechaFinal != null) {
+                                              if (filtroFechaInicio!.isBefore(
+                                                      filtroFechaFinal!) ||
+                                                  filtroFechaInicio!
+                                                      .isAtSameMomentAs(
+                                                          filtroFechaFinal!)) {
+                                                _setFilterState();
+                                                Navigator.pop(context);
+                                              } else {
+                                                _openDateErrorDialog();
+                                              }
+                                            } else {
+                                              _setFilterState();
+                                              Navigator.pop(context);
+                                            }
                                           },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Theme.of(context)

@@ -585,12 +585,13 @@ class ApiService {
   // Parametros: nombre, matricula, Map<String, dynamic> data
   // Retorna: success, data, message
   static Future<ApiResponse> postAlumno(String nombre, String apellido,
-      int matricula, Map<String, dynamic> data) async {
+      int matricula, bool esCaa, String idCaa, Map<String, dynamic> data) async {
     // Unify the data into a single object
     data['nombre'] = nombre;
     data['apellido'] = apellido;
     data['matricula'] = matricula;
-
+    data['es_caa'] = esCaa;
+    data['id_caa'] = idCaa;
     // Check if the matricula has at least 4 digits
     if ('$matricula'.length < 4) {
       return ApiResponse(
@@ -604,7 +605,7 @@ class ApiService {
     data['contraseña'] = password;
 
     final url = Uri.parse(
-        '$_baseUrl/add/alumno?nombre=$nombre&matricula=$matricula&apellido=$apellido');
+        '$_baseUrl/add/alumno?nombre=$nombre&matricula=$matricula&apellido=$apellido&es_caa=$esCaa&id_caa=$idCaa');
     final jsonBody = json.encode(data);
 
     try {

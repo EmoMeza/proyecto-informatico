@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_informatico/pages/agregarEventoPrivado.dart';
@@ -169,7 +171,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CAA "nombre"',
+        title: Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(
@@ -225,12 +227,25 @@ class _menuAlumnosState extends State<menuAlumnos>
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
               ),
-              child: const Text(
-                'Menú Alumno',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const CircleAvatar(
+                    radius: 50,
+                    backgroundImage:
+                        NetworkImage('https://via.placeholder.com/200'),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Text(
+                      '${alumnoData['nombre']} ${alumnoData['apellido']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
@@ -264,6 +279,20 @@ class _menuAlumnosState extends State<menuAlumnos>
                 Navigator.pop(context);
               },
             ),
+            // Cursed code
+            if (alumnoData['es_caa'] == 'true') const Divider(),
+            if (alumnoData['es_caa'] == 'true')
+              ListTile(
+                leading: const Icon(Icons.now_widgets_outlined),
+                title: const Text('Menú CAA'),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              menuCAA(id_caa: alumnoData['id_caa'])));
+                },
+              ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -273,7 +302,6 @@ class _menuAlumnosState extends State<menuAlumnos>
                 Navigator.pop(context);
               },
             ),
-            // Agrega más opciones de menú según sea necesario
           ],
         ),
       ),

@@ -100,6 +100,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
   Random random = Random();
   late List<Evento> eventos = [];
   bool isLoading = true;
+  int numAlumnosCA = 0;
 
   @override
   void initState() {
@@ -114,6 +115,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
         CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _loadEventos();
   }
+
 
   Future<void> _loadEventos() async {
     Map<String, dynamic> filterDataVisibleFalse = {
@@ -144,8 +146,21 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
           .map((e) => Evento.fromJson(e))
           .toList();
     }
+    Map<String, dynamic> filterData = {
+      "id_caa": id_caa,
+    };
 
+    ApiResponse response = await ApiService.getAlumnosFiltrados(filterData);
+    int numAlumnos = 0;
+    if (response.success) {
+      List<dynamic> alumnos = response.data;
+
+      // Get the number of students in the response
+      numAlumnos = alumnos.length;
+
+    } 
     setState(() {
+      numAlumnosCA = numAlumnos;
       if (eventosVisibleFalse.isNotEmpty || eventosVisibleTrue.isNotEmpty) {
         eventos = [...eventosVisibleFalse, ...eventosVisibleTrue];
         debugPrint(eventos.toString());
@@ -312,7 +327,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: _calcularColor(eventosDelDia.length, isMarker: true),
+                            color: _calcularColor(eventosDelDia.length,eventos.length, isMarker: true),
                             shape: BoxShape.circle,
                           ),
                           width: 17.0,
@@ -414,7 +429,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
     }
 
     // Calcular el color en función del número de eventos
-    Color colorCelda = _calcularColor(eventosEnHora.length);
+    Color colorCelda = _calcularColor(eventosEnHora.length, eventosDelDia.length, isMarker: false);
 
     // Agregar fila a la lista
     filas.add(
@@ -458,7 +473,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Table(
-          columnWidths: {
+          columnWidths: const {
             0: FixedColumnWidth(100),
             1: FixedColumnWidth(200),
           },
@@ -469,31 +484,22 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
   );
 }
 // Función para calcular el color en función del número de eventos
-    Color _calcularColor(int numeroEventos, {bool isMarker = false}) {
-      List<Color?> colors = [
-        Colors.deepPurple[300],
-        Colors.deepPurple[500],
-        Colors.deepPurple[700],
-      ];
-
-      // Filtra los valores nulos
-      colors = colors.where((color) => color != null).toList();
-
-      // Si es un marcador y no una celda, usa colores más sutiles
-      if (isMarker) {
-        colors = [
-          Colors.deepPurple[300]?.withOpacity(0.7),
-          Colors.deepPurple[500]?.withOpacity(0.7),
-          Colors.deepPurple[700]?.withOpacity(0.7),
-        ];
-
-        // Filtra los valores nulos después de aplicar la opacidad
-        colors = colors.where((color) => color != null).toList();
-      }
-
-      Random random = Random();
-      int index = random.nextInt(colors.length);
-      return colors[index] ?? Colors.deepPurple[500]!;
+  Color _calcularColor(int numEventos, int totalEventos, {bool isMarker = false}) {
+    // Calcular el porcentaje
+    double porcentaje = 0.0;
+    if(numAlumnosCA == 0){
+      porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos;
     }
+    else{
+      porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos/ numAlumnosCA ;
+    }
+
+    // Interpolar entre blanco (0%) y Colors.deepPurple[700] (100%)
+    Color color = Color.lerp(Colors.white, Colors.deepPurple[700]!, porcentaje) ?? Colors.deepPurple[500]!;
+
+    // Si es un marcador y no una celda, aplica opacidad
+
+    return color;
+  }
   
 }

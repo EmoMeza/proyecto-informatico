@@ -118,58 +118,45 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
 
 
   Future<void> _loadEventos() async {
-    Map<String, dynamic> filterDataVisibleFalse = {
-      "id_creador": id_caa,
-      "global": false.toString(),
-    };
 
-    Map<String, dynamic> filterDataVisibleTrue = {
-      "global": true.toString(),
-    };
-
-    ApiResponse responseVisibleFalse =
-        await ApiService.getEventosFiltrados(filterDataVisibleFalse);
-    ApiResponse responseVisibleTrue =
-        await ApiService.getEventosFiltrados(filterDataVisibleTrue);
-
-    List<Evento> eventosVisibleFalse = [];
-    List<Evento> eventosVisibleTrue = [];
-
-    if (responseVisibleFalse.success && responseVisibleFalse.data is List) {
-      eventosVisibleFalse = (responseVisibleFalse.data as List<dynamic>)
-          .map((e) => Evento.fromJson(e))
-          .toList();
-    }
-
-    if (responseVisibleTrue.success && responseVisibleTrue.data is List) {
-      eventosVisibleTrue = (responseVisibleTrue.data as List<dynamic>)
-          .map((e) => Evento.fromJson(e))
-          .toList();
-    }
     Map<String, dynamic> filterData = {
       "id_caa": id_caa,
     };
 
     ApiResponse response = await ApiService.getAlumnosFiltrados(filterData);
-    int numAlumnos = 0;
+
+    List<String> eventosIds = [];
+
     if (response.success) {
       List<dynamic> alumnos = response.data;
 
-      // Get the number of students in the response
-      numAlumnos = alumnos.length;
+      // Iterar sobre todos los alumnos
+      for (var alumno in alumnos) {
+        // Obtener la lista de ids de eventos del alumno actual
+        List<dynamic> misEventos = alumno['mis_eventos'];
 
-    } 
-    setState(() {
-      numAlumnosCA = numAlumnos;
-      if (eventosVisibleFalse.isNotEmpty || eventosVisibleTrue.isNotEmpty) {
-        eventos = [...eventosVisibleFalse, ...eventosVisibleTrue];
-        debugPrint(eventos.toString());
-      } else {
-        eventos = []; // Calendario vacío
+        // Agregar todos los ids de eventos del alumno a la lista principal
+        eventosIds.addAll(misEventos.map((eventoId) => eventoId.toString()));
       }
+
+      // Obtener la cantidad total de alumnos
+      numAlumnosCA = alumnos.length;
+      // Realizar consultas utilizando cada id en eventosIds
+      for (var eventoId in eventosIds) {
+        ApiResponse eventoResponse = await ApiService.getEvento(eventoId);
+        if (eventoResponse.success) {
+          // Convertir la respuesta a un objeto Evento y agregarlo a la lista
+          Evento evento = Evento.fromJson(eventoResponse.data);
+          eventos.add(evento);
+        }
+      } 
+    }
+    debugPrint(eventos.toString());
+    debugPrint(numAlumnosCA.toString());
+    setState(() {
       isLoading = false;
     });
-}
+    }
   
 
   @override

@@ -264,7 +264,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
   Future<File> convertImageToFile(img.Image image, String filename) async {
     Directory tempDir = await getTemporaryDirectory();
     final file = File('${tempDir.path}/$filename.png');
-    file.writeAsBytesSync(img.encodePng(image));
+    file.writeAsBytesSync(img.encodeJpg(image));
     return file;
   }
 

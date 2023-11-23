@@ -39,7 +39,7 @@ class ApiResponse {
 
 class ApiService {
   // Esto se puede cambiar segun la ip del servidor o el puerto
-  static const String _baseUrl = 'https://ac57-2800-150-107-db6-5dd8-d828-bafc-c856.ngrok-free.app';
+  static const String _baseUrl = 'http://10.0.2.2:4040';
 
   // -----------------Centro de Alumnos-----------------------
 
@@ -438,7 +438,8 @@ class ApiService {
 
     if (response.statusCode == 200) {
       if (response.body.toLowerCase().contains('no existe')) {
-        return ApiResponse(false, {}, 'Evento no encontrado en la base de datos');
+        return ApiResponse(
+            false, {}, 'Evento no encontrado en la base de datos');
       }
 
       Uint8List bytes = response.bodyBytes;
@@ -447,7 +448,7 @@ class ApiService {
         ui.Codec codec = await ui.instantiateImageCodec(
           data.buffer.asUint8List(),
           targetHeight: 100, // Proporciona la altura deseada
-          targetWidth: 100,  // Proporciona el ancho deseado
+          targetWidth: 100, // Proporciona el ancho deseado
         );
         ui.FrameInfo fi = await codec.getNextFrame();
         return ApiResponse(true, {'image': fi.image}, '');
@@ -457,7 +458,8 @@ class ApiService {
       }
     } else {
       // Maneja el caso en que el evento no fue encontrado basándote en el contenido del mensaje
-      return ApiResponse(false, {}, 'Error en la petición: ${response.statusCode}');
+      return ApiResponse(
+          false, {}, 'Error en la petición: ${response.statusCode}');
     }
   }
 
@@ -639,8 +641,13 @@ class ApiService {
   // Función para añadir un alumno
   // Parametros: nombre, matricula, Map<String, dynamic> data
   // Retorna: success, data, message
-  static Future<ApiResponse> postAlumno(String nombre, String apellido,
-      int matricula, bool esCaa, String idCaa, Map<String, dynamic> data) async {
+  static Future<ApiResponse> postAlumno(
+      String nombre,
+      String apellido,
+      int matricula,
+      bool esCaa,
+      String idCaa,
+      Map<String, dynamic> data) async {
     // Unify the data into a single object
     data['nombre'] = nombre;
     data['apellido'] = apellido;

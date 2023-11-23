@@ -117,7 +117,7 @@ class menuCAA extends StatelessWidget {
                     title: const Text('Calendario de disponibilidad'),
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => CalendarioDispoibilidad()),
+                        MaterialPageRoute(builder: (context) => CalendarioDispoibilidad(id_caa: id_caa)),
                       );
                     },
                   ),

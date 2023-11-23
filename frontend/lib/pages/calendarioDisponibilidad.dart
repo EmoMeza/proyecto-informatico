@@ -1,9 +1,9 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../api_services.dart';
-
-
 
 class Evento {
   String id;
@@ -13,7 +13,7 @@ class Evento {
   DateTime fechaInicio;
   DateTime fechaFinal;
   int horaInicio; // Nueva variable para la hora de inicio
-  int horaFinal;  // Nueva variable para la hora de término
+  int horaFinal; // Nueva variable para la hora de término
   bool visible;
   bool global;
 
@@ -85,13 +85,17 @@ class Evento {
 }
 
 class CalendarioDispoibilidad extends StatefulWidget {
+  final String id_caa;
+  const CalendarioDispoibilidad({Key? key, required this.id_caa})
+      : super(key: key);
   @override
-  _CalendarioDisponibilidadState createState() => _CalendarioDisponibilidadState();
+  _CalendarioDisponibilidadState createState() =>
+      _CalendarioDisponibilidadState();
 }
 
-
-class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with SingleTickerProviderStateMixin{
-  String id_caa = "6552d3d4ec6e222a40b76125";
+class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
+    with SingleTickerProviderStateMixin {
+  late String id_caa;
   late AnimationController _animationController;
   late Animation<double> _animation;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -105,6 +109,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
   @override
   void initState() {
     super.initState();
+    id_caa = widget.id_caa;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(
@@ -116,9 +121,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
     _loadEventos();
   }
 
-
   Future<void> _loadEventos() async {
-
     Map<String, dynamic> filterData = {
       "id_caa": id_caa,
     };
@@ -149,15 +152,14 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
           Evento evento = Evento.fromJson(eventoResponse.data);
           eventos.add(evento);
         }
-      } 
+      }
     }
     debugPrint(eventos.toString());
     debugPrint(numAlumnosCA.toString());
     setState(() {
       isLoading = false;
     });
-    }
-  
+  }
 
   @override
   void dispose() {
@@ -309,32 +311,30 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
                 singleMarkerBuilder: (context, day, events) {
                   var eventosDelDia = _getEventosDelDia(day);
                   if (eventosDelDia.isNotEmpty) {
-                    return Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _calcularColor(eventosDelDia.length,eventos.length, isMarker: true),
-                            shape: BoxShape.circle,
-                          ),
-                          width: 17.0,
-                          height: 17.0,
+                    return Stack(alignment: Alignment.bottomRight, children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: _calcularColor(
+                              eventosDelDia.length, eventos.length,
+                              isMarker: true),
+                          shape: BoxShape.circle,
                         ),
-    
-                      ]
-                    );
+                        width: 17.0,
+                        height: 17.0,
+                      ),
+                    ]);
                   } else {
                     return Container();
                   }
-},
+                },
               ),
             ),
           Expanded(
             child: Padding(
-              
               padding: const EdgeInsets.all(10.0),
               child: _selectedDay != null
-                  ? _buildEventList(_getEventosDelDia(_selectedDay!),_selectedDay!)
+                  ? _buildEventList(
+                      _getEventosDelDia(_selectedDay!), _selectedDay!)
                   : Container(),
             ),
           ),
@@ -343,150 +343,154 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad> with
     );
   }
 
-  Widget _buildEventList(List<Evento> eventosDelDia,DateTime fechaSeleccionada) {
-  // Crear una lista de eventos ordenada por la hora de inicio
-  eventosDelDia.sort((a, b) => a.fechaInicio.compareTo(b.fechaInicio));
-  debugPrint(eventosDelDia.toString());
-  // Crear una lista de horas del día
-  List<int> horasDelDia = List.generate(24, (index) => index);
+  Widget _buildEventList(
+      List<Evento> eventosDelDia, DateTime fechaSeleccionada) {
+    // Crear una lista de eventos ordenada por la hora de inicio
+    eventosDelDia.sort((a, b) => a.fechaInicio.compareTo(b.fechaInicio));
+    debugPrint(eventosDelDia.toString());
+    // Crear una lista de horas del día
+    List<int> horasDelDia = List.generate(24, (index) => index);
 
-  // Lista de TableRow
-  List<TableRow> filas = [];
+    // Lista de TableRow
+    List<TableRow> filas = [];
 
-  // Encabezado de la tabla
-  filas.add(
-    TableRow(
-      children: [
-        TableCell(
-          child: Container(
-            color: Colors.grey[300],
-            padding: const EdgeInsets.all(8.0),
-            child: const Center(
-              heightFactor: 2,
-              child: Text(
-                'Hora',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ),
-        TableCell(
-          child: Container(
-            color: Colors.grey[300],
-            padding: const EdgeInsets.all(8.0),
-            child: const Center(
-              heightFactor: 2,
-              child: Text(
-                'Disponibilidad',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  // Filas de datos
-  fechaSeleccionada = fechaSeleccionada.toLocal();
-  for (int hora in horasDelDia) {
-    //imprimir el tipo de dato de hora
-    List<Evento> eventosEnHora = [];
-    for (Evento evento in eventosDelDia) {
-      if(fechaSeleccionada.isAfter(evento.fechaInicio) && fechaSeleccionada.isBefore(evento.fechaFinal)){
-  
-        eventosEnHora.add(evento);
-      }
-      else if(evento.fechaInicio==evento.fechaFinal){ 
-        if (evento.horaInicio <= hora && evento.horaFinal > hora) {
-          eventosEnHora.add(evento);
-        }
-      }
-      else if(fechaSeleccionada.isBefore(evento.fechaFinal) && fechaSeleccionada == evento.fechaInicio){
-        if (evento.horaInicio <= hora) {
-          eventosEnHora.add(evento);
-        }
-      }
-      else if(fechaSeleccionada == evento.fechaFinal && fechaSeleccionada.isAfter(evento.fechaInicio)){
-        if (evento.horaFinal > hora) {
-          eventosEnHora.add(evento);
-        }
-      }
-      
-    }
-
-    // Calcular el color en función del número de eventos
-    Color colorCelda = _calcularColor(eventosEnHora.length, eventosDelDia.length, isMarker: false);
-
-    // Agregar fila a la lista
+    // Encabezado de la tabla
     filas.add(
       TableRow(
         children: [
           TableCell(
             child: Container(
+              color: Colors.grey[300],
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text('$hora:00'),
-                ],
+              child: const Center(
+                heightFactor: 2,
+                child: Text(
+                  'Hora',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
           TableCell(
             child: Container(
-              height: 32,
-              color: colorCelda,
+              color: Colors.grey[300],
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    '${eventosEnHora.length} evento(s)',
-                    style: const TextStyle(fontSize: 12.0),
-                  ),
-                ],
+              child: const Center(
+                heightFactor: 2,
+                child: Text(
+                  'Disponibilidad',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
         ],
       ),
     );
-  }
 
-  return FadeTransition(
-    opacity: _animation,
-    child: SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
-          .animate(_animation),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Table(
-          columnWidths: const {
-            0: FixedColumnWidth(100),
-            1: FixedColumnWidth(200),
-          },
-          children: filas,
+    // Filas de datos
+    fechaSeleccionada = fechaSeleccionada.toLocal();
+    for (int hora in horasDelDia) {
+      //imprimir el tipo de dato de hora
+      List<Evento> eventosEnHora = [];
+      for (Evento evento in eventosDelDia) {
+        if (fechaSeleccionada.isAfter(evento.fechaInicio) &&
+            fechaSeleccionada.isBefore(evento.fechaFinal)) {
+          eventosEnHora.add(evento);
+        } else if (evento.fechaInicio == evento.fechaFinal) {
+          if (evento.horaInicio <= hora && evento.horaFinal > hora) {
+            eventosEnHora.add(evento);
+          }
+        } else if (fechaSeleccionada.isBefore(evento.fechaFinal) &&
+            fechaSeleccionada == evento.fechaInicio) {
+          if (evento.horaInicio <= hora) {
+            eventosEnHora.add(evento);
+          }
+        } else if (fechaSeleccionada == evento.fechaFinal &&
+            fechaSeleccionada.isAfter(evento.fechaInicio)) {
+          if (evento.horaFinal > hora) {
+            eventosEnHora.add(evento);
+          }
+        }
+      }
+
+      // Calcular el color en función del número de eventos
+      Color colorCelda = _calcularColor(
+          eventosEnHora.length, eventosDelDia.length,
+          isMarker: false);
+
+      // Agregar fila a la lista
+      filas.add(
+        TableRow(
+          children: [
+            TableCell(
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text('$hora:00'),
+                  ],
+                ),
+              ),
+            ),
+            TableCell(
+              child: Container(
+                height: 32,
+                color: colorCelda,
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '${eventosEnHora.length} evento(s)',
+                      style: const TextStyle(fontSize: 12.0),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return FadeTransition(
+      opacity: _animation,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
+            .animate(_animation),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Table(
+            columnWidths: const {
+              0: FixedColumnWidth(100),
+              1: FixedColumnWidth(200),
+            },
+            children: filas,
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
 // Función para calcular el color en función del número de eventos
-  Color _calcularColor(int numEventos, int totalEventos, {bool isMarker = false}) {
+  Color _calcularColor(int numEventos, int totalEventos,
+      {bool isMarker = false}) {
     // Calcular el porcentaje
     double porcentaje = 0.0;
-    if(numAlumnosCA == 0){
+    if (numAlumnosCA == 0) {
       porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos;
-    }
-    else{
-      porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos/ numAlumnosCA ;
+    } else {
+      porcentaje =
+          totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA;
     }
 
     // Interpolar entre blanco (0%) y Colors.deepPurple[700] (100%)
-    Color color = Color.lerp(Colors.white, Colors.deepPurple[700]!, porcentaje) ?? Colors.deepPurple[500]!;
+    Color color =
+        Color.lerp(Colors.white, Colors.deepPurple[700]!, porcentaje) ??
+            Colors.deepPurple[500]!;
 
     // Si es un marcador y no una celda, aplica opacidad
 
     return color;
   }
-  
 }

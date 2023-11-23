@@ -639,7 +639,38 @@ app.get('/get/filter/eventos', async (req, res) => {
     }
 });
 
+app.get('/get/filter/alumnos', async (req, res) => {
+    try {
+        await client.connect();
+        const database = client.db("proyecto_informatico");
+        const collection = database.collection("alumnos");
 
+        // Obtén todos los parámetros de filtro de la URL
+        const parametrosFiltro = req.query;
+
+        // Inicializa un objeto de filtro vacío
+        const filtroFinal = {};
+
+        // Agrega parámetros al filtro final según sea necesario
+        for (const param in parametrosFiltro) {
+            filtroFinal[param] = parametrosFiltro[param];
+        }
+
+        // Realiza la consulta en la colección utilizando el filtro final
+        const result = await collection.find(filtroFinal).toArray();
+
+        if (result.length === 0) {
+            res.send('No se encontraron alumnos que cumplan con los criterios de filtro.');
+        } else {
+            res.send(result);
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error en el servidor');
+    } finally {
+        await client.close();
+    }
+});
 
 app.get('/get/alumno/imagen', async function (req, res) {
     const matricula = parseInt(req.query.matricula);

@@ -668,6 +668,41 @@ class ApiService {
     }
   }
 
+  //funcion para filtrar alumnos 
+  static Future<ApiResponse> getAlumnosFiltrados(Map<String, dynamic> filterData) async {
+    var url = Uri.parse('$_baseUrl/get/filter/alumnos');
+
+    // Add parameters to the URL
+    url = url.replace(queryParameters: filterData);
+
+    try {
+      // Make the request
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = response.body;
+        // If the server returns a message without data
+        if (responseBody.startsWith('No se encontraron')) {
+          return ApiResponse(false, {}, responseBody);
+        } else {
+          // If the server finds students, return the data
+          final List<dynamic> jsonData = json.decode(response.body);
+          return ApiResponse(true, jsonData, '');
+        }
+      } else {
+        // If the response is not OK, throw an error.
+        return ApiResponse(false, {}, 'Error en la peticion');
+      }
+    } catch (error) {
+      // Handle errors
+      return ApiResponse(false, {}, 'Error en el servidor');
+    }
+}
   // Funcion para actualizar un alumno
   // Parametros: matricula, Map<String, dynamic> updateData
   // Retorna: success, data, message

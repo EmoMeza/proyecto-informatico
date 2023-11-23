@@ -230,7 +230,9 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
         'categoria': dropdownValue,
         'descripcion': _descripcionController.text,
         'fecha_inicio': formatDateTime(selectedDate, selectedTime),
-        'fecha_final': formatDateTime(selectedEndDate, selectedEndTime),
+        'fecha_final': (dropdownValue == 'Evaluación')
+            ? formatDateTime(selectedDate, selectedEndTime)
+            : formatDateTime(selectedEndDate, selectedEndTime),
         'ingresos': [],
         'egresos': [],
         'total': 0,

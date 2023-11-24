@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
 import 'package:proyecto_informatico/pages/notificaciones.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class EventoPopup extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -19,6 +21,7 @@ class _EventoPopupState extends State<EventoPopup> {
   late List<String> asistencias;
   late bool isAsistireButtonEnabled;
   late String nombreCA;
+  Uint8List? base64Image;
   bool isLoading = true;
 
   @override
@@ -29,7 +32,10 @@ class _EventoPopupState extends State<EventoPopup> {
     asistencias = [];
     isAsistireButtonEnabled = true;
     nombreCA = '';
-
+    if (widget.eventData.containsKey('imagen')) {
+      // Decode base64 image
+      base64Image = base64Decode(widget.eventData['imagen']);
+    }
     // Ejecuta código asíncrono después de que initState ha completado
     Future.delayed(Duration.zero, () async {
       await _loadAsistencias();
@@ -51,7 +57,7 @@ class _EventoPopupState extends State<EventoPopup> {
       setState(() {
         asistencias = asistenciasData.map((e) => e.toString()).toList();
         isAsistireButtonEnabled = !asistencias.contains(matricula.toString());
-        if(eventData['visible'] == false){
+        if (eventData['visible'] == false) {
           isAsistireButtonEnabled = false;
         }
       });
@@ -63,6 +69,7 @@ class _EventoPopupState extends State<EventoPopup> {
       });
     }
   }
+
   Future<void> _loadnombreCA() async {
     debugPrint(widget.eventData['id_creador'].toString().length.toString());
     ApiResponse response =
@@ -83,12 +90,10 @@ class _EventoPopupState extends State<EventoPopup> {
     });
   }
 
-
   Future<void> _loadnombreAlumno() async {
     debugPrint(widget.eventData['id_creador'].toString().length.toString());
     ApiResponse response =
         await ApiService.getAlumno(widget.eventData['id_creador']);
-
 
     if (response.success) {
       // Muestra una ventana emergente con un mensaje
@@ -144,11 +149,21 @@ class _EventoPopupState extends State<EventoPopup> {
               _buildLabelText('Fecha de fin:'),
               _buildText(formattedFechaFinal),
               const SizedBox(height: 10.0),
-              _buildLabelText('Global:'),
-              _buildText(widget.eventData['global'].toString()),
+              if (widget.eventData['categoria'] == 'actividad' ||
+                  widget.eventData['categoria'] == 'Actividad') ...[
+                _buildLabelText('Evento de tipo:'),
+                _buildText(widget.eventData['global'] == true
+                    ? 'Global'
+                    : 'De carrera')
+              ],
               const SizedBox(height: 10.0),
               _buildLabelText('Creador:'),
               _buildText(nombreCA),
+              if (base64Image?.isNotEmpty == false &&
+                  widget.eventData['visible'] == true) ...[
+                const SizedBox(height: 10.0),
+                _buildImage(base64Image!),
+              ],
             ],
           ),
         ),
@@ -204,6 +219,15 @@ class _EventoPopupState extends State<EventoPopup> {
         ],
       );
     }
+  }
+
+  Widget _buildImage(Uint8List base64Image) {
+    return Image.memory(
+      base64Image,
+      width: 400, // Adjust the width as needed
+      height: 400, // Adjust the height as needed
+      fit: BoxFit.cover,
+    );
   }
 
   Widget _buildLabelText(String label) {

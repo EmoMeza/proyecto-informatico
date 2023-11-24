@@ -258,7 +258,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
     if (_formKey.currentState!.validate()) {
       bool isGlobal = false;
 
-      if (dropdownValue == 'actividad') {
+      if (dropdownValue == 'Actividad') {
         // Si el evento es actividad, revisar globalCheckboxValue
         isGlobal = _globalCheckboxValue;
       }
@@ -275,8 +275,10 @@ class _AgregarEventoState extends State<AgregarEvento> {
         );
         base64Image = base64Encode(compressedBytes);
         int originalSizeInBytes = imageBytes.length;
+        int encodedSizeInBytes = imagenConvertida!.length;
         int compressedEncodedSizeInBytes = base64Image!.length;
         print('Original Size: ${originalSizeInBytes / 1024} KB');
+        print('Encoded Size: ${encodedSizeInBytes / 1024} KB');
         print(
             'Compressed and Encoded Size: ${compressedEncodedSizeInBytes / 1024} KB');
       }
@@ -296,7 +298,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'visible': true,
         'global': isGlobal,
         'asistencia': [],
-        'imagen': base64Image,
+        'imagen': base64Image ?? '',
       };
 
       ApiResponse response = await ApiService.postEvento(id_caa, postData);

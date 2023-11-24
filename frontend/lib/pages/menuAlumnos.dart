@@ -1,4 +1,4 @@
-// ignore_for_file: camel_case_types
+// ignore_for_file: camel_case_types, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -94,40 +94,45 @@ class _menuAlumnosState extends State<menuAlumnos>
     _loadEventos();
   }
 
+  static Future<List<Evento>> getEventosByIds(List<dynamic> eventIds) async {
+    List<Evento> eventos = [];
+
+    for (String eventId in eventIds) {
+      ApiResponse response = await ApiService.getEvento(eventId);
+
+      if (response.success && response.data != null) {
+        Map<String, dynamic> eventData = response.data;
+        Evento evento = Evento.fromJson(eventData);
+        eventos.add(evento);
+      }
+    }
+
+    return eventos;
+  }
+
   Future<void> _loadEventos() async {
     alumnoData = widget.alumnoData;
     Map<String, dynamic> filterDataPersonalEvent = {
       "id_creador": alumnoData['matricula'].toString(),
       "visible": "false"
     };
-    // Obtener eventos asistidos por el alumno
-    Map<String, dynamic> filterAssistedEvents = {
-      "mis_asistencias": alumnoData['mis_asistencias'].toString(),
-    };
-
     // Obtener eventos privados
-
     ApiResponse responsePersonalEvents =
         await ApiService.getEventosFiltrados(filterDataPersonalEvent);
-    ApiResponse responseAssistedEvents =
-        await ApiService.getEventosFiltrados(filterAssistedEvents);
-    // Obtener eventos asistidos
     List<Evento> eventosPersonal = [];
-    List<Evento> eventosAsistidos = [];
-
     if (responsePersonalEvents.success && responsePersonalEvents.data is List) {
       eventosPersonal = (responsePersonalEvents.data as List<dynamic>)
           .map((e) => Evento.fromJson(e))
           .toList();
     }
-    if (responseAssistedEvents.success && responseAssistedEvents.data is List) {
-      eventosAsistidos = (responseAssistedEvents.data as List<dynamic>)
-          .map((e) => Evento.fromJson(e))
-          .toList();
-    }
+    // Obtener eventos asistidos
+    List<Evento> eventosAsistidos = [];
+    eventosAsistidos = await getEventosByIds(alumnoData['mis_asistencias']);
+    debugPrint(eventosAsistidos.toString());
+    // Actualizar la lista de eventos
     setState(() {
-      if (eventosPersonal.isNotEmpty) {
-        eventos = eventosPersonal;
+      if (eventosPersonal.isNotEmpty || eventosAsistidos.isNotEmpty) {
+        eventos = [...eventosPersonal, ...eventosAsistidos];
       } else {
         eventos = [];
       }
@@ -159,11 +164,11 @@ class _menuAlumnosState extends State<menuAlumnos>
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text('Error al cargar detalles del evento'),
+            content: const Text('Error al cargar detalles del evento'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cerrar'),
+                child: const Text('Cerrar'),
               ),
             ],
           );
@@ -213,24 +218,34 @@ class _menuAlumnosState extends State<menuAlumnos>
                     child: Text('No hay eventos personales.'),
                   ),
                 if (!isLoading && eventos.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const ScrollPhysics(),
-                    itemCount: eventos.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        elevation: 2.0, // Set the elevation as needed
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: ListTile(
-                          title: Text(eventos[index].nombre),
-                          subtitle: Text(eventos[index].descripcion),
-                          // Add more details as needed
-                          onTap: () => _showEventoDetails(eventos[index]),
-                        ),
-                      );
-                    },
-                  ),
+                  Column(children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Eventos creados y asistidos por ti:',
+                      style: TextStyle(
+                        fontSize: 18.0, // Set the font size as needed
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ScrollPhysics(),
+                      itemCount: eventos.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 2.0, // Set the elevation as needed
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: ListTile(
+                            title: Text(eventos[index].nombre),
+                            subtitle: Text(eventos[index].descripcion),
+                            // Add more details as needed
+                            onTap: () => _showEventoDetails(eventos[index]),
+                          ),
+                        );
+                      },
+                    ),
+                  ]),
               ],
             ),
           ),

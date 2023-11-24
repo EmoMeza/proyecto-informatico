@@ -30,7 +30,9 @@ const client = new MongoClient(uri, {
 // Middlewares
 app.use(morgan('tiny')); // Usamos morgan con el formato tiny.
 app.use(cors()); // Usamos cors para evitar el bloqueo de peticiones.
-app.use(express.json()) // Nos permite trabajar con el formato json.
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
+
 // app.use(express.urlencoded({ extended: true })); 
 //app.use(express.static(path.join(__dirname, 'public')));
 

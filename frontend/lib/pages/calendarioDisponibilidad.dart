@@ -154,8 +154,6 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
         }
       }
     }
-    debugPrint(eventos.toString());
-    debugPrint(numAlumnosCA.toString());
     setState(() {
       isLoading = false;
     });
@@ -347,7 +345,6 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
       List<Evento> eventosDelDia, DateTime fechaSeleccionada) {
     // Crear una lista de eventos ordenada por la hora de inicio
     eventosDelDia.sort((a, b) => a.fechaInicio.compareTo(b.fechaInicio));
-    debugPrint(eventosDelDia.toString());
     // Crear una lista de horas del día
     List<int> horasDelDia = List.generate(24, (index) => index);
 

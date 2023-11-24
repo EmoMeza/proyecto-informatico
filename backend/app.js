@@ -7,10 +7,8 @@ const MongoClient = require('mongodb').MongoClient;
 const ServerApiVersion = require('mongodb').ServerApiVersion;
 const { ObjectId } = require('mongodb');
 const multer = require('multer'); // Moved this line up
-const storage = multer.memoryStorage(); // Almacena la imagen en memoria
 const fs = require('fs');
 const path = require('path');
-const upload = multer({ storage: multer.memoryStorage() });
 require('dotenv').config();
 
 const app = express(); // Inicializamos express.
@@ -98,39 +96,9 @@ app.get('/get/caa', async function (req, res) {
     }
 });
 
-app.get('/get/caa/imagen', async function (req, res) {
-    const id = req.query.id;
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        const database = client.db("proyecto_informatico"); //schema
-        const collection = database.collection("caa"); //table
-        // Check if the id already exists in the collection
-        const result = await collection.findOne({ _id: new ObjectId(id) });
-        if (!result) {
-            // If the id already exists, send a message to the client
-            res.send(`El id ${id} no existe en la base de datos`);
-        } else {
-            // If the id exists, send the image data
-            const img = Buffer.from(result.imagen, 'base64');
-            res.writeHead(200, {
-               'Content-Type': 'image/png',
-               'Content-Length': img.length
-            });
-            res.end(img);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Server error');
-    } finally {
-        await client.close();
-    }
-});
 
 app.post('/add/caa', async function (req, res) {
     const data = req.body;
-    const imagen = req.file;
-    data.imagen = imagen.buffer.toString('base64');
     try {
         await client.connect();
         const database = client.db("proyecto_informatico");
@@ -399,42 +367,12 @@ app.get('/get/evento', async function (req, res) {
     }
 });
 
-app.get('/get/evento/imagen', async function (req, res) {
-    const id = req.query.id;
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        const database = client.db("proyecto_informatico"); //schema
-        const collection = database.collection("test"); //table
-        // Check if the id already exists in the collection
-        const result = await collection.findOne({ _id: new ObjectId(id) });
-        if (!result) {
-            // If the id already exists, send a message to the client
-            res.send(`El id ${id} no existe en la base de datos`);
-        } else {
-            // If the id exists, send the image data
-            const img = Buffer.from(result.imagen, 'base64');
-            res.writeHead(200, {
-               'Content-Type': 'image/png',
-               'Content-Length': img.length
-            });
-            res.end(img);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Server error');
-    } finally {
-        await client.close();
-    }
-});
 
 app.post('/add/evento', async function (req, res) {
     const id_creador = req.query.id_creador;
     const data = req.body;
-    const imagen = req.file;
 
 
-    data.imagen = imagen.buffer.toString('base64');
 
     if (!data.fecha_inicio || !data.fecha_final) {
         // Si falta una o ambas fechas, establece ambas en la fecha y hora actual.
@@ -640,36 +578,6 @@ app.get('/get/filter/eventos', async (req, res) => {
 });
 
 
-
-app.get('/get/alumno/imagen', async function (req, res) {
-    const matricula = parseInt(req.query.matricula);
-    try {
-        await client.connect();
-        const database = client.db("proyecto_informatico");
-        const collection = database.collection("alumnos");
-        // Check if the alumno already exists in the collection
-        const result = await collection.findOne({ matricula: matricula });
-        console.log(result);
-        if (!result) {
-            // If the alumno doesn't exist, send a 404 status code
-            res.status(404).send('Alumno not found');
-        } else {
-            // If the alumno exists, send the image data
-            const img = Buffer.from(result.imagen, 'base64');
-            res.writeHead(200, {
-               'Content-Type': 'image/png',
-               'Content-Length': img.length
-            });
-            res.end(img);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Server error');
-    } finally {
-        await client.close();
-    }
-});
-
 app.get('/get/alumno', async function (req, res) {
     const matricula = parseInt(req.query.matricula);
     try {
@@ -693,7 +601,7 @@ app.get('/get/alumno', async function (req, res) {
     }
 });
 
-app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
+app.post('/add/alumno', async function (req, res) {
     const nombre = req.query.nombre;
     const matricula = req.query.matricula;
     const apellido = req.query.apellido;
@@ -705,7 +613,6 @@ app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     if (!req.file) {
         return res.status(400).send('No image file was uploaded');
     }
-    const imagen = req.file.buffer.toString('base64');
 
 
     // Unify the data into a single object
@@ -716,7 +623,6 @@ app.post('/add/alumno', upload.single('imagen'), async function (req, res) {
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
     data.mis_asistencias = mis_asistencias;
-    data.imagen = imagen
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

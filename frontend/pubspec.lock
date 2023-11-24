@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: basic_utils
-      sha256: "2064b21d3c41ed7654bc82cc476fd65542e04d60059b74d5eed490a4da08fc6c"
+      sha256: "1fb8c5493fc1b9500512b2e153c0b9bcc9e281621cde7f810420f4761be9e38d"
       url: "https://pub.dev"
     source: hosted
-    version: "5.7.0"
+    version: "5.6.1"
   bidi:
     dependency: transitive
     description:
@@ -473,10 +473,10 @@ packages:
     dependency: transitive
     description:
       name: mongo_dart_query
-      sha256: "4ed33795ee592c9b423894b04508d86f65a991c453576abeb05477ad416725ce"
+      sha256: d9185804b24088b933248892c956b8c6962d079523946bdd8b5eef557dca0355
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.5"
+    version: "4.0.4"
   packages_extensions:
     dependency: transitive
     description:

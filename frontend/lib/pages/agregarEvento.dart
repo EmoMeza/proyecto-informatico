@@ -295,26 +295,13 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'global': isGlobal,
         'asistencia': [],
       };
-      if (_pickedImage != null) {
-        imagetype = convertXFileToImage(_pickedImage);
-        if (imagetype != null) {
-          imageFile = await convertImageToFile(imagetype, 'eventImage.png');
-        }
-        ApiResponse response =
-            await ApiService.postEvento(id_caa, postData, imageFile);
-        if (response.success) {
-          showResponseDialog(context, response.message, response.success);
-        } else {
-          showResponseDialog(context, response.message, response.success);
-        } // Si se selecciono una imagen, enviarla a la API
+
+      ApiResponse response = await ApiService.postEvento(id_caa, postData);
+
+      if (response.success) {
+        showResponseDialog(context, response.message, response.success);
       } else {
-        ApiResponse response =
-            await ApiService.postEvento(id_caa, postData, null);
-        if (response.success) {
-          showResponseDialog(context, response.message, response.success);
-        } else {
-          showResponseDialog(context, response.message, response.success);
-        } // Si no se selecciono una imagen, enviar el evento sin imagen
+        showResponseDialog(context, response.message, response.success);
       }
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:convert';
 import '../api_services.dart';
 import 'package:image/image.dart' as img;
@@ -262,10 +263,22 @@ class _AgregarEventoState extends State<AgregarEvento> {
         isGlobal = _globalCheckboxValue;
       }
       String? base64Image;
+      String? imagenConvertida;
       // Si se selecciono una imagen, convertirla a base64
       if (_pickedImage != null) {
         List<int> imageBytes = await _pickedImage!.readAsBytes();
-        base64Image = base64Encode(imageBytes);
+        imagenConvertida = base64.encode(imageBytes);
+        Uint8List uint8List = Uint8List.fromList(imageBytes);
+        List<int> compressedBytes = await FlutterImageCompress.compressWithList(
+          uint8List,
+          quality: 80, // Adjust the quality as needed (0 to 100)
+        );
+        base64Image = base64Encode(compressedBytes);
+        int originalSizeInBytes = imageBytes.length;
+        int compressedEncodedSizeInBytes = base64Image!.length;
+        print('Original Size: ${originalSizeInBytes / 1024} KB');
+        print(
+            'Compressed and Encoded Size: ${compressedEncodedSizeInBytes / 1024} KB');
       }
       // Datos para enviar a la API
       Map<String, dynamic> postData = {
@@ -283,7 +296,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'visible': true,
         'global': isGlobal,
         'asistencia': [],
-        'imagen': base64Image ?? ''
+        'imagen': base64Image,
       };
 
       ApiResponse response = await ApiService.postEvento(id_caa, postData);

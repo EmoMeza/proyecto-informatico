@@ -236,7 +236,7 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
         'ingresos': [],
         'egresos': [],
         'total': 0,
-        'id_creador': matricula.toString(), //idk how to get this
+        'id_creador': matricula.toString(),
         'visible': false,
         'global': false,
         'asistencia': []

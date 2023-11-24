@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'dart:convert';
 import '../api_services.dart';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
@@ -47,29 +47,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
     setState(() {
       _pickedImage = pickedFile;
     });
-  }
-
-  img.Image? convertXFileToImage(XFile? xFile) {
-    if (xFile == null) {
-      return null;
-    }
-
-    // Read the bytes of the image file
-    List<int> imageBytes = File(xFile.path).readAsBytesSync();
-
-    // Decode the bytes into an Image object
-    img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
-
-    // Convert the image to PNG format
-    if (image != null) {
-      //encode to png
-      Uint8List pngBytes = img.encodePng(image);
-      //decode to image
-      img.Image? pngImage = img.decodeImage(pngBytes);
-      return pngImage;
-    }
-
-    return null;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -261,11 +238,18 @@ class _AgregarEventoState extends State<AgregarEvento> {
     );
   }
 
-  Future<File> convertImageToFile(img.Image image, String filename) async {
-    Directory tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/$filename.png');
-    file.writeAsBytesSync(img.encodeJpg(image));
-    return file;
+  img.Image? convertXFileToImage(XFile? xFile) {
+    if (xFile == null) {
+      return null;
+    }
+
+    // Read the bytes of the image file
+    List<int> imageBytes = File(xFile.path).readAsBytesSync();
+
+    // Decode the bytes into an Image object
+    img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
+
+    return image;
   }
 
   void _submitForm(BuildContext context) async {
@@ -277,7 +261,13 @@ class _AgregarEventoState extends State<AgregarEvento> {
         // Si el evento es actividad, revisar globalCheckboxValue
         isGlobal = _globalCheckboxValue;
       }
+      String? base64Image;
       img.Image? imagetype;
+      // Si se selecciono una imagen, convertirla a base64
+      if (_pickedImage != null) {
+        List<int> imageBytes = await _pickedImage!.readAsBytes();
+        base64Image = base64Encode(imageBytes);
+      }
       // Datos para enviar a la API
       Map<String, dynamic> postData = {
         'nombre': _nombreController.text,
@@ -294,6 +284,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
         'visible': true,
         'global': isGlobal,
         'asistencia': [],
+        'imagen': base64Image ?? ''
       };
 
       ApiResponse response = await ApiService.postEvento(id_caa, postData);

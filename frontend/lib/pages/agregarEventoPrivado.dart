@@ -241,7 +241,7 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
       };
 
       ApiResponse response =
-          await ApiService.postEvento(matricula.toString(), postData, null);
+          await ApiService.postEvento(matricula.toString(), postData);
       if (response.success) {
         showResponseDialog(context, response.message, response.success);
       } else {

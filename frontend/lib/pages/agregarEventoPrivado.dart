@@ -212,7 +212,7 @@ class _AgregarEventoPrivadoState extends State<AgregarEventoPrivado> {
                 Navigator.of(dialogContext).pop();
                 if (success) {
                   //Cierra la pagina si se envio el formulario
-                  Navigator.of(dialogContext).pop();
+                  Navigator.pop(context, true);
                 }
               },
             ),

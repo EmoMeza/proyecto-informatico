@@ -354,9 +354,15 @@ class _CalendarioState extends State<CalendarioAlumos>
           itemCount: eventosDelDia.length,
           itemBuilder: (context, index) {
             Evento evento = eventosDelDia[index];
+            String shortenedDescription =
+                _getShortenedDescription(evento.descripcion);
+
             return ListTile(
               title: Text(evento.nombre),
-              subtitle: Text(evento.descripcion),
+              subtitle: Tooltip(
+                message: evento.descripcion,
+                child: Text(shortenedDescription),
+              ),
               onTap: () => _showEventoDetails(evento),
             );
           },
@@ -364,6 +370,14 @@ class _CalendarioState extends State<CalendarioAlumos>
       ),
     );
   }
+
+  String _getShortenedDescription(String description) {
+    const int maxCharacters = 100; // Define el número máximo de caracteres
+    return (description.length <= maxCharacters)
+        ? description
+        : description.substring(0, maxCharacters) + '...';
+  }
+
 
   void _showEventoDetails(Evento evento) async {
     ApiResponse response = await ApiService.getEvento(evento.id);

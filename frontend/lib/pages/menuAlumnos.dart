@@ -71,6 +71,7 @@ class menuAlumnos extends StatefulWidget {
 
 class _menuAlumnosState extends State<menuAlumnos>
     with TickerProviderStateMixin {
+  final GlobalKey<_menuAlumnosState> _key = GlobalKey<_menuAlumnosState>();
   late Map<String, dynamic> alumnoData;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -80,7 +81,6 @@ class _menuAlumnosState extends State<menuAlumnos>
   @override
   void initState() {
     super.initState();
-    alumnoData = widget.alumnoData;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(
@@ -92,34 +92,45 @@ class _menuAlumnosState extends State<menuAlumnos>
     _loadEventos();
   }
 
+  static Future<List<Evento>> getEventosByIds(List<dynamic> eventIds) async {
+    List<Evento> eventos = [];
+
+    for (String eventId in eventIds) {
+      ApiResponse response = await ApiService.getEvento(eventId);
+
+      if (response.success && response.data != null) {
+        Map<String, dynamic> eventData = response.data;
+        Evento evento = Evento.fromJson(eventData);
+        eventos.add(evento);
+      }
+    }
+
+    return eventos;
+  }
+
   Future<void> _loadEventos() async {
+    alumnoData = widget.alumnoData;
     Map<String, dynamic> filterDataPersonalEvent = {
       "id_creador": alumnoData['matricula'].toString(),
       "visible": "false"
     };
-    // Obtener eventos asistidos por el alumno
-    Map<String, dynamic> filterAssistedEvents = {
-      "matricula": alumnoData['matricula'].toString(),
-    };
-
     // Obtener eventos privados
-
     ApiResponse responsePersonalEvents =
         await ApiService.getEventosFiltrados(filterDataPersonalEvent);
-    // Obtener eventos asistidos
     List<Evento> eventosPersonal = [];
-
     if (responsePersonalEvents.success && responsePersonalEvents.data is List) {
       eventosPersonal = (responsePersonalEvents.data as List<dynamic>)
           .map((e) => Evento.fromJson(e))
           .toList();
     }
-
+    // Obtener eventos asistidos
+    List<Evento> eventosAsistidos = [];
+    eventosAsistidos = await getEventosByIds(alumnoData['mis_asistencias']);
+    debugPrint(eventosAsistidos.toString());
+    // Actualizar la lista de eventos
     setState(() {
-      if (eventosPersonal.isNotEmpty) {
-        eventos = eventosPersonal;
-        print(eventosPersonal.toString());
-        debugPrint(eventosPersonal.toString());
+      if (eventosPersonal.isNotEmpty || eventosAsistidos.isNotEmpty) {
+        eventos = [...eventosPersonal, ...eventosAsistidos];
       } else {
         eventos = [];
       }
@@ -177,42 +188,64 @@ class _menuAlumnosState extends State<menuAlumnos>
               .onPrimary, // Cambia el color según tu necesidad
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isLoading)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 200),
-                      CircularProgressIndicator(),
-                      SizedBox(height: 8.0),
-                      Text('Cargando eventos...'),
-                    ],
+      body: RefreshIndicator(
+        key: _key,
+        onRefresh: () async {
+          await _loadEventos();
+        },
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 200),
+                        CircularProgressIndicator(),
+                        SizedBox(height: 8.0),
+                        Text('Cargando eventos...'),
+                      ],
+                    ),
                   ),
-                ),
-              if (!isLoading && eventos.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No hay eventos personales.'),
-                ),
-              if (!isLoading && eventos.isNotEmpty)
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const ScrollPhysics(),
-                  itemCount: eventos.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                        title: Text(eventos[index].nombre),
-                        subtitle: Text(eventos[index].descripcion),
-                        // Add more details as needed
-                        onTap: () => _showEventoDetails(eventos[index]));
-                  },
-                ),
-            ],
+                if (!isLoading && eventos.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('No hay eventos personales.'),
+                  ),
+                if (!isLoading && eventos.isNotEmpty)
+                  Column(children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Eventos creados y asistidos por ti:',
+                      style: TextStyle(
+                        fontSize: 18.0, // Set the font size as needed
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ScrollPhysics(),
+                      itemCount: eventos.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 2.0, // Set the elevation as needed
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: ListTile(
+                            title: Text(eventos[index].nombre),
+                            subtitle: Text(eventos[index].descripcion),
+                            // Add more details as needed
+                            onTap: () => _showEventoDetails(eventos[index]),
+                          ),
+                        );
+                      },
+                    ),
+                  ]),
+              ],
+            ),
           ),
         ),
       ),
@@ -248,14 +281,20 @@ class _menuAlumnosState extends State<menuAlumnos>
             ListTile(
               leading: const Icon(Icons.add),
               title: const Text('Agregar Evento'),
-              onTap: () {
-                // Navegar a la página 1
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AgregarEventoPrivado(
-                            alumnoData: widget.alumnoData)));
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgregarEventoPrivado(
+                      alumnoData: widget.alumnoData,
+                    ),
+                  ),
+                );
+
+                if (result == true) {
+                  // If the result is true, refresh the events
+                  _loadEventos();
+                }
               },
             ),
             ListTile(

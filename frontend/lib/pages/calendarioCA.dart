@@ -332,25 +332,38 @@ class _CalendarioState extends State<CalendarioCA>
   }
 
   Widget _buildEventList(List<Evento> eventosDelDia) {
-    return FadeTransition(
-      opacity: _animation,
-      child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
-            .animate(_animation),
-        child: ListView.builder(
-          itemCount: eventosDelDia.length,
-          itemBuilder: (context, index) {
-            Evento evento = eventosDelDia[index];
-            return ListTile(
-              title: Text(evento.nombre),
-              subtitle: Text(evento.descripcion),
-              onTap: () => _showEventoDetails(evento),
-            );
-          },
-        ),
+  return FadeTransition(
+    opacity: _animation,
+    child: SlideTransition(
+      position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
+          .animate(_animation),
+      child: ListView.builder(
+        itemCount: eventosDelDia.length,
+        itemBuilder: (context, index) {
+          Evento evento = eventosDelDia[index];
+          String shortenedDescription =
+              _getShortenedDescription(evento.descripcion);
+
+          return ListTile(
+            title: Text(evento.nombre),
+            subtitle: Tooltip(
+              message: evento.descripcion,
+              child: Text(shortenedDescription),
+            ),
+            onTap: () => _showEventoDetails(evento),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
+
+String _getShortenedDescription(String description) {
+  const int maxCharacters = 150; // Define el número máximo de caracteres
+  return (description.length <= maxCharacters)
+      ? description
+      : description.substring(0, maxCharacters) + '...';
+}
 
   void _showEventoDetails(Evento evento) async {
     ApiResponse response = await ApiService.getEvento(evento.id);

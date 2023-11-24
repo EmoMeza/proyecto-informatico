@@ -262,7 +262,6 @@ class _AgregarEventoState extends State<AgregarEvento> {
         isGlobal = _globalCheckboxValue;
       }
       String? base64Image;
-      img.Image? imagetype;
       // Si se selecciono una imagen, convertirla a base64
       if (_pickedImage != null) {
         List<int> imageBytes = await _pickedImage!.readAsBytes();

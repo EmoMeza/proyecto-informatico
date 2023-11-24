@@ -421,10 +421,10 @@ class ApiService {
   // Retorna: success, data, message
   static Future<ApiResponse> postEvento(
       String idCreador, Map<String, dynamic> postData) async {
-    final url = Uri.parse('$_baseUrl/add/evento');
+    final baseUrl = Uri.parse('$_baseUrl/add/evento');
 
     // Agrega los parametros a la url
-    url.replace(queryParameters: {
+    final url = baseUrl.replace(queryParameters: {
       'id_creador': idCreador,
     });
 

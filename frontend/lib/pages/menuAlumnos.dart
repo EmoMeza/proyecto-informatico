@@ -6,6 +6,7 @@ import 'menuCAA.dart';
 import 'calendarioAlumos.dart';
 import '../api_services.dart';
 import 'detallesEventoAlumno.dart';
+import 'package:intl/intl.dart';
 
 class Evento {
   String id;
@@ -78,6 +79,16 @@ class _menuAlumnosState extends State<menuAlumnos>
   bool isLoading = true;
   late List<Evento> eventos = []; // Lista para guardar eventos privados
 
+  //controladores para los filtros
+  TextEditingController searchController = TextEditingController();
+  TextEditingController dateStartController = TextEditingController();
+  TextEditingController dateEndController = TextEditingController();
+
+  DateTime? filtroFechaInicio; // Filtro de fecha inicial
+  DateTime? filtroFechaFinal; //  filtro de fecha final
+  List<Evento> filteredEventos = []; // Lista para guardar eventos filtrados
+  List<Evento> filteredEventosDateFiltered =
+      []; // Lista para guardar eventos filtrados por fecha
   @override
   void initState() {
     super.initState();
@@ -90,6 +101,9 @@ class _menuAlumnosState extends State<menuAlumnos>
     _animation =
         CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _loadEventos();
+    searchController.addListener(() {
+      _setFilterState();
+    });
   }
 
   static Future<List<Evento>> getEventosByIds(List<dynamic> eventIds) async {
@@ -106,6 +120,55 @@ class _menuAlumnosState extends State<menuAlumnos>
     }
 
     return eventos;
+  }
+
+  void _filterSearch() {
+    if (searchController.text.isNotEmpty) {
+      filteredEventos = eventos
+          .where((evento) => evento.nombre
+              .toLowerCase()
+              .contains(searchController.text.toLowerCase()))
+          .toList();
+    } else {
+      // If the search is empty, use the date-filtered list
+      filteredEventos = List.from(filteredEventosDateFiltered ?? eventos);
+    }
+    setState(() {});
+  }
+
+  void _filterDate() {
+    // Perform date filtering and store it in a separate list
+    List<Evento> dateFilteredEvents = List.from(eventos);
+
+    if (filtroFechaInicio != null) {
+      dateFilteredEvents = dateFilteredEvents
+          .where((evento) =>
+              DateTime.parse(evento.fechaInicio.toIso8601String())
+                  .isAfter(filtroFechaInicio!))
+          .toList();
+    }
+    if (filtroFechaFinal != null) {
+      filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
+      dateFilteredEvents = dateFilteredEvents
+          .where((evento) =>
+              DateTime.parse(evento.fechaInicio.toIso8601String())
+                  .isBefore(filtroFechaFinal!))
+          .toList();
+      filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
+    }
+
+    // Update the date-filtered list
+    filteredEventosDateFiltered = dateFilteredEvents;
+
+    // Call _filterSearch to update the search filter as well
+    _filterSearch();
+
+    setState(() {});
+  }
+
+  void _setFilterState() {
+    _filterDate();
+    _filterSearch();
   }
 
   Future<void> _loadEventos() async {
@@ -175,6 +238,27 @@ class _menuAlumnosState extends State<menuAlumnos>
     }
   }
 
+  void _openDateErrorDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text(
+              'La fecha inicial debe ser menor o igual a la fecha final.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,10 +297,190 @@ class _menuAlumnosState extends State<menuAlumnos>
                 if (!isLoading && eventos.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text('No hay eventos personales.'),
+                    child: Text('No hay eventos personales ni asistidos.'),
                   ),
                 if (!isLoading && eventos.isNotEmpty)
                   Column(children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 12.0, top: 8.0, bottom: 8, right: 8),
+                            child: TextField(
+                              controller: searchController,
+                              decoration: InputDecoration(
+                                labelText: 'Buscar',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 20.0,
+                                ),
+                                suffixIcon: InkWell(
+                                  onTap: () {
+                                    // Clear the search text and reset filters
+                                    searchController.clear();
+                                    _setFilterState();
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Icon(Icons.clear),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ListTile(
+                                      tileColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      title: const Text(
+                                        'Filtrar por Fecha',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: TextField(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Fecha inicial',
+                                        ),
+                                        controller: dateStartController,
+                                        readOnly: true,
+                                        onTap: () async {
+                                          DateTime? pickedDateStart =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate: filtroFechaInicio ??
+                                                DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2101),
+                                          );
+                                          if (pickedDateStart != null &&
+                                              pickedDateStart !=
+                                                  filtroFechaInicio) {
+                                            setState(() {
+                                              filtroFechaInicio =
+                                                  pickedDateStart;
+                                              dateStartController.text =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .format(
+                                                          filtroFechaInicio!);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: TextField(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Fecha final',
+                                        ),
+                                        controller: dateEndController,
+                                        readOnly: true,
+                                        onTap: () async {
+                                          DateTime? pickedDateEnd =
+                                              await showDatePicker(
+                                            context: context,
+                                            initialDate: filtroFechaFinal ??
+                                                DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2101),
+                                          );
+                                          if (pickedDateEnd != null &&
+                                              pickedDateEnd !=
+                                                  filtroFechaFinal) {
+                                            setState(() {
+                                              filtroFechaFinal = pickedDateEnd;
+                                              dateEndController.text =
+                                                  DateFormat('dd-MM-yyyy')
+                                                      .format(
+                                                          filtroFechaFinal!);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10.0),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                filtroFechaInicio = null;
+                                                filtroFechaFinal = null;
+                                                dateStartController.text = "";
+                                                dateEndController.text = "";
+                                                _setFilterState();
+                                              });
+                                            },
+                                            child:
+                                                const Text("Limpiar filtros")),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // comparamos los controladores para ver si la fecha inicial es menor a la final
+                                            if (filtroFechaInicio != null &&
+                                                filtroFechaFinal != null) {
+                                              if (filtroFechaInicio!.isBefore(
+                                                      filtroFechaFinal!) ||
+                                                  filtroFechaInicio!
+                                                      .isAtSameMomentAs(
+                                                          filtroFechaFinal!)) {
+                                                _setFilterState();
+                                                Navigator.pop(context);
+                                              } else {
+                                                _openDateErrorDialog();
+                                              }
+                                            } else {
+                                              _setFilterState();
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                          child: const Text(
+                                            'Aplicar Filtros',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: const CircleBorder(),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(
+                                left: 7, right: 7, top: 12, bottom: 12),
+                            child:
+                                Icon(Icons.calendar_today, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     const Text(
                       'Eventos creados y asistidos por ti:',
@@ -228,17 +492,18 @@ class _menuAlumnosState extends State<menuAlumnos>
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const ScrollPhysics(),
-                      itemCount: eventos.length,
+                      itemCount: filteredEventos.length,
                       itemBuilder: (context, index) {
                         return Card(
                           elevation: 2.0, // Set the elevation as needed
                           margin: const EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 16.0),
                           child: ListTile(
-                            title: Text(eventos[index].nombre),
-                            subtitle: Text(eventos[index].descripcion),
+                            title: Text(filteredEventos[index].nombre),
+                            subtitle: Text(filteredEventos[index].descripcion),
                             // Add more details as needed
-                            onTap: () => _showEventoDetails(eventos[index]),
+                            onTap: () =>
+                                _showEventoDetails(filteredEventos[index]),
                           ),
                         );
                       },

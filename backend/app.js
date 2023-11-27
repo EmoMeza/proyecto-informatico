@@ -685,7 +685,7 @@ app.post('/add/alumno', async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
-    data.mis_asistencias = mis_asistencias;
+    //data.mis_asistencias = mis_asistencias;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

@@ -1,6 +1,7 @@
 // import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 
 // Se importa de la siguiente manera:
 // import '../api_services.dart';
@@ -589,57 +590,30 @@ class ApiService {
   // Función para añadir un alumno
   // Parametros: nombre, matricula, Map<String, dynamic> data
   // Retorna: success, data, message
-  static Future<ApiResponse> postAlumno(
-      String nombre,
-      String apellido,
-      int matricula,
-      bool esCaa,
-      String idCaa,
-      Map<String, dynamic> data) async {
-    // Unify the data into a single object
-    data['nombre'] = nombre;
-    data['apellido'] = apellido;
-    data['matricula'] = matricula;
-    data['es_caa'] = esCaa;
-    data['id_caa'] = idCaa;
-    // Check if the matricula has at least 4 digits
-    if ('$matricula'.length < 4) {
-      return ApiResponse(
-          false, {}, 'La matricula $matricula no tiene el mínimo de 4 dígitos');
-    }
+  static Future<ApiResponse> postAlumno(String nombre, String apellido, int matricula, bool esCaa, String idCaa, Map<String, dynamic> postData) async {   
+    final url = Uri.parse('$_baseUrl/add/alumno').replace(queryParameters: {
+      'nombre': nombre,
+      'apellido': apellido,
+      'matricula': matricula.toString(),
+      'es_caa': esCaa.toString(),
+      'id_caa': idCaa,
+    });
 
-    // password = 4 primeros digitos de la matricula + 2 primeras letras del nombre + 2 primeras letras del apellido
-    final password = '$matricula'.substring(0, 4) +
-        nombre.toLowerCase().substring(0, 2) +
-        apellido.toLowerCase().substring(0, 2);
-    data['contraseña'] = password;
+    final jsonBody = json.encode(postData);
 
-    final url = Uri.parse(
-        '$_baseUrl/add/alumno?nombre=$nombre&matricula=$matricula&apellido=$apellido&es_caa=$esCaa&id_caa=$idCaa');
-    final jsonBody = json.encode(data);
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonBody,
+    );
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonBody,
-      );
-
-      if (response.statusCode == 200) {
-        final responseBody = response.body;
-        // Ya existe el alumno en la bdd
-        if (responseBody.startsWith('El alumno')) {
-          return ApiResponse(false, {}, responseBody);
-        } else {
-          return ApiResponse(true, {}, 'Se ha insertado correctamente');
-        }
-      } else {
-        return ApiResponse(false, {}, 'Error en el servidor');
-      }
-    } catch (error) {
-      return ApiResponse(false, {}, 'Error en la petición: $error');
+    if(response.statusCode == 200) {
+      final responseBody = response.body;
+      return ApiResponse(true, {}, responseBody);
+    } else {
+      return ApiResponse(false, {}, 'Error en la peticion');
     }
   }
 

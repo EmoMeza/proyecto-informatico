@@ -3,6 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../api_services.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+
 
 class Registro extends StatefulWidget {
   const Registro({Key? key}) : super(key: key);
@@ -19,6 +24,8 @@ class _RegistroState extends State<Registro> {
   bool esCaa = false;
   String idCaa = '';
   late Future<ApiResponse> caaFuture;
+  XFile? _pickedImage;
+  File? imageFile;
 
   @override
   void initState() {
@@ -27,13 +34,49 @@ class _RegistroState extends State<Registro> {
     caaFuture = ApiService.getAllCaa();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    setState(() {
+      _pickedImage = pickedFile;
+    });
+  }
+
+
   void guardarDatos() async {
   String nombre = nombreController.text;
   String apellido = apellidoController.text;
   int matricula = int.parse(matriculaController.text);
-  Map<String, dynamic> data = {}; // Add any additional data if needed
+  
+  String? base64Image;
+  String? imagenConvertida;
+  if (_pickedImage != null) {
+    List<int> imageBytes = await _pickedImage!.readAsBytes();
+    imagenConvertida = base64.encode(imageBytes);
+    Uint8List uint8List = Uint8List.fromList(imageBytes);
+    List<int> compressedBytes = await FlutterImageCompress.compressWithList(
+      uint8List,
+      quality: 80, // Adjust the quality as needed (0 to 100)
+    );
+    base64Image = base64Encode(compressedBytes);
+    int originalSizeInBytes = imageBytes.length;
+    int encodedSizeInBytes = imagenConvertida!.length;
+    int compressedEncodedSizeInBytes = base64Image!.length;
+    debugPrint('Original Size: ${originalSizeInBytes / 1024} KB');
+    debugPrint('Encoded Size: ${encodedSizeInBytes / 1024} KB');
+    debugPrint('Compressed and Encoded Size: ${compressedEncodedSizeInBytes / 1024} KB');
+  }
+  Map<String, dynamic> postData = {
+    'nombre': nombre,
+    'apellido': apellido,
+    'matricula': matricula,
+    'esCaa': esCaa,
+    'idCaa': idCaa,
+    'imagen': base64Image ?? '',
+  };
 
-  ApiResponse response = await ApiService.postAlumno(nombre, apellido, matricula, esCaa, idCaa, data);
+  ApiResponse response = await ApiService.postAlumno(nombre, apellido, matricula, esCaa, idCaa, postData);
 
   if (response.success) {
     showDialog(
@@ -114,7 +157,7 @@ class _RegistroState extends State<Registro> {
                       });
                     },
                   ),
-                  const Text('Es CAA'),
+                  const Text('¿Eres CAA?'),
                   const SizedBox(width: 20),
                   // Lista desplegable para seleccionar idCaa
                   FutureBuilder<ApiResponse>(
@@ -157,6 +200,62 @@ class _RegistroState extends State<Registro> {
                   ),
                 ],
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () => _pickImage(ImageSource.gallery),
+                        icon: const Icon(Icons.photo),
+                        tooltip: 'Seleccionar imagen',
+                      ),
+                      const Text('Seleccionar de la galería'),
+                    ],
+                  ),
+                  const SizedBox(width: 20), // Add some spacing between icons and text
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () => _pickImage(ImageSource.camera),
+                          icon: const Icon(Icons.camera_alt),
+                          tooltip: 'Tomar foto',
+                        ),
+                      const Text('Tomar una foto'),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20), // Add some spacing between rows
+              _pickedImage != null
+                ? Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Imagen seleccionada:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _pickedImage = null;
+                              });
+                            },
+                            icon: const Icon(Icons.delete),
+                            tooltip: 'Eliminar imagen',
+                          ),
+                        ],
+                      ),
+                      Image.file(
+                        File(_pickedImage!.path),
+                        height: 100,
+                        width: 100,
+                      ),
+                    ],
+                  )
+                : const Text('No se ha seleccionado ninguna imagen'),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

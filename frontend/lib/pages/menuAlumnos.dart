@@ -265,7 +265,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alumno: ${alumnoData['nombre']} ${alumnoData['apellido']}',
+        title: Text('Eventos',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(
@@ -484,13 +484,13 @@ class _menuAlumnosState extends State<menuAlumnos>
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Eventos creados y asistidos por ti:',
-                      style: TextStyle(
-                        fontSize: 18.0, // Set the font size as needed
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    // const Text(
+                    //   'Eventos creados y asistidos por ti:',
+                    //   style: TextStyle(
+                    //     fontSize: 18.0, // Set the font size as needed
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const ScrollPhysics(),

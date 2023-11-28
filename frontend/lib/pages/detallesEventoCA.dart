@@ -113,7 +113,7 @@ class _EventoPopupCAState extends State<EventoPopupCA> {
               const SizedBox(height: 10.0),
               _buildLabelText('Creador:'),
               _buildText(nombreCA),
-              if (base64Image?.isNotEmpty == false) ...[
+              if (base64Image?.isNotEmpty == true) ...[
                 const SizedBox(height: 10.0),
                 _buildImage(base64Image!),
               ],

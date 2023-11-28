@@ -144,8 +144,8 @@ class _EventoPopupCAState extends State<EventoPopupCA> {
   Widget _buildImage(Uint8List base64Image) {
     return Image.memory(
       base64Image,
-      width: 400, // Adjust the width as needed
-      height: 400, // Adjust the height as needed
+      width: 400,
+      height: 400,
       fit: BoxFit.cover,
     );
   }

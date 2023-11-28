@@ -7,6 +7,8 @@ import 'calendarioAlumos.dart';
 import '../api_services.dart';
 import 'detallesEventoAlumno.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+
 
 class Evento {
   String id;
@@ -525,10 +527,11 @@ class _menuAlumnosState extends State<menuAlumnos>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        NetworkImage('https://via.placeholder.com/200'),
+                  CircleAvatar(
+                    backgroundImage: widget.alumnoData.containsKey('imagen')
+                        ? MemoryImage(base64Decode(widget.alumnoData['imagen']))
+                        : Image.asset('assets/images/user_placeholder.png').image,
+                    radius: 30,
                   ),
                   const SizedBox(height: 10),
                   Expanded(

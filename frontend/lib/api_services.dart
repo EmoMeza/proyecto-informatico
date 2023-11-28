@@ -610,7 +610,12 @@ class ApiService {
     );
 
     if(response.statusCode == 200) {
-      final responseBody = response.body;
+      if (response.body == 'El alumno $matricula ya existe en la base de datos') {
+        return ApiResponse(false, {}, 'El alumno $matricula ya existe en la base de datos');
+      } else if (response.body == 'La matricula no tiene el minimo de 4 digitos') {
+        return ApiResponse(false, {}, 'La matricula no tiene el minimo de 4 digitos');
+      }
+      final responseBody = json.decode(response.body);
       return ApiResponse(true, {}, responseBody);
     } else {
       return ApiResponse(false, {}, 'Error en la peticion');

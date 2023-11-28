@@ -672,11 +672,7 @@ app.post('/add/alumno', async function (req, res) {
     const es_caa = req.query.es_caa;
     const data = req.body;
     const mis_eventos = [];
-
-    if (!req.file) {
-        return res.status(400).send('No image file was uploaded');
-    }
-
+    const mis_asistencias = [];
 
     // Unify the data into a single object
     data.nombre = nombre;
@@ -685,7 +681,7 @@ app.post('/add/alumno', async function (req, res) {
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
-    //data.mis_asistencias = mis_asistencias;
+    data.mis_asistencias = mis_asistencias;
 
     //check if the matricula has at least 4 digits
     if (matricula.length < 4) {

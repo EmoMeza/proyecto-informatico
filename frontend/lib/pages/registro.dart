@@ -43,11 +43,10 @@ class _RegistroState extends State<Registro> {
     });
   }
 
-
   void guardarDatos() async {
   String nombre = nombreController.text;
   String apellido = apellidoController.text;
-  int matricula = int.parse(matriculaController.text);
+  int matricula = matriculaController.text.isEmpty ? 0 : int.parse(matriculaController.text);
   
   String? base64Image;
   String? imagenConvertida;
@@ -88,6 +87,7 @@ class _RegistroState extends State<Registro> {
             actions: [
               ElevatedButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
                 child: const Text('OK'),
@@ -144,60 +144,92 @@ class _RegistroState extends State<Registro> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Matricula: '),
               ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Casilla de verificación para esCaa
-                  Checkbox(
-                    value: esCaa,
-                    onChanged: (value) {
-                      setState(() {
-                        esCaa = value!;
-                      });
-                    },
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color.fromARGB(255,212,212,212),
+                      width: 2.0,
+                    ),
                   ),
-                  const Text('¿Eres CAA?'),
-                  const SizedBox(width: 20),
-                  // Lista desplegable para seleccionar idCaa
-                  FutureBuilder<ApiResponse>(
-                    future: caaFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        ApiResponse apiResponse = snapshot.data as ApiResponse;
-                        if (apiResponse.success) {
-                          List<dynamic> caas = apiResponse.data as List<dynamic>;
-
-                          // Verifica si idCaa es válido y establece un valor predeterminado si no lo es
-                          if (idCaa.isEmpty || !caas.any((caa) => caa['_id'] == idCaa)) {
-                            idCaa = caas.first['_id']; // Puedes ajustar esto según tus necesidades
-                          }
-
-                          return DropdownButton<String>(
-                            value: idCaa,
-                            hint: const Text('Seleccionar CAA'),
-                            items: caas.map((caa) {
-                              return DropdownMenuItem<String>(
-                                value: caa['_id'],
-                                child: Text(caa['nombre']),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                idCaa = value!;
-                              });
-                            },
-                          );
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Casilla de verificación para esCaa
+                    Checkbox(
+                      value: esCaa,
+                      onChanged: (value) {
+                        setState(() {
+                          esCaa = value!;
+                        });
+                      },
+                    ),
+                    const Text('¿Eres parte de un CAA?'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color.fromARGB(255,212,212,212),
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Selecciona tu centro de alumnos: '),
+                    FutureBuilder<ApiResponse>(
+                      future: caaFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
                         } else {
-                          return Text('Error en la respuesta de la API: ${apiResponse.message}');
+                          ApiResponse apiResponse = snapshot.data as ApiResponse;
+                          if (apiResponse.success) {
+                            List<dynamic> caas = apiResponse.data as List<dynamic>;
+
+                            // Verifica si idCaa es válido y establece un valor predeterminado si no lo es
+                            if (idCaa.isEmpty || !caas.any((caa) => caa['_id'] == idCaa)) {
+                              idCaa = caas.first['_id']; // Puedes ajustar esto según tus necesidades
+                            }
+
+                            return DropdownButton<String>(
+                              value: idCaa,
+                              hint: const Text('Seleccionar CAA'),
+                              items: caas.map((caa) {
+                                return DropdownMenuItem<String>(
+                                  value: caa['_id'],
+                                  child: Text(caa['nombre']),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  idCaa = value!;
+                                });
+                              },
+                            );
+                          } else {
+                            return Text('Error en la respuesta de la API: ${apiResponse.message}');
+                          }
                         }
-                      }
-                    },
-                  ),
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Selecciona una imagen de perfil:'),
                 ],
               ),
               Row(
@@ -256,7 +288,7 @@ class _RegistroState extends State<Registro> {
                     ],
                   )
                 : const Text('No se ha seleccionado ninguna imagen'),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

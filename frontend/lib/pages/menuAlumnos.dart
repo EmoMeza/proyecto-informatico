@@ -9,7 +9,6 @@ import 'detallesEventoAlumno.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
-
 class Evento {
   String id;
   String nombre;
@@ -199,6 +198,7 @@ class _menuAlumnosState extends State<menuAlumnos>
       } else {
         eventos = [];
       }
+      filteredEventos = List.from(eventos);
       isLoading = false;
     });
   }
@@ -530,7 +530,8 @@ class _menuAlumnosState extends State<menuAlumnos>
                   CircleAvatar(
                     backgroundImage: widget.alumnoData.containsKey('imagen')
                         ? MemoryImage(base64Decode(widget.alumnoData['imagen']))
-                        : Image.asset('assets/images/user_placeholder.png').image,
+                        : Image.asset('assets/images/user_placeholder.png')
+                            .image,
                     radius: 30,
                   ),
                   const SizedBox(height: 10),

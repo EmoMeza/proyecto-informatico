@@ -15,7 +15,6 @@ class Dashboard extends StatefulWidget {
 class DataPoint {
   final int value;
   final String description;
-  // guardamos un tipo de dato ISOS de fecha
   final String date;
   String evento = "";
 
@@ -473,7 +472,6 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                         ),
-                        //SizedBox(width: 1),
                         ElevatedButton(
                           onPressed: () {
                             showModalBottomSheet(
@@ -540,7 +538,6 @@ class _DashboardState extends State<Dashboard> {
                             child: Icon(Icons.celebration, color: Colors.white),
                           ),
                         ),
-
                         ElevatedButton(
                           onPressed: () {
                             showModalBottomSheet(

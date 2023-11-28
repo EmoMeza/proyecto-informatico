@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
-import 'package:image_picker/image_picker.dart';
 
 class Dashboard extends StatefulWidget {
   // ignore: non_constant_identifier_names
@@ -16,7 +15,6 @@ class Dashboard extends StatefulWidget {
 class DataPoint {
   final int value;
   final String description;
-  // guardamos un tipo de dato ISOS de fecha
   final String date;
   String evento = "";
 
@@ -54,7 +52,6 @@ class _DashboardState extends State<Dashboard> {
   List<DataPoint> filteredCashFlowData = [];
   DateTime? filtroFechaInicio;
   DateTime? filtroFechaFinal;
-  XFile? image;
 
   @override
   void initState() {
@@ -116,7 +113,6 @@ class _DashboardState extends State<Dashboard> {
         // usando dialogevent se obtiene el id del evento
         // ignore: unused_local_variable
         var idEvento = eventosId[eventos.indexOf(dialogEvent!)];
-
         ApiResponse response = await ApiService.postEgresoEvento(idEvento, {
           'egresos': [monto, descripcion]
         });
@@ -250,19 +246,6 @@ class _DashboardState extends State<Dashboard> {
     _filterSearch();
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      isPicked = true;
-      image = null;
-      // Aquí puedes manejar la imagen seleccionada, como guardarla o mostrarla.
-      // Puedes usar pickedFile.path para obtener la ruta de la imagen.
-      // Por ejemplo, puedes mostrar la imagen con Image.file(File(pickedFile.path)).
-    }
-  }
-
   void _openDateErrorDialog() async {
     await showDialog(
       context: context,
@@ -327,21 +310,6 @@ class _DashboardState extends State<Dashboard> {
                     }).toList(),
                   ),
                 )),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await _pickImage();
-                      // ignore: use_build_context_synchronously
-                      Navigator.of(context).pop();
-                      _openEntryDialog(isIncome);
-                    },
-                    icon: Icon(isPicked ? Icons.check : Icons.photo),
-                    label: Text(isPicked
-                        ? 'Cambiar Foto de la galeria'
-                        : 'Subir Foto de la galeria'),
-                  ),
-                ),
               ],
             ),
           ),
@@ -352,7 +320,6 @@ class _DashboardState extends State<Dashboard> {
                 descriptionController.clear();
                 dialogEvent = "Vista General";
                 isPicked = false;
-                image = null;
                 Navigator.of(context).pop(); // Cerrar el diálogo
               },
               child: const Text('Cancelar'),
@@ -505,48 +472,51 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                         ),
-                        //SizedBox(width: 1),
                         ElevatedButton(
                           onPressed: () {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               builder: (BuildContext context) {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      tileColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      title: const Text(
-                                        'Filtrar por eventos',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16.0,
-                                          color: Colors.white,
+                                return SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        tileColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        title: const Text(
+                                          'Filtrar por eventos',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    // Resto de las opciones del evento
-                                    ...eventos.map((String value) {
-                                      bool isSelected = value == dropdownValue;
-                                      return ListTile(
-                                        title: Row(
-                                          children: [
-                                            Text(value),
-                                            if (isSelected)
-                                              Icon(Icons.check,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary),
-                                          ],
-                                        ),
-                                        onTap: () {
-                                          Navigator.pop(context, value);
-                                        },
-                                      );
-                                    }).toList(),
-                                  ],
+                                      // Resto de las opciones del evento
+                                      ...eventos.map((String value) {
+                                        bool isSelected =
+                                            value == dropdownValue;
+                                        return ListTile(
+                                          title: Row(
+                                            children: [
+                                              Text(value),
+                                              if (isSelected)
+                                                Icon(Icons.check,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary),
+                                            ],
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context, value);
+                                          },
+                                        );
+                                      }).toList(),
+                                    ],
+                                  ),
                                 );
                               },
                             ).then((selectedValue) {
@@ -568,7 +538,6 @@ class _DashboardState extends State<Dashboard> {
                             child: Icon(Icons.celebration, color: Colors.white),
                           ),
                         ),
-
                         ElevatedButton(
                           onPressed: () {
                             showModalBottomSheet(
@@ -730,7 +699,7 @@ class _DashboardState extends State<Dashboard> {
                               title: Text(
                                 dataPoint.description.length <= 20
                                     ? dataPoint.description
-                                    : '${dataPoint.description.substring(0, 30)}...',
+                                    : '${dataPoint.description.substring(0, 20)}...',
                                 style: const TextStyle(
                                   fontSize: 18.0,
                                 ),

@@ -848,6 +848,7 @@ app.post('/add/egreso', async function (req, res) {
 
             // Update the caa collection with the new array
             await caa.updateOne({ _id: new ObjectId(result.id_creador) }, { $push: { egresos: data3 } });
+            res.send("se ha insertado correctamente");
         } else {
             res.send(`El id ${id} no existe en la base de datos.`);
         }

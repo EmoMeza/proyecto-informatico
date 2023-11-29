@@ -19,9 +19,9 @@ Se debe clonar este repositorio en su sistema y seguir los siguientes pasos.
 ir a la carpeta backend y ejecutar los siguientes pasos:
 
 1. Instalar los módulos necesarios con el siguiente comando:
-    ```
-    npm install
-    ```
+
+       npm install
+
 
 2. Copiar el archivo `.env.example` y renómbrarlo a `.env`.
 
@@ -32,9 +32,9 @@ ir a la carpeta backend y ejecutar los siguientes pasos:
 Ir a la carpeta frontend y ejecutar el siguiente paso:
 
 1. Instalar las dependencias con el comando:
-   ```
-   flutter pub get
-   ```
+
+       flutter pub get
+
 
 ## Ejecución ▶️
 

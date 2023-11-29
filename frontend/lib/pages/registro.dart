@@ -48,6 +48,48 @@ class _RegistroState extends State<Registro> {
   String apellido = apellidoController.text;
   int matricula = matriculaController.text.isEmpty ? 0 : int.parse(matriculaController.text);
   
+  // Validation
+  if (nombre.length < 2) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('El nombre debe tener al menos 2 caracteres'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    return;
+  }
+  if (apellido.length < 2) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('El apellido debe tener al menos 2 caracteres'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    return;
+  }
+
   String? base64Image;
   String? imagenConvertida;
   if (_pickedImage != null) {
@@ -128,12 +170,24 @@ class _RegistroState extends State<Registro> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              TextField(
+              TextFormField(
                 controller: nombreController,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value.length < 2) {
+                    return 'Introduce al menos 2 caracteres';
+                  }
+                  return null;
+                },
                 decoration: const InputDecoration(labelText: 'Nombre: '),
               ),
-              TextField(
+              TextFormField(
                 controller: apellidoController,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value.length < 2) {
+                    return 'Introduce al menos 2 caracteres';
+                  }
+                  return null;
+                },
                 decoration: const InputDecoration(labelText: 'Apellido: '),
               ),
               TextField(

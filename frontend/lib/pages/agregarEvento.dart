@@ -277,9 +277,9 @@ class _AgregarEventoState extends State<AgregarEvento> {
         int originalSizeInBytes = imageBytes.length;
         int encodedSizeInBytes = imagenConvertida!.length;
         int compressedEncodedSizeInBytes = base64Image!.length;
-        print('Original Size: ${originalSizeInBytes / 1024} KB');
-        print('Encoded Size: ${encodedSizeInBytes / 1024} KB');
-        print(
+        debugPrint('Original Size: ${originalSizeInBytes / 1024} KB');
+        debugPrint('Encoded Size: ${encodedSizeInBytes / 1024} KB');
+        debugPrint(
             'Compressed and Encoded Size: ${compressedEncodedSizeInBytes / 1024} KB');
       }
       // Datos para enviar a la API

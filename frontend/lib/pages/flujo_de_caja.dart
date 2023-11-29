@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_is_empty
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../api_services.dart';
@@ -80,8 +82,8 @@ class _DashboardState extends State<Dashboard> {
           _LoadCashFlow();
         } else {
           // Handle error
-          // ignore: avoid_print
-          print('Error adding income: ${response.message}');
+
+          debugPrint('Error adding income: ${response.message}');
         }
       } else {
         // usando dialogevent se obtiene el id del evento
@@ -93,8 +95,7 @@ class _DashboardState extends State<Dashboard> {
         if (response.success) {
           _LoadCashFlow();
         } else {
-          // ignore: avoid_print
-          print('Error adding income: ${response.message}');
+          debugPrint('Error adding income: ${response.message}');
         }
       }
     } else {
@@ -106,8 +107,7 @@ class _DashboardState extends State<Dashboard> {
           //en caso de funcionar se actualiza la lista cashFlowData
           _LoadCashFlow();
         } else {
-          // ignore: avoid_print
-          print('Error adding income: ${response.message}');
+          debugPrint('Error adding income: ${response.message}');
         }
       } else {
         // usando dialogevent se obtiene el id del evento
@@ -119,8 +119,7 @@ class _DashboardState extends State<Dashboard> {
         if (response.success) {
           _LoadCashFlow();
         } else {
-          // ignore: avoid_print
-          print('Error adding income: ${response.message}');
+          debugPrint('Error adding income: ${response.message}');
         }
       }
     }
@@ -170,8 +169,7 @@ class _DashboardState extends State<Dashboard> {
         isloading = false;
       });
     } else {
-      // ignore: avoid_print
-      print('Error al obtener los datos: ${Response.message}');
+      debugPrint('Error al obtener los datos: ${Response.message}');
     }
   }
 
@@ -191,8 +189,7 @@ class _DashboardState extends State<Dashboard> {
         }
       }
     } else {
-      // ignore: avoid_print
-      print('Error al obtener los datos: ${response.message}');
+      debugPrint('Error al obtener los datos: ${response.message}');
     }
   }
 
@@ -278,13 +275,13 @@ class _DashboardState extends State<Dashboard> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Descripción'),
+                ),
+                TextField(
                   controller: amountController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: 'Monto'),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(labelText: 'Descripción'),
                 ),
                 SafeArea(
                     child: Container(
@@ -331,7 +328,7 @@ class _DashboardState extends State<Dashboard> {
                 if (monto != null && monto > 0 && monto < 10000000) {
                   final descripcion = descriptionController.text;
 
-                  if (descripcion.length <= 250) {
+                  if (descripcion.length > 0 && descripcion.length <= 250) {
                     // La descripción tiene 250 caracteres o menos.
                     _AddCashFlow(isIncome, monto, descripcion);
                     amountController.clear();
@@ -366,8 +363,8 @@ class _DashboardState extends State<Dashboard> {
                     builder: (context) {
                       return AlertDialog(
                         title: const Text('Error'),
-                        content:
-                            const Text('El monto debe ser menor a 10,000,000.'),
+                        content: const Text(
+                            'El monto debe ser mayor que 1 y menor que 10,000,000.'),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () {

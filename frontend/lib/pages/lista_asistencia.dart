@@ -27,7 +27,6 @@ class AlumnoInfo {
   }
 }
 
-
 class ListaAsistenciaPage extends StatefulWidget {
   final String eventId;
 
@@ -48,20 +47,21 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
     super.initState();
     eventId = widget.eventId;
     _getEventData();
-
   }
-  Future<void> _getEventData() async{
+
+  Future<void> _getEventData() async {
     ApiResponse response = await ApiService.getEvento(eventId);
     if (response.success) {
       // Muestra una ventana emergente con un mensaje
       setState(() {
         nombreEvento = response.data['nombre'];
-        asistencias = (response.data['asistencia'] as List<dynamic>).map((e) => e.toString()).toList();
+        asistencias = (response.data['asistencia'] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList();
         _loadAlumnosInfo();
       });
     }
   }
-  
 
   Future<void> _loadAlumnosInfo() async {
     List<AlumnoInfo> alumnos = [];
@@ -79,7 +79,7 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
       isLoading = false;
     });
   }
-  
+
   Future<void> _exportToExcel() async {
     var excel = Excel.createExcel();
     var sheet = excel['ListaAsistencia'];
@@ -92,7 +92,7 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
       sheet.appendRow([alumno.matricula, alumno.nombre, alumno.apellido]);
     }
 
-   // Guarda el archivo Excel en la memoria del dispositivo
+    // Guarda el archivo Excel en la memoria del dispositivo
     final directory = await getExternalStorageDirectory();
     final filePath = '${directory!.path}/lista_asistencia-$nombreEvento.xlsx';
 
@@ -106,11 +106,10 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
       Share.shareFiles([filePath], text: 'Lista de Asistencia - $nombreEvento');
     } else {
       // Handle the case where fileBytes is null (optional)
-      print('Error creating Excel file');
+      debugPrint('Error creating Excel file');
     }
   }
 
-  
   Future<void> _exportToPdf() async {
     final pdf = pw.Document();
 
@@ -159,7 +158,7 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
-            onPressed:() {
+            onPressed: () {
               _exportToPdf();
             },
           ),
@@ -204,4 +203,3 @@ class _ListaAsistenciaPageState extends State<ListaAsistenciaPage> {
     );
   }
 }
-

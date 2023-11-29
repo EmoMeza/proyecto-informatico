@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:proyecto_informatico/pages/calendarioAlumos.dart';
 import 'package:proyecto_informatico/pages/calendarioCA.dart';
 import 'package:proyecto_informatico/pages/login.dart';
@@ -9,7 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   initializeDateFormatting().then((_) {
     runApp(const MyApp());
   });

@@ -1,24 +1,47 @@
-# Proyecto Informático
+# Proyecto Informático - EventiCAA
 
-Este proyecto requiere Node.js para ejecutar el backend. Sigue los siguientes pasos para configurar y ejecutar el proyecto.
+Proyecto realizado para el ramo Proyecto Informático.
 
-## Configuración
+## Requisitos previos 📋
 
-1. Instala Node.js en tu sistema.
+Se deben tener instaladas o instalar y configurar los siguientes programas:
+- Node.js
+- Flutter
+- Android Studio (para ejecutar en android)
+- Xcode (para ejecutar en iOS)
 
-2. Instala los módulos necesarios con el siguiente comando:
-    ```
-    npm install
-    ```
+## Configuración 💽
 
-3. Copia el archivo `.env.example` y renómbralo a `.env`.
+Se debe clonar este repositorio en su sistema y seguir los siguientes pasos.
 
-4. Dentro del archivo `.env`, añade el enlace de tu base de datos MongoDB a la variable `MONGODB_URI`.
+### Backend 🗄️
 
-## Ejecución
+ir a la carpeta backend y ejecutar los siguientes pasos:
 
-Una vez completada la configuración, puedes ejecutar el backend con el siguiente comando:
+1. Instalar los módulos necesarios con el siguiente comando:
 
+       npm install
+
+
+2. Copiar el archivo `.env.example` y renómbrarlo a `.env`.
+
+3. Dentro del archivo `.env`, se añade el enlace de tu base de datos MongoDB a la variable `MONGODB_URI`.
+
+### Frontend 📱
+
+Ir a la carpeta frontend y ejecutar el siguiente paso:
+
+1. Instalar las dependencias con el comando:
+
+       flutter pub get
+
+
+## Ejecución ▶️
+
+Una vez completada la configuración, se debe ejecutar el servidor con el comando:
+    
     npm run dev
 
-    
+Finalmente se puede ejecutar la aplicación con el comando:
+
+    flutter run

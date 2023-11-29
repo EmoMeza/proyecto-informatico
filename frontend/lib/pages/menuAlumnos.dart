@@ -137,23 +137,36 @@ class _menuAlumnosState extends State<menuAlumnos>
     setState(() {});
   }
 
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  //Filter by date
   void _filterDate() {
-    // Perform date filtering and store it in a separate list
+    // Perform date and time filtering and store it in a separate list
     List<Evento> dateFilteredEvents = List.from(eventos);
 
     if (filtroFechaInicio != null) {
       dateFilteredEvents = dateFilteredEvents
           .where((evento) =>
-              DateTime.parse(evento.fechaInicio.toIso8601String())
-                  .isAfter(filtroFechaInicio!))
+              evento.fechaInicio.isAfter(filtroFechaInicio!) ||
+              isSameDay(evento.fechaInicio, filtroFechaInicio!) &&
+                  evento.fechaInicio.isAtSameMomentAs(filtroFechaInicio!) &&
+                  (filtroFechaFinal == null ||
+                      evento.fechaInicio.isBefore(filtroFechaFinal!) ||
+                      isSameDay(evento.fechaInicio, filtroFechaFinal!)))
           .toList();
     }
+
     if (filtroFechaFinal != null) {
       filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
       dateFilteredEvents = dateFilteredEvents
           .where((evento) =>
-              DateTime.parse(evento.fechaInicio.toIso8601String())
-                  .isBefore(filtroFechaFinal!))
+              evento.fechaFinal.isBefore(filtroFechaFinal!) ||
+              isSameDay(evento.fechaFinal, filtroFechaFinal!) &&
+                  evento.fechaFinal.isAtSameMomentAs(filtroFechaFinal!))
           .toList();
       filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
     }
@@ -265,7 +278,7 @@ class _menuAlumnosState extends State<menuAlumnos>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Eventos',
+        title: Text('Mis Eventos',
             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         iconTheme: IconThemeData(
@@ -326,8 +339,8 @@ class _menuAlumnosState extends State<menuAlumnos>
                                     searchController.clear();
                                     _setFilterState();
                                   },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(10.0),
                                     child: Icon(Icons.clear),
                                   ),
                                 ),
@@ -528,10 +541,9 @@ class _menuAlumnosState extends State<menuAlumnos>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: widget.alumnoData.containsKey('imagen')
+                    backgroundImage: widget.alumnoData.containsKey('imagen') && widget.alumnoData['imagen'].isNotEmpty
                         ? MemoryImage(base64Decode(widget.alumnoData['imagen']))
-                        : Image.asset('assets/images/user_placeholder.png')
-                            .image,
+                        : Image.asset('assets/images/user_placeholder.png').image,
                     radius: 30,
                   ),
                   const SizedBox(height: 10),
@@ -577,13 +589,6 @@ class _menuAlumnosState extends State<menuAlumnos>
                         builder: (context) => CalendarioAlumos(
                             matricula: alumnoData['matricula'],
                             id_caa: alumnoData['id_caa'])));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.attach_money),
-              title: const Text('Ver flujo de caja'),
-              onTap: () {
-                Navigator.pop(context);
               },
             ),
             // Cursed code

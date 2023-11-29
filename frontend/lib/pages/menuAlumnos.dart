@@ -541,10 +541,9 @@ class _menuAlumnosState extends State<menuAlumnos>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: widget.alumnoData.containsKey('imagen')
+                    backgroundImage: widget.alumnoData.containsKey('imagen') && widget.alumnoData['imagen'].isNotEmpty
                         ? MemoryImage(base64Decode(widget.alumnoData['imagen']))
-                        : Image.asset('assets/images/user_placeholder.png')
-                            .image,
+                        : Image.asset('assets/images/user_placeholder.png').image,
                     radius: 30,
                   ),
                   const SizedBox(height: 10),

@@ -589,13 +589,6 @@ class _menuAlumnosState extends State<menuAlumnos>
                             id_caa: alumnoData['id_caa'])));
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.attach_money),
-              title: const Text('Ver flujo de caja'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
             // Cursed code
             if (alumnoData['es_caa'] == 'true') const Divider(),
             if (alumnoData['es_caa'] == 'true')

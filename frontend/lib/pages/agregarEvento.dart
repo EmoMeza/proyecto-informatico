@@ -373,22 +373,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
                     _selectDate(context);
                   },
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _timeController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Hora',
-                    suffixIcon: IconButton(
-                      onPressed: () => _selectTime(context),
-                      icon: const Icon(Icons.access_time),
-                    ),
-                  ),
-                  validator: (value) => _validateHora(selectedTime),
-                  onTap: () {
-                    _selectTime(context);
-                  },
-                ),
+                
                 if (dropdownValue == 'Actividad')
                   Column(
                     children: [
@@ -408,26 +393,25 @@ class _AgregarEventoState extends State<AgregarEvento> {
                           _selectEndDate(context);
                         },
                       ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _endTimeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'Hora Final',
-                          suffixIcon: IconButton(
-                            onPressed: () => _selectEndTime(context),
-                            icon: const Icon(Icons.access_time),
-                          ),
-                        ),
-                        validator: (value) => _validateEndTime(selectedEndTime),
-                        onTap: () {
-                          _selectEndTime(context);
-                        },
-                      ),
                     ],
                   ),
                 const SizedBox(height: 20),
-                if (dropdownValue == 'Evaluación')
+                TextFormField(
+                  controller: _timeController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Hora',
+                    suffixIcon: IconButton(
+                      onPressed: () => _selectTime(context),
+                      icon: const Icon(Icons.access_time),
+                    ),
+                  ),
+                  validator: (value) => _validateHora(selectedTime),
+                  onTap: () {
+                    _selectTime(context);
+                  },
+                ),
+                const SizedBox(height: 20),
                   TextFormField(
                     controller: _endTimeController,
                     readOnly: true,
@@ -464,7 +448,7 @@ class _AgregarEventoState extends State<AgregarEvento> {
                 ),
                 if (dropdownValue == 'Actividad')
                   CheckboxListTile(
-                    title: const Text('¿Es un evento global?'),
+                    title: const Text('¿Es un evento para toda la universidad?'),
                     value: _globalCheckboxValue,
                     onChanged: (bool? value) {
                       setState(() {

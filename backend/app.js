@@ -851,21 +851,25 @@ app.delete('/delete/alumno', async function (req, res) {
     }
 });
 
-// falta que despues de cada movimiento se calcule el total y se actualice en la base de datos
-
+// Definir una ruta GET para '/get/all/ingresos'
 app.get('/get/all/ingresos', async function (req, res) {
-    const id = req.query.id; // assuming the query parameter is named "id"
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
+    const id = req.query.id;
+
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a la colección 'test' en la base de datos
         const collection = database.collection("test");
-        // Check if the document already exists in the collection
-        const result = await collection.findOne({ _id: new ObjectId(id) }); // using ObjectId to convert the string id to a BSON ObjectId
+        // Verificar si el documento ya existe en la colección
+        const result = await collection.findOne({ _id: new ObjectId(id) }); // usando ObjectId para convertir el id de string a BSON ObjectId
         if (!result) {
-            // If the document doesn't exist, send a message to the client
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
-            // sum the first position of the arrays of ingresos and returns the result
+            // Sumar la primera posición de los arrays de ingresos y devolver el resultado
             if (result.ingresos) {
                 var suma = 0;
                 for (var i = 0; i < result.ingresos.length; i++) {
@@ -873,76 +877,98 @@ app.get('/get/all/ingresos', async function (req, res) {
                         suma += result.ingresos[i][0];
                     }
                 }
-                res.send(suma.toString()); // using the "nombre" field from the result document
+                // Enviar la suma al cliente
+                res.send(suma.toString());
             } else {
+                // Si el campo 'ingresos' no existe, enviar "0" al cliente
                 res.send("0");
             }
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
-
+// Definir una ruta POST para '/add/ingreso'
 app.post('/add/ingreso', async function (req, res) {
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
     const id = req.query.id;
+    // Extraer los datos del cuerpo de la solicitud
     const data = req.body;
+    // Crear un nuevo array 'data2' a partir del campo 'ingresos' de 'data'
     const data2 = data.ingresos;
 
-    // Agrega la fecha actual en formato ISO 8601
+    // Agregar la fecha actual en formato ISO 8601 a 'data2'
     const currentDate = new Date().toISOString();
-    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+    data2.push(currentDate);
 
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a las colecciones 'test' y 'caa' en la base de datos
         const eventos = database.collection("test");
         const caa = database.collection("caa");
-        //check if the id already exists in the collection, if exists send a message to the client and exit
+
+        // Verificar si el documento ya existe en la colección 'eventos'
         const result = await eventos.findOne({ _id: new ObjectId(id) });
         id_caa = result.id_creador;
         const caa_result = await caa.findOne({ _id: new ObjectId(id_caa) });
 
         if (result) {
-            // if the id exists, add the data to the array named ingresos inside the one that has the same id
+            // Si el documento existe, agregar 'data2' al campo 'ingresos' del documento
             await eventos.updateOne({ _id: new ObjectId(id) }, { $push: { ingresos: data2 } });
             data3 = data2;
             data3.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $push: { ingresos: data2 } });
-            //send the result to the client
 
+            // Actualizar el campo 'total' del documento sumando el primer elemento de 'data2' al 'total' actual
             await eventos.updateOne({ _id: new ObjectId(id) }, { $set: { total: result.total + data2[0] } });
-            //add to the data the id of the event to the array data2
+
+            // Agregar el 'id' del evento a 'data2'
             data2.push(id);
             await caa.updateOne({ _id: new ObjectId(id_caa) }, { $set: { total: caa_result.total + data2[0] } });
+
+            // Enviar un mensaje al cliente indicando que la inserción fue exitosa
             res.send("se ha insertado correctamente");
         }
         else {
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El id ${id} no existe en la base de datos`);
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
-
+// Definir una ruta GET para '/get/all/egresos'
 app.get('/get/all/egresos', async function (req, res) {
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
     const id = req.query.id;
+
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a la colección 'test' en la base de datos
         const collection = database.collection("test");
-        // Check if the document already exists in the collection
+        // Verificar si el documento ya existe en la colección
         const result = await collection.findOne({ _id: new ObjectId(id) });
         if (!result) {
-            // If the document doesn't exist, send a message to the client
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
-            // sum the first position of the arrays of egresos and returns the result
+            // Sumar la primera posición de los arrays de egresos y devolver el resultado
             if (result.egresos) {
                 var suma = 0;
                 for (var i = 0; i < result.egresos.length; i++) {
@@ -950,144 +976,195 @@ app.get('/get/all/egresos', async function (req, res) {
                         suma += result.egresos[i][0];
                     }
                 }
-                res.send(suma.toString()); // Send the calculated value as the response
+                // Enviar la suma al cliente
+                res.send(suma.toString());
             } else {
+                // Si el campo 'egresos' no existe, enviar "0" al cliente
                 res.send("0");
             }
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
 
-
+// Definir una ruta POST para '/add/egreso'
 app.post('/add/egreso', async function (req, res) {
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
     const id = req.query.id;
+    // Extraer los datos del cuerpo de la solicitud
     const data = req.body;
+    // Crear un nuevo array 'data2' a partir del campo 'egresos' de 'data'
     const data2 = data.egresos;
 
-    // Agrega la fecha actual en formato ISO 8601
+    // Agregar la fecha actual en formato ISO 8601 a 'data2'
     const currentDate = new Date().toISOString();
-    data2.push(currentDate); // Push the amount, description, and current date to the data2 array
+    data2.push(currentDate); // Agregar la cantidad, descripción y fecha actual al array 'data2'
 
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a las colecciones 'test' y 'caa' en la base de datos
         const collection = database.collection("test");
         const caa = database.collection("caa");
+
+        // Verificar si el documento ya existe en la colección 'test'
         const result = await collection.findOne({ _id: new ObjectId(id) });
 
         if (result) {
-            // if the id exists, add the data to the array named egresos inside the one that has the same id
+            // Si el documento existe, agregar 'data2' al campo 'egresos' del documento
             await collection.updateOne({ _id: new ObjectId(id) }, { $push: { egresos: data2 } });
 
-            // Create a new array with the data and the id of the event it is coming from
+            // Crear un nuevo array 'data3' que incluye 'data2' y el 'id' del evento
             const data3 = [...data2, id];
 
-            // Update the caa collection with the new array
+            // Actualizar la colección 'caa' con el nuevo array 'data3'
             await caa.updateOne({ _id: new ObjectId(result.id_creador) }, { $push: { egresos: data3 } });
+
+            // Enviar un mensaje al cliente indicando que la inserción fue exitosa
             res.send("se ha insertado correctamente");
         } else {
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El id ${id} no existe en la base de datos.`);
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
 
+// Definir una ruta GET para '/get/total'
 app.get('/get/total', async function (req, res) {
-    //total is all ingresos - all egresos
+    // 'total' es todos los 'ingresos' menos todos los 'egresos'
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
     const id = req.query.id;
+
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a la colección 'test' en la base de datos
         const collection = database.collection("test");
-        // Check if the document already exists in the collection
+        // Verificar si el documento ya existe en la colección
         const result = await collection.findOne({ _id: new ObjectId(id) });
+
         if (!result) {
-            // If the document doesn't exist, send a message to the client
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El evento con el id "${id}" no existe en la base de datos`);
         } else {
-
+            // Enviar el campo 'total' del documento al cliente
             res.send(result.total.toString());
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
 
+// Definir una ruta GET para '/get/all/asistencias'
 app.get('/get/all/asistencias', async function (req, res) {
+    // Extraer el 'id' de los parámetros de consulta de la solicitud
     const id = req.query.id;
+
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a la colección 'test' en la base de datos
         const collection = database.collection("test");
+        // Verificar si el documento ya existe en la colección
         const result = await collection.findOne({ _id: new ObjectId(id) });
+
         if (!result) {
+            // Si el documento no existe, enviar un mensaje al cliente
             res.send(`El id ${id} no existe en la base de datos`);
-        }
-        else {
+        } else {
+            // Enviar el campo 'asistencia' del documento al cliente
             res.send(result.asistencia);
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
 
-app.post('/add/asistencia', async function (req, res) { //quizá añadir nombre del alumno
+// Definir una ruta POST para '/add/asistencia'
+app.post('/add/asistencia', async function (req, res) {
+    // Extraer el 'id' y 'matricula' de los parámetros de consulta de la solicitud
     const id = req.query.id;
     const matricula = parseInt(req.query.matricula);
 
     try {
+        // Conectar al cliente de MongoDB
         await client.connect();
+        // Acceder a la base de datos 'proyecto_informatico'
         const database = client.db("proyecto_informatico");
+        // Acceder a la colección 'test' en la base de datos
         const collection = database.collection("test");
+        // Verificar si el evento ya existe en la colección
         const result = await collection.findOne({ _id: new ObjectId(id) });
+        // Acceder a la colección 'alumnos' en la base de datos
         const collection2 = database.collection("alumnos");
+        // Verificar si el alumno ya existe en la colección
         const result2 = await collection2.findOne({ matricula: matricula });
-        //check if the matricula already exists in the collection, if exists send a message to the client and exit
+
+        // Si el alumno no existe, enviar un mensaje al cliente y salir
         if (!result2) {
             res.send(`El alumno con matricula ${matricula} no existe en la base de datos`);
         }
         else {
+            // Si el evento no existe, enviar un mensaje al cliente y salir
             if (!result) {
                 res.send(`El id ${id} no existe en la base de datos`);
             }
             else {
-                //if the matricula doesn't exist in the collection, insert it into the collection
+                // Si el alumno no está registrado en el evento, insertarlo en la colección
                 if (result.asistencia.includes(matricula)) {
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
+                    // Insertar la 'matricula' en el campo 'asistencia' del evento
                     await collection.updateOne({_id: new ObjectId(id)}, {$push: {asistencia: matricula}});
-                    //calculate the length of result.asistencia
+                    // Recalcular la longitud de 'asistencia'
                     const result = await collection.findOne({ _id: new ObjectId(id) });
+                    // Si la longitud de 'asistencia' es mayor o igual a 5, establecer 'global' a 'true'
                     if (result.asistencia.length >= 5){
                         await collection.updateOne({_id: new ObjectId(id)}, {$set: {global: true}});
                     }
+                    // Enviar un mensaje al cliente indicando que la 'matricula' se ha insertado correctamente
                     res.send("se ha insertado correctamente");
                 }
             }
         }
     } catch (error) {
+        // Si ocurre un error, imprimirlo en la consola y enviar un código de estado 500 al cliente
         console.log(error);
         res.status(500).send('Error en el servidor');
     } finally {
+        // Asegurarse de que el cliente se cierre cuando termine o ocurra un error
         await client.close();
     }
 });
-
 
 const puerto = process.env.PORT || 4040;
 

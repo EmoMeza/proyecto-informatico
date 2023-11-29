@@ -152,8 +152,11 @@ class _menuAlumnosState extends State<menuAlumnos>
       dateFilteredEvents = dateFilteredEvents
           .where((evento) =>
               evento.fechaInicio.isAfter(filtroFechaInicio!) ||
-              (isSameDay(evento.fechaInicio, filtroFechaInicio!) &&
-                  evento.fechaInicio.isAfter(filtroFechaInicio!)))
+              isSameDay(evento.fechaInicio, filtroFechaInicio!) &&
+                  evento.fechaInicio.isAtSameMomentAs(filtroFechaInicio!) &&
+                  (filtroFechaFinal == null ||
+                      evento.fechaInicio.isBefore(filtroFechaFinal!) ||
+                      isSameDay(evento.fechaInicio, filtroFechaFinal!)))
           .toList();
     }
 
@@ -161,9 +164,9 @@ class _menuAlumnosState extends State<menuAlumnos>
       filtroFechaFinal = filtroFechaFinal!.add(const Duration(days: 1));
       dateFilteredEvents = dateFilteredEvents
           .where((evento) =>
-              evento.fechaInicio.isBefore(filtroFechaFinal!) ||
-              (isSameDay(evento.fechaInicio, filtroFechaFinal!) &&
-                  evento.fechaFinal.isAfter(filtroFechaFinal!)))
+              evento.fechaFinal.isBefore(filtroFechaFinal!) ||
+              isSameDay(evento.fechaFinal, filtroFechaFinal!) &&
+                  evento.fechaFinal.isAtSameMomentAs(filtroFechaFinal!))
           .toList();
       filtroFechaFinal = filtroFechaFinal!.subtract(const Duration(days: 1));
     }

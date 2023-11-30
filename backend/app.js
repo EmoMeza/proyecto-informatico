@@ -510,6 +510,8 @@ app.post('/add/evento', async function (req, res) {
             } else {
                 // Si el alumno existe, insertar 'data' en la colección 'test'
                 data.id_creador = id_creador;
+                data.global = false;
+                //insert the event into the collection
                 await collection.insertOne(data);
                 res.send("se ha insertado correctamente");
 
@@ -661,7 +663,7 @@ app.get('/get/filter/eventos', async (req, res) => {
         };
         
         for (const param in parametrosFiltro) {
-            if (param === 'visible') {
+            if (param === 'visible' || param ==='global') {
                 // Si el parámetro es 'visible', mapear el valor al formato correcto
                 filtroFinal[param] = booleanMapping[parametrosFiltro[param]];
             } else {
@@ -689,6 +691,7 @@ app.get('/get/filter/eventos', async (req, res) => {
 });
 
 // Definir una ruta GET para '/get/alumno'
+
 app.get('/get/alumno', async function (req, res) {
     // Parsear la 'matricula' de los parámetros de consulta de la solicitud a un entero
     const matricula = parseInt(req.query.matricula);
@@ -730,20 +733,14 @@ app.post('/add/alumno', async function (req, res) {
     const data = req.body;
     // Inicializar un array vacío 'mis_eventos'
     const mis_eventos = [];
-
-    // Verificar si se subió un archivo de imagen con la solicitud
-    if (!req.file) {
-        // Si no se subió un archivo de imagen, enviar un mensaje al cliente
-        return res.status(400).send('No se subió ningún archivo de imagen');
-    }
-
-    // Unificar los datos en un solo objeto
+    const mis_asistencias = [];
     data.nombre = nombre;
     data.apellido = apellido;
     data.matricula = parseInt(matricula);
     data.id_caa = id_caa;
     data.es_caa = es_caa;
     data.mis_eventos = mis_eventos;
+    data.mis_asistencias = mis_asistencias;
 
     // Verificar si la 'matricula' tiene al menos 4 dígitos
     if (matricula.length < 4) {
@@ -1144,14 +1141,15 @@ app.post('/add/asistencia', async function (req, res) {
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
                     // Insertar la 'matricula' en el campo 'asistencia' del evento
-                    await collection.updateOne({_id: new ObjectId(id)}, {$push: {asistencia: matricula}});
+                    await collect
+                    // add the id of the event to the array mis_asistencias of the alumno
+                    const mis_asistencias = result2.mis_asistencias;
+                    mis_asistencias.push(id);
+                    await collection2.updateOne({ matricula: parseInt(matricula) }, { $set: { mis_asistencias: mis_asistencias } });
+
                     // Recalcular la longitud de 'asistencia'
                     const result = await collection.findOne({ _id: new ObjectId(id) });
-                    // Si la longitud de 'asistencia' es mayor o igual a 5, establecer 'global' a 'true'
-                    if (result.asistencia.length >= 5){
-                        await collection.updateOne({_id: new ObjectId(id)}, {$set: {global: true}});
-                    }
-                    // Enviar un mensaje al cliente indicando que la 'matricula' se ha insertado correctamente
+                  
                     res.send("se ha insertado correctamente");
                 }
             }

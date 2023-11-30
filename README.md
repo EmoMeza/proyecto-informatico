@@ -45,3 +45,5 @@ Una vez completada la configuración, se debe ejecutar el servidor con el comand
 Finalmente se puede ejecutar la aplicación con el comando:
 
     flutter run
+
+Es importante verificar que el archivo `lib/pages/api_services.dart` tenga la dirección ip que deseen usar (línea 40), en este caso, `http://10.0.2.2:4040` para emulador de celular.

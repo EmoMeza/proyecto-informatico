@@ -47,3 +47,15 @@ Finalmente se puede ejecutar la aplicación con el comando:
     flutter run
 
 Es importante verificar que el archivo `lib/pages/api_services.dart` tenga la dirección ip que deseen usar (línea 40), en este caso, `http://10.0.2.2:4040` para emulador de celular.
+
+## Aspectos adicionales del programa 📝
+
+Al crear un nuevo usuario, su contraseña será: 
+4 primeros números de la matricula + 2 letras iniciales de su nombre + 2 letras iniciales de su apellido (todo en minúscula), por ejemplo, consideremos al Alumno:
+
+    Nombre: Alvaro
+    Apellido: Matamala
+    Matricula: 2019423050
+Su contraseña estaría dada por:
+    
+    2019alma

@@ -474,11 +474,21 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
       {bool isMarker = false}) {
     // Calcular el porcentaje
     double porcentaje = 0.0;
-    if (numAlumnosCA == 0) {
-      porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos;
-    } else {
-      porcentaje =
-          totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA;
+    if(isMarker) {
+        if (numAlumnosCA == 0) {
+        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos * 6;
+      } else {
+        porcentaje =
+            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA * 6;
+      }
+    }
+      else{
+        if (numAlumnosCA == 0) {
+        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos;
+      } else {
+        porcentaje =
+            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA;
+      }
     }
 
     // Interpolar entre blanco (0%) y Colors.deepPurple[700] (100%)

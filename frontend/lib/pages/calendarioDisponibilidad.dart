@@ -256,6 +256,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
                 return events;
               },
               calendarStyle: CalendarStyle(
+                outsideDaysVisible: false,
                   weekendTextStyle:
                       const TextStyle().copyWith(color: Colors.red),
                   markersMaxCount: 1,

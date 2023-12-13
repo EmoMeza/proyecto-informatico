@@ -16,6 +16,7 @@ class Evento {
   int horaFinal; // Nueva variable para la hora de término
   bool visible;
   bool global;
+  Color color = Colors.white;
 
   Evento({
     required this.id,
@@ -82,6 +83,9 @@ class Evento {
   String toString() {
     return 'Evento{nombre: $nombre, categoria: $categoria, descripcion: $descripcion, fechaInicio: $fechaInicio, fechaFinal: $fechaFinal, horaInicio: $horaInicio, horaFinal: $horaFinal, visible: $visible}';
   }
+  void setColor(Color color) {
+    this.color = color;
+  }
 }
 
 class CalendarioDispoibilidad extends StatefulWidget {
@@ -105,6 +109,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
   late List<Evento> eventos = [];
   bool isLoading = true;
   int numAlumnosCA = 0;
+  List<int> numEventosMes = List.generate(12, (index) => 0);
 
   @override
   void initState() {
@@ -151,6 +156,25 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
           // Convertir la respuesta a un objeto Evento y agregarlo a la lista
           Evento evento = Evento.fromJson(eventoResponse.data);
           eventos.add(evento);
+        }
+      }
+      //sumatoria del numero de dias que durara cada evento para cada mes, contando dias intermedios
+      for (var evento in eventos) {
+        int mesInicio = evento.fechaInicio.month;
+        int mesFinal = evento.fechaFinal.month;
+        int diaInicio = evento.fechaInicio.day;
+        int diaFinal = evento.fechaFinal.day;
+        int dias = 0;
+        if (mesInicio == mesFinal) {
+          dias = diaFinal - diaInicio + 1;
+          numEventosMes[mesInicio - 1] += dias;
+        } else {
+          dias = 31 - diaInicio + 1;
+          numEventosMes[mesInicio - 1] += dias;
+          for (int i = mesInicio + 1; i < mesFinal; i++) {
+            numEventosMes[i - 1] += 31;
+          }
+          numEventosMes[mesFinal - 1] += diaFinal;
         }
       }
     }
@@ -313,7 +337,7 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
                       Container(
                         decoration: BoxDecoration(
                           color: _calcularColor(
-                              eventosDelDia.length, eventos.length,
+                              eventosDelDia.length, numEventosMes[day.month - 1],
                               isMarker: true),
                           shape: BoxShape.circle,
                         ),
@@ -475,12 +499,14 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
     // Calcular el porcentaje
     double porcentaje = 0.0;
     if(isMarker) {
+      debugPrint('numEventos: $numEventos , totalEventos: $totalEventos , numAlumnosCA: $numAlumnosCA');
         if (numAlumnosCA == 0) {
-        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos * 6;
+        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos*6;
       } else {
         porcentaje =
-            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA * 6;
+            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA *(numAlumnosCA/(totalEventos*0.5));
       }
+      debugPrint('porcentaje: $porcentaje');
     }
       else{
         if (numAlumnosCA == 0) {

@@ -1167,7 +1167,8 @@ app.post('/add/asistencia', async function (req, res) {
     // Extraer el 'id' y 'matricula' de los parámetros de consulta de la solicitud
     const id = req.query.id;
     const matricula = parseInt(req.query.matricula);
-
+    console.log("id: " + id);
+    console.log("matricula: " + matricula);
     try {
         // Conectar al cliente de MongoDB
         await client.connect();
@@ -1197,7 +1198,7 @@ app.post('/add/asistencia', async function (req, res) {
                     res.send(`El alumno con matricula ${matricula} ya esta registrado en el evento`);
                 }else{
                     // Insertar la 'matricula' en el campo 'asistencia' del evento
-                    await collect
+                    await collection.updateOne({ _id: new ObjectId(id) }, { $push: { asistencia: matricula } });
                     // add the id of the event to the array mis_asistencias of the alumno
                     const mis_asistencias = result2.mis_asistencias;
                     mis_asistencias.push(id);

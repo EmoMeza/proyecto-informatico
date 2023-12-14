@@ -462,10 +462,9 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
+                    // que si el numero de evento es 1 que sea "evento" y si es mayor que sea eventos
                     Text(
-                      '${eventosEnHora.length} evento(s)',
-                      style: const TextStyle(fontSize: 12.0),
-                    ),
+                        '${eventosEnHora.length} ${eventosEnHora.length == 1 ? 'evento' : 'eventos'}'),
                   ],
                 ),
               ),
@@ -502,28 +501,31 @@ class _CalendarioDisponibilidadState extends State<CalendarioDispoibilidad>
     if(isMarker) {
       debugPrint('numEventos: $numEventos , totalEventos: $totalEventos , numAlumnosCA: $numAlumnosCA');
         if (numAlumnosCA == 0) {
-        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos*6;
+        porcentaje = totalEventos == 0 ? 0.0 : numEventos*100 / totalEventos;
       } else {
         porcentaje =
-            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA *(numAlumnosCA/(totalEventos*0.5));
+            totalEventos == 0 ? 0.0 : numEventos*100 / totalEventos;
       }
       debugPrint('porcentaje: $porcentaje');
     }
       else{
         if (numAlumnosCA == 0) {
-        porcentaje = totalEventos == 0 ? 0.0 : numEventos / totalEventos;
+        porcentaje = totalEventos == 0 ? 0.0 : numEventos*100 / totalEventos;
       } else {
         porcentaje =
-            totalEventos == 0 ? 0.0 : numEventos / totalEventos / numAlumnosCA;
+            totalEventos == 0 ? 0.0 : numEventos*100 / totalEventos;
       }
     }
-
+    porcentaje = porcentaje.clamp(0.0, 100.0);
+    debugPrint('porcentaje final: $porcentaje');
     // Interpolar entre blanco (0%) y Colors.deepPurple[700] (100%)
-    Color color =
-        Color.lerp(Colors.white, Colors.deepPurple[700]!, porcentaje) ??
-            Colors.deepPurple[500]!;
+    Color color = Color.lerp(
+      Colors.white,
+      Colors.deepPurple[700]!,
+      porcentaje / 100,
+  ) ?? Colors.deepPurple[500]!;
 
-    // Si es un marcador y no una celda, aplica opacidad
+
 
     return color;
   }
